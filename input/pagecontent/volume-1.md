@@ -1,4 +1,4 @@
-
+A
 As an individal moves within or across jurisidicional boundaries, they may wish to provide access to clinical anor other health related documents to a set of trusted parties who are authorized to access that individual's health documents. The individual may wish to grant access to a single health document or a set of related health documents. 
 
 
@@ -10,7 +10,7 @@ The respective jurisidictions of the VHL Receiver and VHL Sharer may have regula
 
 The VHL leverages Public Key Infrastructure (PKI) as a means to verify trust amongst the actors and the veracity of artefacts.  As participants within a trust network, the VHL Receiver and VHL Sharer both share and receive PKI material with the Trust Anchor of the trust network.  The means by which the VHL Receiver and VHL Sharer establish trust with the Trust Anchor is beyond the scope of this profile.
 
-
+Note that VHLs and a SMART(R) Health Links (SHLs) are related concepts with different assumptions on the trust network.  In the VHL context a trust relationship is pre-established between the VHL Receiver and the VHL Sharer including a mutual PKI distribution mechanism. In the SHL context, there is no pre-existing trust relationship between the a SHL Receiver and SHL Sharer and the PKI material is distributed by the SHL Sharer at the time that the SHL Holder provides the SHL to the SHL Receiver.  
 
 <a name="actors-and-transactions"> </a>
 
@@ -29,6 +29,7 @@ This section defines the actors, transactions, and/or content modules in this pr
   * [Generate VHL](ITI-YY3.html)
   * [Request VHL Documents](ITI-YY4.html)
   * [Request VHL Document](ITI-YY5.html)
+  * [Provide VHL](ITI-YY6.html)
 
 
 As a pre-condition to transactions ITI-YY3, ITI-YY4 and ITI-YY5, the VHL Receiver and VHL Sharer must exchange the appropriate PKI in order to verify their trust relationship at the time of the utlization of the VHL.  As the identities of the VHL Receiver and VHL Sharer are not directly know to each other in advance of a request to utilize a VHL, the VHL Receiver and VHL Sharer publish and retrieve key material from a third party, the Trust Anchor.    This is illustrated in Figure X.X.X.X-1
@@ -64,8 +65,10 @@ The interaction between a VHL Holder requesting a VHL to a single health documen
 | Trust Anchor | Publish PKI Material         | Responder              | R          | ITI TF-2: YY1 |
 |              | Retrieve PKI Material        | Responder              | R          | ITI TF-2: YY2 |
 | VHL Holder   | Generate VHL                 | Initiator              | R          | ITI TF-2: YY3 |
+|              | Provide VHL                  | Initiator              | R          | ITI TF-2: YY6 |
 | VHL Receiver | Publish PKI Material         | Initiator              | R          | ITI TF-2: YY1 |
 |              | Retrieve PKI Material        | Initiator              | R          | ITI TF-2: YY2 |
+|              | Provide VHL                  | Requester              | R          | ITI TF-2: YY6 |
 |              | Request VHL Documents        | Initiator              | R          | ITI TF-2: YY4 |
 |              | Request VHL Document         | Initiator              | R          | ITI TF-2: YY5 |
 | VHL Sharer   | Publish PKI Material         | Initiator              | R          | ITI TF-2: YY1 |
@@ -141,7 +144,7 @@ For more details see the detailed [transaction description](ITI-YY3.html)
 
 #### XX.1.2.4 Request VHL Documents
 
-This transactions is used by a VHL Receiver to request a set of health documents from a VHL Sharer.  This transaction should be conducted in such a manner that the VHL Receiver and VHL Sharer can validate one another's participation in the same trust network. The VHL Sharer shall optionally be able to record an audit event for the access of the folder by the VHL Receiver upon the transaction request under the Audit Event option.
+This transactions is initiated by a VHL Receiver to request a set of health documents from a VHL Sharer.  This transaction should be conducted in such a manner that the VHL Receiver and VHL Sharer can validate one another's participation in the same trust network. The VHL Sharer shall optionally be able to record an audit event for the access of the folder by the VHL Receiver upon the transaction request under the Audit Event option.
 
 
 For more details see the detailed [transaction description](ITI-YY4.html)
@@ -149,9 +152,17 @@ For more details see the detailed [transaction description](ITI-YY4.html)
 
 #### XX.1.2.5 Request VHL Document
 
-This transactions is used by a VHL Receiver to request a single health document from a VHL Sharer.  This transaction should be conducted in such a manner that the VHL Receiver and VHL Sharer can validate one another's participation in the same trust network.  The VHL Receiver shall optionally be able to validate that the veracity of the health document received through this transaction under the Verify Document Signature option.  The VHL Sharer shall optionally be able to record an audit event for the access of the folder by the VHL Receiver upon the transaction request under the Audit Event option.
+This transactions is initiated by a VHL Receiver to request a single health document from a VHL Sharer.  This transaction should be conducted in such a manner that the VHL Receiver and VHL Sharer can validate one another's participation in the same trust network.  The VHL Receiver shall optionally be able to validate that the veracity of the health document received through this transaction under the Verify Document Signature option.  The VHL Sharer shall optionally be able to record an audit event for the access of the folder by the VHL Receiver upon the transaction request under the Audit Event option.
+
+For more details see the detailed [transaction description](ITI-YY4.html)
 
 
+#### XX.1.2.6 Provide VHL
+
+This transacation is initiated by a VHL Holder to transmit a VHL to the VHL Receiver.   Depending on the use case and context, the payload comprising the VHL may be rendered/serialized and transmitted through various mechanisms, for example as a QR-code, Verifiable Credentials, bluetooth or near-field communication protocols.  These mechanisms are described in [Volume 3](volume-3.html)
+
+
+For more details see the detailed [transaction description](ITI-YY4.html)
 
 <a name="actor-options"> </a>
 
@@ -161,18 +172,18 @@ Options that may be selected for each actor in this implementation guide, are li
 
 <p id ="tXX.1-1" class="tableTitle">Table XX.2-1: Actor Options</p>
 
-|              |                 |
-|--------------|-----------------|
-| Actor        | Option Name     |
-| VHL Receiver | Verify Document |
-| VHL Sharer   | Record Consent  |
-|              | Audit Event     |
+|              |                           |
+|--------------|---------------------------|
+| Actor        | Option Name               |
+| VHL Receiver | Verify Document Signature |
+| VHL Sharer   | Record Consent            |
+|              | Audit Event               |
 {: .grid}
 
 
-### XX.2.1 Verify Document Option
+### XX.2.1 Verify Document Signature Option
 
-In this option the VHL Receiver, after receipt of a digitally signed document from a VHL Sharer, shall verify that digtial singature using previosuly retrieved PKI material.  
+In this option the VHL Receiver, after receipt of a digitally signed document from a VHL Sharer, shall verify the digtial signature using previosuly retrieved PKI material.  This key material may or may not be distributed under the same trust network under which the VHL was distributed.  This key material may or may not be the same key material that was used to verify the VHL.
 
 See cross-profile considerations for a discussion of the relationship of this option to the IHE Document Signature profile.
 
@@ -589,20 +600,30 @@ During the Hajj pilgrimage the Kingdom of Saudi Arabia (KSA) hosts approximately
 
 Starting with Hajj XXXX, in 2024, pilgrims from Oman, Malaysia and Indonesia were able to share their health records utilizing the International Patient Summary (IPS) with verification of health documents provided through the GDHCN infrastructure.
 
-Pilgrims begin their journey in their home country where they receive a health check and are educated on the use of QR codes (a version of Verifiable Health Links) and provide the consent to share their health records.  There are in fact two notions of consent recorded: one for their home country in which they agree that health records from their home country can be shared with appropriate authorities during Hajj, and the second is to permit utilization of these health records within the Saudi System. These consent records are recorded into the IPS Advanced Directives section and are included with the IPS when it is shared.  
+Pilgrims begin their journey in their home country where they receive a health check and are educated on the use of QR codes (a version of Verifiable Health Links) and provide the consent to share their health records.  This consent may be provided verbally or recorded digitally.  When recorded, there are two notions of consent recorded: 
+- for their home country in which they agree that health records from their home country can be shared with appropriate authorities during Hajj
+- for KSA is to permit utilization of these health records within the Saudi System. These consent records are recorded into the IPS Advanced Directives section and are included with the IPS when it is shared.  
 
-Depending on the digital infrastructure pilgrim's origin country and digital capabilities (e.g. access to smart phones) of the pilgrim's origin country, the verifable health link may be printed on the pilgrim's card so that a static QR code is needed,  or the QR code is provided through a national health wallet, which allows a dynamic QR code generation.
+The verifiable health link is provided by their home jurisidiction during their health check as a QR code.   
+Depending on the digital infrastructure pilgrim's origin country, jurisidictional policies and digital capabilities (e.g. access to smart phones) of the pilgrim's origin country, the verifable health link may be:
+* generated and printed on the pilgrim's health card and distrubted to the pilgrim at the time of the health check; or
+* provisioned to the pilgrim through an existing digital health platform or wallet.
+For similar reasons, the verifiable health link may refer to:
+* an instance of the IPS rendered as a PDF;
+* an instance of the IPS rendered as JSON; or
+* a folder containing at least the PDF of JSON rendering of the IPS as well associated digital signatures.
 
 
-Once a VHL is shared by a pilgrim during a care enounter in KSA:
+During a care encounter in KSA, the pilgrim provides their verifiable health link as a QR code to their care provider.  Once a VHL is shared by a pilgrim during a care enounter in KSA:
 * the VHL is verified through the GDHCN infrastructure
 * an mTLS connection is established between the KSA EMRs and the origin country national infrastructure using key material exchanged via GDHCN
 * a manifest of IPS relataed files including a PDF and JSON renderings and associated digital signatures
 * The EMR retrieves the requisite files,
 
-Challenges:
-- pin is weakness, need to enable better options for future (biometrics?)
-- planning for expansion to umrah and general tourism, will not be able to pre-record consent
+Some of the challenges faced during the pilot implementation, though not necessarily to be taken up in this profile, include:
+- while not the main point of security, levergaing the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorizaiton methods)
+- in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit.  
+- how to scale and automate some of the health checks  (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS). 
 
 <figure>
   <div>
@@ -744,30 +765,17 @@ VHL is a building block that is meant to be used together with added security me
 - Before a Receiver Application initiates a VHL request, it should be able to determine the provenance of the VHL that it was presented. 
 
 
-## XX.6 ToDo Cross-Profile Considerations
+## XX.6 Cross-Profile Considerations
 
 This section is informative, not normative. It is intended to put
 this profile in context with other profiles. Any required groupings
-should have already been described above. Brief descriptions can go
-directly into this section; lengthy descriptions should go into an
-appendix. Examples of this material include ITI Cross Community Access
-(XCA) Grouping Rules (Section 18.2.3), the Radiology associated profiles
-listed at wiki.ihe.net, or ITI Volume 1 Appendix E "Cross Profile
-Considerations", and the "See Also" sections Radiology Profile
-descriptions on the wiki such as
-<http://wiki.ihe.net/index.php/Scheduled_Workflow#See_Also>. If this
-section is left blank, add "Not applicable."
+should have already been described above.
 
-Consider using a format such as the following:
 
-other profile acronym - other profile name
-
-A other profile actor name in other profile name might
-be grouped with a this profile actor name to describe
-benefit/what is accomplished by grouping.
-
-### mCSD
+### mCSD - Mobile Care Services Discovery 
 The mCSD Profile supports querying for Endpoint(s) for Organizations. The Trust Anchor may store DID (Decentralized IDentifier) as endpoints for Jurisdictions.
-### DSG
-IPS or other health documents being shared could be digitally signed using DSG under the Verify Document Signature Option.
+### DSGj - JSON Document Signature
+<TO DO: insert content> 
+### DSG - Document Signature
+<TO DO: insert>
 	

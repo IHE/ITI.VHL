@@ -13,6 +13,7 @@ VHLH -> VHLS : Generate VHL request [ITI-YY3]
 VHLS -> VHLH : Generate VHL response [ITI-YY3]
 
 activate VHLR
+VHLH -> VHLR : Provide VHL  [ITI-YY6]
 VHLR -> VHLS : Request VHL Document request [ITI-YY5]
 VHLS -> VHLR : Request VHL Document response [ITI-YY5]
 

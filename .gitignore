@@ -1,3 +1,6 @@
+
+# Temporary folders and files#
+##############################
 /input/images/Thumbs.db
 /temp
 /template
@@ -9,3 +12,43 @@
 /_gencontinuous.sh
 /_genonce.bat
 /_genonce.sh
+
+
+# Windows generated files #
+###########################
+Thumbs.db
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+**/.index.json
+
+# backup files #
+################
+*.bak
+
+# java settings 
+################
+
+
+.vscode/
+.idea/
+.idea/*
+
+# word #
+########
+~$*
+
+
+# emacs #
+#########
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+.swp
