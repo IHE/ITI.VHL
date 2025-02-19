@@ -1,5 +1,5 @@
 
-As an indivudal moves within or across jurisidicional boundaries, they may wish to provide access to clinical anor other health related documents to a set of trusted parties who are authorized to access that individual's health documents. The individual may wish to grant access to a single health document or a set of related health documents. 
+As an individal moves within or across jurisidicional boundaries, they may wish to provide access to clinical anor other health related documents to a set of trusted parties who are authorized to access that individual's health documents. The individual may wish to grant access to a single health document or a set of related health documents. 
 
 
 The Verifiable Health Link (VHL) profile defines protocols and patterns that allow the sharing of health documents in a auditable and verfiable manner within and across jurisdictional boundaries.   The VHL profile describes mechanisms, the VHLs, that an individual, the VHL Holder, uses to provide authorize access to their health records from an issuer, the VHL Sharer, to a third party, the VHL Receiver.  The means by which the VHL is held by the VHL Holder or shared by the VHL Holder to the VHL Receiver are beyond the scope of this profile.
@@ -35,27 +35,24 @@ As a pre-condition to transactions ITI-YY3, ITI-YY4 and ITI-YY5, the VHL Receive
 
 
 <figure>
-  {%include usecase-exchange-key-material-processflow.svg%}
-  <p id="fX.X.X.X-1" class="figureTitle">Figure X.X.X.X-1: Use Case Issue and Utilize VHL Process Flow</p>
+  {%include trust_interaction.svg%}
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Use Case Issue and Utilize VHL for a (set of) Health Document(s) Process Flow</p>
 </figure>
 
 The process of a VHL Holder requesting a VHL to a set of health documents from a VHL Sharer and subsequently sharing them to a VHL Receiver is illusrated in Figure X.X.X.X-2.
 
 
+
+The interaction between a VHL Holder requesting a VHL to a single health document from a VHL Sharer and subsequently sharing them to a VHL Receiver is illusrated in Figure X.X.X.X-2.
+
+
 <figure>
-  {%include usecase-generate-use-vhl-processflow.svg%}
-  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Use Case Issue and Utilize VHL for a Set of Health Documents Process Flow</p>
+  {%include vhl_interaction.svg%}
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Use Case Issue and Utilize VHL for a (set of) Health Document(s) Process Flow</p>
 </figure>
 
 
 
-The process of a VHL Holder requesting a VHL to a single health document from a VHL Sharer and subsequently sharing them to a VHL Receiver is illusrated in Figure X.X.X.X-3.
-
-
-<figure>
-  {%include usecase-generate-use-vhl-single-doc-processflow.svg%}
-  <p id="fX.X.X.X-3" class="figureTitle">Figure X.X.X.X-3: Use Case Issue and Utilize VHL for a Single Health Document Process Flow</p>
-</figure>
 
 <br clear="all">
 
@@ -135,7 +132,7 @@ This transactions is used by a VHL Receiver or VHL Sharer to retrieve PKI materi
 For more details see the detailed [transaction description](ITI-YY2.html)
 
 
-#### XX.1.2.4 Generate VHL
+#### XX.1.2.3 Generate VHL
 
 This transactions is used by a VHL Holder to request that a VHL Sharer generate a VHL.  A VHL Sharer may optionally record the consent of the individual to share their information under the Record Consent option. A VHL Sharer may optionally create an audit trail of the creation of the VHL under the Audit Event option. The individual shall trust that VHL Sharer has been authorized by its jurisidiction to authorize and provide access to health documents.   
 
@@ -504,13 +501,13 @@ A QR code, with a VHL, is created and displayed to the patient for accessing and
 <a name="security-considerations"> </a>
 
 
-#### XX.4.2.2 Use Case \#2: Holder shares generated VHLink to HCP for access
+#### XX.4.2.2 Use Case \#2: Holder Generates and Uses a VHL 
 
 The patient provides access to their encrypted patient summary via the QR code on their mobile device or by sharing a secure VHL, (e.g., via email) at the point of care (e.g., walk-in clinic, emergency department).  The healthcare provider scans the QR code or accesses the VHL shared by the patient, addressing any security prompts, such as entering a passcode if required, and then may proceed to view/utilize and consume the patient summary.
 
-##### XX.4.2.2.1 simple name Use Case Description
+##### XX.4.2.2.1 Generate and Use VHL Case Description
 
-##### XX.4.2.2.2 simple name Process Flow
+##### XX.4.2.2.2 Generate and Use VHL Process Flow
 
 **Pre-conditions**:
 - Patient has a QR code or VHL with access to a patient summary.
@@ -536,11 +533,22 @@ The patient provides access to their encrypted patient summary via the QR code o
 HCP has access to Patient Summary.
 
 
-#### XX.4.2.3 Use Case \#3: Holder requests to destroy a VHLink
+<figure>
+  {%include usecase-generate-use-vhl-single-doc-processflow.svg%}
+  <p id="fX.X.X.X-3" class="figureTitle">Figure X.X.X.X-3: Use Case Issue and Utilize VHL for a Single Health Document Process Flow</p>
+</figure>
 
-##### XX.4.2.3.1 simple name Use Case Description
+<figure>
+  {%include usecase-generate-use-vhl-processflow.svg%}
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Use Case Issue and Utilize VHL for a (set of) Health Document(s) Process Flow</p>
+</figure>
 
-##### XX.4.2.3.2 simple name Process Flow
+
+#### XX.4.2.3 Use Case \#3: Exchange Key Material 
+
+##### XX.4.2.3.1 Exchange Key Material  Use Case Description
+
+##### XX.4.2.3.2 Exchange Key Material  Process Flow
 
 **Pre-conditions**:
 
@@ -548,6 +556,10 @@ HCP has access to Patient Summary.
 
 **Post-conditions:**
 
+<figure>
+  {%include usecase-exchange-key-material-processflow.svg%}
+  <p id="fX.X.X.X-1" class="figureTitle">Figure X.X.X.X-1: Use Case Issue and Utilize VHL Process Flow</p>
+</figure>
 
 #### XX.4.2.4 Use Case \#4: Holder requests to destroy a VHLink
 
@@ -561,17 +573,79 @@ HCP has access to Patient Summary.
 
 **Post-conditions:**
 
-#### XX.4.2.5 Use Case \#5: Receiver accesses the data and updates the link and provides a new link back
+#### XX.4.2.5 Use Case \#5: WHO Global Digital Health Certification Network
 
-##### XX.4.2.5.1 simple name Use Case Description
+The World Health Organization (WHO) operates a trust network, the Global Digital Health Certification Network (GDHCN), for use by public sector health jurisidictions.  The WHO GDHCN uses the notion of a Trust Domain which is defined by a set of:
+* use cases and business processes related to the utilization of Verifiable Digital Health Certificates;
+* open, interoperable technical specifications that define the applicable Trusted Services and verifiable digital health certificates for the use case; and
+* policy and regulatory standards describing expected behavior of participants for to the use case.
 
-##### XX.4.2.5.2 simple name Process Flow
+The PKI operated by the WHO supports a variety of trust domains, two of which are described below. 
 
-**Pre-conditions**:
 
-**Main Flow**:
+##### XX.4.2.5.1 Hajj Pilgrimage Use Case Description
 
-**Post-conditions:**
+During the Hajj pilgrimage the Kingdom of Saudi Arabia (KSA) hosts approximately two milliion pilgrims from across the globe as part of a mass gathering event.  Temporary hospitals and clinics, comprising over a thousand beds, are established to provide care to the pilgrims over the ?four? week period of Hajj.
+
+Starting with Hajj XXXX, in 2024, pilgrims from Oman, Malaysia and Indonesia were able to share their health records utilizing the International Patient Summary (IPS) with verification of health documents provided through the GDHCN infrastructure.
+
+Pilgrims begin their journey in their home country where they receive a health check and are educated on the use of QR codes (a version of Verifiable Health Links) and provide the consent to share their health records.  There are in fact two notions of consent recorded: one for their home country in which they agree that health records from their home country can be shared with appropriate authorities during Hajj, and the second is to permit utilization of these health records within the Saudi System. These consent records are recorded into the IPS Advanced Directives section and are included with the IPS when it is shared.  
+
+Depending on the digital infrastructure pilgrim's origin country and digital capabilities (e.g. access to smart phones) of the pilgrim's origin country, the verifable health link may be printed on the pilgrim's card so that a static QR code is needed,  or the QR code is provided through a national health wallet, which allows a dynamic QR code generation.
+
+
+Once a VHL is shared by a pilgrim during a care enounter in KSA:
+* the VHL is verified through the GDHCN infrastructure
+* an mTLS connection is established between the KSA EMRs and the origin country national infrastructure using key material exchanged via GDHCN
+* a manifest of IPS relataed files including a PDF and JSON renderings and associated digital signatures
+* The EMR retrieves the requisite files,
+
+Challenges:
+- pin is weakness, need to enable better options for future (biometrics?)
+- planning for expansion to umrah and general tourism, will not be able to pre-record consent
+
+<figure>
+  {%include hajj-diagram.png%}
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Hajj Pilgrimage</p>
+</figure>
+
+
+##### XX.4.2.5.2 Pan-American Highway for Health Use Case Description
+
+In the region of the Americas,  "countries identified several priorities for cross-border digital
+health, including optimizing available human resources through international
+telehealth, validating digital certificates, ensuring continuity of care, and regional
+resilience to face health emergencies by sharing data for public health. During the
+IDB-PAHO co-led event, RELACSIS 4.0,1 a plan was launched to strengthen regional
+digital health services and resilience, through regional data exchange and policy
+harmonization. Sixteen countries successfully exchanged digital vaccine certificates
+(COVID-19, Polio, Measles, and Yellow Fever) and critical clinical information
+(diagnosis, allergy, and prescription information) using international standards during
+the 2nd Regional LACPASS Connectathon.2 Regional bodies and network such as the
+Council of Ministers of Health of Central America and the Dominican Republic
+(COMISCA), The Caribbean Public Health Agency (CARPHA), and the LAC Digital
+Health Network (RACSEL) have all identified cross-border data sharing as a priority."  
+[footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
+
+The Pan American Health Organization (PAHO) and the InterAmerican Development Bank (IADB) are supporting the development of policues and digital infrastructrue to support this need. One particular priority is to improve the continuity of care for internal migrants within the region, by ensuring individuals have access to and can share their vaccination records and the International Patient Summary.
+
+The Pan-American Highway for Health (PH4H)  "aims to provide patients with better healthcare services, regardless of their location. It will also enhance healthcare for those who move temporarily for work
+or study, as well as for migrants, by enabling them to share their health history, thus
+improving their employability and access to education. "  
+[footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
+
+While there currently there is no single legal framework that broadly enables data sharing across the region, there are sub-regional networks (e.g. COMISCA, CARPHA) that have policies that can be leveraged in the short term while neccesary data sharing agreements are developed.   Thus, individuals in this region will need to be able to move through overlapping trust networks.
+
+
+
+<figure>
+  {%include PH4H.png%}
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Pan-American Highway for Digital Health Goals</p>
+</figure>
+
+
+#### XX.4.2.6 Use Case \#6: Smart Health Links
+<bold>Note:</bold>  Not sure if we want to include "Verifiable" health link as an option and Smart Health Link as another option.  If so, we should recap SHL use case here. (No pre-coordination of trust)
 
 ## XX.5 ToDo Security Considerations
 

@@ -1,0 +1,9 @@
+@startuml
+title VHL Trust Actor Diagram
+agent "Trust Anchor" as TA 
+agent "VHL Sharer" as VHLS
+agent "VHL Receiver" as VHLR
+
+VHLS -- TA : "Publish PKI Material\nRetrieve PKI Material"
+TA -- VHLR : "Publish PKI Material\nRetrieve PKI Material"
+@enduml

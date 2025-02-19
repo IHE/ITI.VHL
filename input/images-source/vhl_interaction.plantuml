@@ -1,0 +1,10 @@
+@startuml
+title VHL Trust Actor Diagram
+agent "Holder" as H
+agent "VHL Sharer" as VHLS
+agent "VHL Receiver" as VHLR
+
+H -- VHLS : "Generate VHL"
+H -- VHLR : "Provide VHL"
+VHLR -- VHLS : "Request Document(s)
+@enduml
