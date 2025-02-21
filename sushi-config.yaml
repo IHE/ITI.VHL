@@ -59,13 +59,10 @@ pages:
     title: ToDo Home
     generation: markdown
   volume-1.md:
-    title: 1:XX Verifiable Health Links (VHL)
+    title: 1:XX Verifiable Health Links (VHL) - Volume 1
     generation: markdown
-  domain-YY.md:
-    title: 2:3.YY Transaction one [Domain-YY]
-    generation: markdown
-  domain-ZZ.md:
-    title: 3:?.ZZ Content one [Domain-ZZ]
+  volume-3.md:
+    title: 3:3.YY Verifiable Health Links (VHL) - Volume 3
     generation: markdown
   testplan.md:
     title: "Test Plan"
@@ -93,7 +90,7 @@ menu:
   Volume 2:
     "Transaction one [Domain-YY]": domain-YY.html
   Volume 3:
-    "Content one [Domain-ZZ]": domain-ZZ.html
+    "Content Profiles": volume-3.html
   Artifacts: artifacts.html
   Other:
     Changes to Other IHE Specifications: other.html

@@ -27,7 +27,7 @@ This guide is organized into the following sections:
    1. [ToDo do \[domain-YY\]](domain-YY.html)
    1. **TODO: point to the Volume 2 Appendix if there is one**
 3. Volume 3: Metadata and Content
-   1. [Content One](domain-ZZ.html)
+   1. [Content Profiles](volume-3.html)
 4. Volume 4: National Extensions
    1. **TODO: point at the National Extensions if there are any**
 5. Other

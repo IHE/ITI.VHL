@@ -1,4 +1,3 @@
-A
 As an individal moves within or across jurisidicional boundaries, they may wish to provide access to clinical anor other health related documents to a set of trusted parties who are authorized to access that individual's health documents. The individual may wish to grant access to a single health document or a set of related health documents. 
 
 
@@ -68,7 +67,7 @@ The interaction between a VHL Holder requesting a VHL to a single health documen
 |              | Provide VHL                  | Initiator              | R          | ITI TF-2: YY6 |
 | VHL Receiver | Publish PKI Material         | Initiator              | R          | ITI TF-2: YY1 |
 |              | Retrieve PKI Material        | Initiator              | R          | ITI TF-2: YY2 |
-|              | Provide VHL                  | Requester              | R          | ITI TF-2: YY6 |
+|              | Provide VHL                  | Responder              | R          | ITI TF-2: YY6 |
 |              | Request VHL Documents        | Initiator              | R          | ITI TF-2: YY4 |
 |              | Request VHL Document         | Initiator              | R          | ITI TF-2: YY5 |
 | VHL Sharer   | Publish PKI Material         | Initiator              | R          | ITI TF-2: YY1 |
@@ -627,7 +626,7 @@ Some of the challenges faced during the pilot implementation, though not necessa
 
 <figure>
   <div>
-  <img src="hajj-diagram.png" caption="Figure X.X.X.X-2: Hajj Pilgrimage"/>
+  <img src="hajj-diagram.png" caption="Figure X.X.X.X-2: Hajj Pilgrimage" style="width:100%;"/>
   </div>
 </figure>
 
@@ -661,7 +660,7 @@ While there currently there is no single legal framework that broadly enables da
 
 
 <figure>
-  <img src="PH4h.png" caption="Figure X.X.X.X-2: Pan-American Highway for Digital Health Goals"/>
+  <img src="PH4H.png" caption="Figure X.X.X.X-2: Pan-American Highway for Digital Health Goals" style="width:100%;"/>
 </figure>
 
 
