@@ -4,7 +4,7 @@
 {% assign capes = actordefinition.extension | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.capabilities" %}
  
 
-{% unless capes == empty %}
+{% unless capes == empty or capes == nil %}
 This actor fufills the following capabilities:
 <ul>	  
   {% for cape in capes %}

@@ -25,7 +25,7 @@
       <th>Jurisdiction</th>
       <td>{{ ext | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.jurisdiction' | first | map: 'valueCodeableConcept' | map: 'coding' | first | first | map: 'code' | first }}</td>
     </tr>
-    {% unless capes == empty %}    
+    {% unless capes == empty or capes == nil %}    
     <tr>
       <th>Capability Statements</th>
       <td>{% include actordefinition-list-capabilites.liquid site=site actordefinition=actordefinition %}</td>

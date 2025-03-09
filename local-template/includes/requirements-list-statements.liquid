@@ -1,6 +1,6 @@
 
 {% assign statements = requirement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement' %}
-{% unless statements == empty %}
+{% unless statements == empty or statements == nil %}
 Steps in the requirement:
 <ol>
  {% for statement in statements %}
@@ -18,7 +18,7 @@ Steps in the requirement:
      | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement.requirement'
      | map: 'valueMarkdown' | first  | markdownify %}	    
    <b>
-     {% unless stmtconformance == empty %}  
+     {% unless stmtconformance == empty or stmtconformance == nil %}  
        <a href="https://hl7.org/fhir/R5//codesystem-conformance-expectation.html#content">
          {{ stmtconformance  }}
        </a> -
