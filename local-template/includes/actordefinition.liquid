@@ -28,43 +28,12 @@
     {% unless capes == empty %}    
     <tr>
       <th>Capability Statements</th>
-      <td>
-	This actor fufills the following capabilities:
-        <ul>	  
-          {% for cape in capes %}
-              {% assign capeinstance = cape.valueCanonical | split: "/" | last  | split: ".html" | first %}
-	      {% assign capepage = "CapabilityStatement-" | append: capeinstance | append: ".html" %}
-	      {% assign capename = site.data.pages[capepage].title %}
-              <li><a href="{{  capepage  }}">{{ capename | escape_once  }}</a></li>
-	      
-          {% endfor %}
-        </ul>
-      </td>
+      <td>{% include actor-definition-list-capabilities.liquid site=site actordefinition=actordefinition %}</td>
     </tr>
     {% endunless %}
     <tr>
       <th>Requirements</th>
-      <td>
-	This actor fufulls the following requirements:
-	<ul>
-	  {% assign actorstub = "ActorDefinition-" | append: actordefinition.id %}
-	  {% assign canonicals = site.data.canonicals | where: 'type' , 'Requirements' %}
-	  {% for canonical in canonicals %}
-	    {% assign stub = canonical.type | append: "-" | append: canonical.id %}
-	    {% assign requirement = site.data[stub] %}
-	    {% assign reqactors =  requirement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.actor'  %}
-	    {% for reqactor in reqactors %}
-	      {% assign reqactorcanonical = reqactor.valueCanonical | split: "/" | last   %}
-    	      {% assign reqactorstub = "ActorDefinition-" | append: reqactorcanonical %}
-              {% unless reqactorstub != actorstub %}
-  	         <li>
-  	           {% include requirements-short-summary.liquid requirement=requirement site=site %}
-	         <li>
-	      {% endunless %}
-            {% endfor %}
-	  {% endfor %}
-	</ul>
-      </td>
+      <td>{% include actor-definition-list-requirements.liquid site=site actordefinition=actordefinition %}</td>
     </tr>
   </tbody>
 </table>

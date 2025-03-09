@@ -25,31 +25,8 @@
       <td>{{ ext | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.jurisdiction' | first | map: 'valueCodeableConcept' | map: 'coding' | first | first | map: 'code' | first }}</td>
     </tr>
     <tr>
-      <th>Steps</th>
-      <td>
-  	<ol>
-	  {% assign statements = ext | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement' %}
-          {% for statement in statements %}
-	  <li>
-            {% assign stmtconformance = statement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement.conformance' | map: 'valueCode' | first  %}
-	    {% assign stmtkey = statement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement.key' | map: 'valueId' | first  %}
-	    {% assign stmtlabel = statement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement.label' | map: 'valueString' | first  %}	    
-	    {% assign stmtrequirement = statement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement.requirement' | map: 'valueMarkdown' | first  %}	    
-
-	    <b>
-	      {% unless stmtconformance == empty %}  
-	      <a href="https://hl7.org/fhir/R5//codesystem-conformance-expectation.html#content">
-		{{ stmtconformance  }}
-	      </a>
-	      -
-	      {% endunless %}
-	      {{ stmtlabel }} ( {{  stmtkey  }} )
-	    </b>
-	    : {{ stmtrequirement }}
-	  </li>
-	  {% endfor %}
-        </ol>	 
-      </td>
+      <th>Statements</th>
+      <td>{% include requirements-list-statements.liquid site=site requirement=requirement %}</td>
     <tr>
     <tr>
       <th>Participanting Actors</th>
