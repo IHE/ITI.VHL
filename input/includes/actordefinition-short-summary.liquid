@@ -1,48 +1,15 @@
 
-{% assign ext  = actordefinition.extension %}
-{% assign title = ext | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.title" | first %}
-{% assign descr = ext | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.description" | first %}
-{% assign capes = ext | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.capabilities" %}
 
+{% assign title = actordefinition.extension | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.title" | first %}
+{% assign descr = actordefinition.extension | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.description" | first %}
 
 <h4>XX.1.1.X {{title.valueString}}</h4>
 
 {{descr.valueMarkdown | markdownify}}
 
-This actor fufulls the following requirements:
-<ul>
-  {% assign actorstub = "ActorDefinition-" | append: actordefinition.id %}
-  {% assign canonicals = site.data.canonicals | where: 'type' , 'Requirements' %}
-  {% for canonical in canonicals %}
-    {% assign stub = canonical.type | append: "-" | append: canonical.id %}
-    {% assign requirement = site.data[stub] %}
-    {% assign reqactors =  requirement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.actor' %}
-    {% for reqactor in reqactors %}
-      {% assign reqactorcanonical = reqactor.valueCanonical | split: "/" | last   %}
-      {% assign reqactorstub = "ActorDefinition-" | append: reqactorcanonical %}
-      {% unless reqactorstub != actorstub %}
-        {% assign reqtitle = requirement.extension | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
-         <li><b><a href="Requirements-{{requirement.id}}.html">{{reqtitle.valueString}}</a></b></li>
-      {% endunless %}
-    {% endfor %}
-  {% endfor %}
-</ul>
 
+{% include actordefinition-list-requirements.liquid site=site actordefinition=actordefinition %}
 
-{% unless capes == empty %}
-This actor fufills the following capabilities:
-<ul>	  
-  {% for cape in capes %}
-  <li>
-    {% assign capeinstance = cape.valueCanonical | split: "/" | last  | split: ".html" | first | replace: "." , "" %}
-    {% assign capestub = "CapabilityStatement-" | append: capeinstance  %}
-
-    {% assign cs = site.data[capestub] %}
-    {% include capabilitystatement-short-summary.liquid cs=cs site=site %}
-  </li>
-  {% endfor %}
-</ul>
-{% endunless %}
-
+{% include actordefinition-list-capabilites.liquid site=site actordefinition=actordefinition %}
 
 

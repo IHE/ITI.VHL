@@ -38,15 +38,7 @@ This section defines the actors, transactions, and/or content modules in this pr
 <ul>
   <li>
     Actors
-	<ul>
-	  {% assign canonicals = site.data.canonicals | where: 'type' , 'ActorDefinition' %}
-	  {% for canonical in canonicals %}
-	    {% assign actorstub = canonical.type | append: "-" | append: canonical.id %}
-	    {% assign actorpage = actorstub | append: ".html" %}
-		{% assign actortitle = site.data.pages[actorpage].title %}	
-		<li><a href="{{ actorstub }}.html">{{ actortitle }}</a></li>
-	  {% endfor %}
-	</ul>
+	{% include actordefinition-list.liquid site=site %}
   </li>
   <li>
     Transactions
