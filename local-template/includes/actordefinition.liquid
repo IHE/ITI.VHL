@@ -28,12 +28,12 @@
     {% unless capes == empty %}    
     <tr>
       <th>Capability Statements</th>
-      <td>{% include actor-definition-list-capabilities.liquid site=site actordefinition=actordefinition %}</td>
+      <td>{% include actordefinition-list-capabilites.liquid site=site actordefinition=actordefinition %}</td>
     </tr>
     {% endunless %}
     <tr>
       <th>Requirements</th>
-      <td>{% include actor-definition-list-requirements.liquid site=site actordefinition=actordefinition %}</td>
+      <td>{% include actordefinition-list-requirements-full.liquid site=site actordefinition=actordefinition %}</td>
     </tr>
   </tbody>
 </table>
