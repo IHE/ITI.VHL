@@ -3,38 +3,18 @@
 {% assign canonicals = site.data.canonicals | where: 'type' , 'Requirements' %}
 <ul>
   {% for canonical in canonicals %}
-    {% assign derivedFrom  =  requirement.extension
-      | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.actor' %}
-    {% if derivedFrom == requirement.url %}
+    {% assign stub = canonical.type | append: "-" | append: canonical.id %}
+    {% assign req = site.data[stub] %}
+    {% assign df  =  req.extension
+      | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.derivedFrom' %}
+    {% assign dfinstance = df.valueCanonical | split: "/" | last   %}
+    <pre>DF={{ df | escape }}</pre>
+    <pre>{{ dfinstance }} ==  {{ requirement.id }} ? </pre>
+    {% if dfinstance == requirement.id %}
       <li><pre>{{ canonical | escape }}</pre></li>
-    {% endif }}
+    {% else %}
+      <li>Scanned: <pre>{{ canonical | escape }}</pre></li>
+    {% endif %}
   {% endfor %}
-</ul>    
-  {% assign stub = canonical.type | append: "-" | append: canonical.id %}
 
-{% assign reqactors =  requirement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.actor' %}
-{% for reqactor in reqactors %}
-{% assign reqactorcanonical = reqactor.valueCanonical | split: "/" | last   %}
-{% assign reqactorstub = "ActorDefinition-" | append: reqactorcanonical %}
-{% unless reqactorstub != actorstub %}
-{% assign reqtitle = requirement.extension 
-| where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title"
-| first %}
-<li>{% include requirements-short-summary.liquid requirement=requirement site=site %}</li>
-{% endunless %}
-{% endfor %}
-{% endfor %}
-
-
-{% assign parents = ext
-	    | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.derivedFrom' %}
-          {% for parent in parents %}
-              {% assign parentinstance = parent.valueCanonical | split: "/" | last  | split: ".html" | first %}
-	      {% assign parentpage = "Requirements-" | append: parentinstance | append: ".html" %}
-	      {% assign parentname = site.data.pages[parentpage].title %}
-	  <pre>{{ parent | escape }} </pre>
-	  <pre>{{ parentinstance | escape }} </pre>
-	  <pre>{{ parentpage | escape }} </pre>
-	  <pre>{{ parentname | escape }} </pre>
-              <li><a href="{{  parentpage  }}">{{ parentname | escape  }}</a></li>	      
-          {% endfor %}
+</ul> 
