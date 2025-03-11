@@ -39,7 +39,7 @@
 	  | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.contact'
   	  | map: 'valueContactDetail' | map: 'telecom' | first | where: 'system', 'email' | first | map: 'value' | first %}
 	{% if url == empty or url == nil %}
-	   No contact email had been registered.
+	   No contact email has been registered.
 	{% else %}
 	  {{url}}
 	{% endif %}
