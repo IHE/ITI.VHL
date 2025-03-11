@@ -17,7 +17,7 @@ This actor fulfills the following requirements:
            | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title"
            | first %}
         <li>
-          <b><a href="Requirements-{{requirement.id}}.html">{{reqtitle.valueString}}</a></b>
+          <b><a href="Requirements-{{requirement.id}}.html">{{ reqtitle.valueString | escape }}</a></b>
         </li>
       {% endunless %}
     {% endfor %}
