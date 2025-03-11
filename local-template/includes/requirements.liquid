@@ -45,19 +45,25 @@
 	{% endif %}
       </td>
     </tr>
+
+
     <tr>
       <th>Jurisdiction</th>
       <td>
 	{% assign jursisdiction = ext
 	  | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.jurisdiction'
- 	  | first | map: 'valueCodeableConcept' | map: 'coding' | first | first | map: 'code' | first }}
+ 	  | first | map: 'valueCodeableConcept' | map: 'coding' | first | first | map: 'code' | first %}
 	{{ jurisdiction }}
       </td>
     </tr>
+    
     <tr>
       <th>Statements</th>
       <td>{% include requirements-list-statements.liquid site=site requirement=requirement %}</td>
-    <tr>
+    </tr>
+
+
+    
     <tr>
       <th>Derived from</th>
       <td>
@@ -77,13 +83,11 @@
 	  {% endif %}    
         </ul>
       </td>
-    <tr>
+    </tr>
     <tr>
       <th>Derivatives</th>
       <td>
-	<ul>
-	  {% include requirements-list-derivatives.liquid site=site requirement=requirement %}
-        </ul>
+	{% include requirements-list-derivatives.liquid site=site requirement=requirement %}
       </td>
     </tr>      
       
