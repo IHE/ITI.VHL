@@ -1,11 +1,11 @@
 
 {% assign linkta = '<a href="ActorDefinition-TrustAnchor.html">Trust Anchor</a>' %}
-{% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">vHL Holder</a>' %}
+{% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 {% assign linkgeneratevhl = '<a href="volume-2.html#GenerateVHL">Generate VHL</a>' %}
-{% assign linkpublishpki = '<a href="volume-2.html#PublishPKI">Publish PKI</a>' %}
-{% assign linkretrievepki = '<a href="volume-2.html#Retrieve PKI">Retreive PKI</a>' %}
+{% assign linkpublishpki = '<a href="volume-2.html#PublishPKIMaterial">Publish PKI Material</a>' %}
+{% assign linkretrievepki = '<a href="volume-2.html#RetrievePKIMaterial">Retreive PKI Material</a>' %}
 {% assign linkprovidevhl = '<a href="volume-2.html#ProvideVHL">Provide VHL</a>' %}
 {% assign linkrequestdocument = '<a href="volume-2.html#RequestDocument">Request Document</a>' %}
 {% assign linkrequestdocuments = '<a href="volume-2.html#RequestDocuments">Request Documents</a>' %}
@@ -16,13 +16,15 @@ As an individual moves within or across jurisdictional boundaries, they may wish
 
 The Verifiable Health Link (VHL) profile defines protocols and patterns that allow the sharing of health documents in a auditable and verfiable manner within and across jurisdictional boundaries.   The VHL profile describes mechanisms, the VHLs, that an individual, the VHL Holder, uses to provide authorize access to their health records from an issuer, the {{ linkvhls }}, to a third party, the {{ linkvhlr }}.  The means by which the VHL is held by the VHL Holder or shared by the VHL Holder to the {{ linkvhlr }} are beyond the scope of this profile.
 
+The VHL leverages Public Key Infrastructure (PKI) as a means to verify trust amongst the actors and the veracity of artifacts.  
+
 In the VHL profile, the {{ linkvhlr }} and {{ linkvhls }} participate in a trust network which enables the verification of the origin of the health document, any access mechanisms to these health documents, and the origin of requests to utilze these access mechanisms. The authorization for the participation of a {{ linkvhlr }} or {{ linkvhls }} with the trust network is maintained by their respective jurisidictions.  The verification of that authorization is acheived using the PKI. 
 
 The respective jurisidictions of the {{ linkvhlr }} and {{ linkvhls }} may have regulatory framework in regards to the privacy and security of access to patient data that may include the needs for verfication of consent and maintaining audit trails for access to an person's health data.
 
-The VHL leverages Public Key Infrastructure (PKI) as a means to verify trust amongst the actors and the veracity of artefacts.  As participants within a trust network, the {{ linkvhlr }} and {{ linkvhls }} both share and receive PKI material with the {{ linkta }} of the trust network.  The means by which the {{ linkvhlr }} and {{ linkvhls }} establish trust with the {{ linkta }} is beyond the scope of this profile.
+qAs participants within a trust network, the {{ linkvhlr }} and {{ linkvhls }} both share and receive PKI material as Trustlists, with the {{ linkta }} of the trust network.  The means by which the {{ linkvhlr }} and {{ linkvhls }} establish trust with the {{ linkta }} is beyond the scope of this profile.
 
-Note that VHLs and a SMART(R) Health Links (SHLs) are related concepts with different assumptions on the trust network.  In the VHL context a trust relationship is pre-established between the {{ linkvhlr }} and the {{ linkvhls }} including a mutual PKI distribution mechanism. In the SHL context, there is no pre-existing trust relationship between the a SHL Receiver and SHL Sharer and the PKI material is distributed by the SHL Sharer at the time that the SHL Holder provides the SHL to the SHL Receiver. See [Appendix A](vhl_vs_shl.html) for a more detailed comparison.
+Note that VHLs and a SMART(R) Health Links (SHLs) are related concepts with different assumptions on the trust network.  In the VHL context a trust relationship is pre-established between the {{ linkvhlr }} and the {{ linkvhls }} through  PKI material distributed as Trustlists distribution mechanism. In the SHL context, there is no pre-existing trust relationship between the a SHL Receiver and SHL Sharer and the PKI material is distributed by the SHL Sharer at the time that the SHL Holder provides the SHL to the SHL Receiver. See [Appendix A](vhl_vs_shl.html) for a more detailed comparison.
 
 
 

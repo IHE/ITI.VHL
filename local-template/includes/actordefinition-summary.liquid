@@ -1,0 +1,23 @@
+
+
+{% assign ext = actordefinition.extension %}
+
+{% assign title = ext | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.title" | first %}
+{% assign capes = ext | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.capabilities' %}
+    
+
+
+{% assign title = actordefinition.extension | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.title" | first %}
+{% assign descr = actordefinition.extension | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-ActorDefinition.description" | first %}
+
+<h4>XX.1.1.X {{title.valueString}}</h4>
+
+{{descr.valueMarkdown | markdownify}}
+
+
+{% unless capes == empty or capes == nil %}    
+  {% include actordefinition-list-capabilites.liquid site=site actordefinition=actordefinition %}
+{% endunless %}
+
+{% include actordefinition-list-requirements-full.liquid site=site actordefinition=actordefinition %}
+
