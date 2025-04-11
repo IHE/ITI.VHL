@@ -95,7 +95,9 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    Generate VHL: volume-2.html#GenerateVHL
+    Publish PKI: volume-2.html#publish-pki-material
+    Retrieve PKI: volume-2.html#retrieve-pki-material
+    Issue VHL: volume-2.html#issue-verifiable-health-link
   Volume 3:
     Content Profiles: volume-3.html
   Artifacts: artifacts.html
