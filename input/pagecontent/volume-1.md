@@ -732,7 +732,9 @@ The EVC will operate in the context of the European Health Data Spaces that requ
   <p id="fX.X.X.X-1" class="figureTitle">Figure X.X.X.X-1:European Health Data Spaces </p>
 </figure>
 
-
+For more infomration see Regulation (EU) 2025/327 of the European Parliament and of the Council of 11 February 2025 on the European Health Data Space and amending Directive 2011/24/EU and Regulation (EU) 2024/2847.  Specifically:
+* [ANNEX II - Essential requirements for the harmonised software components of EHR systems and for products for which interoperability with EHR systems has been claimed](https://eur-lex.europa.eu/eli/reg/2025/327/oj#anx_II)
+* [Article 9 - Right to obtain information on accessing data](https://eur-lex.europa.eu/eli/reg/2025/327/oj#art_9)
 
 This use case has the following business requirement:
 * [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
