@@ -510,8 +510,8 @@ A Verifiable Health Link is a mechanism which enables the sharing of health docu
 #### XX.4.2.1 Use Case \#1: Holder requests generation of link
 
 A patient, via a patient-facing application, requests access to a shareable copy of their health summary. 
+###### **XX.4.2.1.1 Scenario Narrative**
 
-##### XX.4.2.1.1 Genreate VHL Use Case Description
 Ms. SJ, a 37-year-old non-smoker and non-drinker, recently experienced a high-risk pregnancy involving early hospitalization and pre-term delivery due to pre-eclampsia and gestational diabetes. She is currently taking metformin and an anti-hypertensive. Ms. SJ, recently moved within her province, and she found a new primary care clinic that is taking on new patients.  
 
 Ms. SJ signs up for a patient-facing provincial application to access her personal health information and creates a shareable patient summary, which will be useful for her upcoming appointment. On the application, she is presented with privacy and security measures, such as a consent notice, passcode, and QR code timeout. After providing her consent and completing the security instructions for her shareable patient summary, the application assembles her patient summary using available data and creates a VHL and QR code, which is displayed on Ms. SJ’s mobile phone, and she is happy to see that she has the option to print a copy. Ms. SJ is ready for her appointment. 
