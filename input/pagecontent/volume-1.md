@@ -11,21 +11,26 @@
 {% assign linkrequestdocuments = '<a href="volume-2.html#RequestDocuments">Request Documents</a>' %}
 
 
-As an individual moves within or across jurisdictional boundaries, they may wish to provide access to clinical anor other health related documents to a set of trusted parties who are authorized to access that individual's health documents. The individual may wish to grant access to a single health document or a set of related health documents. 
+As individuals move within or across jurisdictional boundaries, they may wish to provide access to clinical or other health-related documents to a defined set of trusted parties who are authorized to access their records. This access may be granted for a single document or for a set of related documents.
 
+The **Verifiable Health Link (VHL)** profile defines a set of protocols and patterns that enable health documents to be shared in a verifiable and auditable manner—both within and across jurisdictions. Central to this profile is the concept of the **VHL**, a signed artifact that an individual (the **VHL Holder**) can use to authorize access to their health records from an issuer (the {{ linkvhls }}) to a third party (the {{ linkvhlr }}). The mechanisms by which the VHL is held by the Holder or transmitted to the {{ linkvhlr }} are out of scope for this profile.
 
-The Verifiable Health Link (VHL) profile defines protocols and patterns that allow the sharing of health documents in a auditable and verfiable manner within and across jurisdictional boundaries.   The VHL profile describes mechanisms, the VHLs, that an individual, the VHL Holder, uses to provide authorize access to their health records from an issuer, the {{ linkvhls }}, to a third party, the {{ linkvhlr }}.  The means by which the VHL is held by the VHL Holder or shared by the VHL Holder to the {{ linkvhlr }} are beyond the scope of this profile.
+VHL leverages **Public Key Infrastructure (PKI)** to establish trust among actors and to verify the authenticity and integrity of exchanged artifacts.
 
-The VHL leverages Public Key Infrastructure (PKI) as a means to verify trust amongst the actors and the veracity of artifacts.  
+Within the VHL trust model, both the {{ linkvhlr }} and the {{ linkvhls }} are participants in a shared **trust network**. This network enables:
+- Verification of the origin of a health document,
+- Validation of any access mechanism (i.e., the VHL itself),
+- Authentication of requests that seek to utilize these mechanisms.
+    
+The authority to participate in the trust network is governed by each actor’s **jurisdiction**, which determines eligibility and onboarding criteria. Verification of this authorization is achieved through PKI, specifically through the validation of credentials issued or endorsed by a **Trust Anchor** ({{ linkta }}).
 
-In the VHL profile, the {{ linkvhlr }} and {{ linkvhls }} participate in a trust network which enables the verification of the origin of the health document, any access mechanisms to these health documents, and the origin of requests to utilze these access mechanisms. The authorization for the participation of a {{ linkvhlr }} or {{ linkvhls }} with the trust network is maintained by their respective jurisidictions.  The verification of that authorization is acheived using the PKI. 
+Jurisdictions may also impose specific regulatory requirements on the privacy and security of health data exchange. These may include mandatory **consent verification**, **audit logging**, or other compliance controls that impact how VHL-based exchanges are implemented.
 
-The respective jurisidictions of the {{ linkvhlr }} and {{ linkvhls }} may have regulatory framework in regards to the privacy and security of access to patient data that may include the needs for verfication of consent and maintaining audit trails for access to an person's health data.
+As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} are expected to publish and retrieve PKI material—typically as signed **Trust Lists**—from the {{ linkta }}. The precise onboarding and credential issuance processes used to establish trust with the {{ linkta }} are implementation-specific and beyond the scope of this profile.
 
-qAs participants within a trust network, the {{ linkvhlr }} and {{ linkvhls }} both share and receive PKI material as Trustlists, with the {{ linkta }} of the trust network.  The means by which the {{ linkvhlr }} and {{ linkvhls }} establish trust with the {{ linkta }} is beyond the scope of this profile.
+> **Note on SMART Health Links (SHL):**
 
-Note that VHLs and a SMART(R) Health Links (SHLs) are related concepts with different assumptions on the trust network.  In the VHL context a trust relationship is pre-established between the {{ linkvhlr }} and the {{ linkvhls }} through  PKI material distributed as Trustlists distribution mechanism. In the SHL context, there is no pre-existing trust relationship between the a SHL Receiver and SHL Sharer and the PKI material is distributed by the SHL Sharer at the time that the SHL Holder provides the SHL to the SHL Receiver. See [Appendix A](vhl_vs_shl.html) for a more detailed comparison.
-
+> VHLs and SMART® Health Links (SHLs) are conceptually related but rely on fundamentally different trust assumptions. In the VHL model, a **pre-established trust relationship** exists between the {{ linkvhls }} and the {{ linkvhlr }}, verified via PKI material exchanged through Trust Lists. In contrast, SHL assumes **no prior trust** between the SHL Receiver and SHL Sharer. Instead, trust is conveyed at the time the SHL is presented, often using embedded JWS signatures and keys controlled by the SHL Sharer. See [Appendix A](vhl_vs_shl.html) for a more detailed comparison.
 
 
 <a name="actors-and-transactions"> </a>
@@ -501,43 +506,44 @@ not allowed in use cases.
 
 ### XX.4.1 Concepts
 
+A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to share access to health documents in a secure, auditable, and configurable manner. Sharing options may include **limited-time access**, **PIN-protected retrieval**, or **ongoing access** to a longitudinal dataset that may evolve over time. VHLs can be rendered as QR codes or downloaded to a user’s device, supporting patient-mediated data sharing and enhancing interoperability across healthcare systems.
 
-A Verifiable Health Link is a mechanism which enables the sharing of health documents with additional sharing options that may include: limited-time access, long-term sharing of data that can evolve over time,  and protecting access with a PIN. These shareable links can often be downloaded onto devices and converted into a QR code format, facilitating patient-mediated data sharing and interoperability within the healthcare ecosystem.
+#### XX.4.2 Use Cases
 
+##### XX.4.2.1 Use Case #1: Holder Requests Generation of a Verifiable Health Link
 
-### XX.4.2 Use Cases
+A patient uses a digital health application to request a shareable summary of their health information, intended for use by a new healthcare provider or other interested.
 
-#### XX.4.2.1 Use Case \#1: Holder requests generation of link
+###### XX.4.2.1.1 Scenario Narrative
 
-A patient, via a patient-facing application, requests access to a shareable copy of their health summary. 
-###### **XX.4.2.1.1 Scenario Narrative**
+**Ms. SJ**, age 37, recently relocated within her province after a complex pregnancy. She is currently managing hypertension and Type 2 diabetes and is seeking continuity of care at a new primary care clinic. Through a provincial patient portal, she accesses her personal health information and elects to generate a Verifiable Health Link (VHL) for her new provider.
 
-Ms. SJ, a 37-year-old non-smoker and non-drinker, recently experienced a high-risk pregnancy involving early hospitalization and pre-term delivery due to pre-eclampsia and gestational diabetes. She is currently taking metformin and an anti-hypertensive. Ms. SJ, recently moved within her province, and she found a new primary care clinic that is taking on new patients.  
+The application guides Ms. SJ through privacy and security options: she is presented with a consent form, the ability to set a PIN, and an expiration time for the VHL. Once she completes the required steps, the system assembles a health summary (e.g., medications, encounters, diagnoses) and generates a VHL encoded in a QR code, which is displayed on her device. She is also given the option to print the QR code. Ms. SJ is now ready for her upcoming appointment.
 
-Ms. SJ signs up for a patient-facing provincial application to access her personal health information and creates a shareable patient summary, which will be useful for her upcoming appointment. On the application, she is presented with privacy and security measures, such as a consent notice, passcode, and QR code timeout. After providing her consent and completing the security instructions for her shareable patient summary, the application assembles her patient summary using available data and creates a VHL and QR code, which is displayed on Ms. SJ’s mobile phone, and she is happy to see that she has the option to print a copy. Ms. SJ is ready for her appointment. 
+###### XX.4.2.1.2 Process Flow – Generate VHL**
 
-##### XX.4.2.1.2  Generate VHL Process Flow
+**Preconditions:**
+- The patient has access to a jurisdictionally supported patient portal or mobile application that allows the generation of a VHL referencing a patient summary.
+    
+**Main Flow:**
 
-**Pre-conditions**:
-
-- Patient has access to a patient-facing application which supports access to their patient summary and creation of a QR code with a VHL for sharing with an HCP. 
-
-
-**Main Flow**:
-
-- Patient or their designated caregiver accesses Personal Health Information via a patient facing application (e.g., Jurisdictional Patient Portal).
-- Patient or their designated caregiver requests access to a shareable patient summary, on option available within their patient facing application.
-- Patient or their designated caregiver is presented with applicable privacy and/or security forms such as a consent statement, requirements for a PIN, passcode, validity time frame etc., according to jurisdictional policies.
-- Patient or their designated caregiver reviews the information presented and selects information they'd like to share.
-- Patient determines if they would like to proceed. 
-  - If yes,proceed to complete the privacy and security forms.
-  - If no, Patient or their designated caregiver decide not to complete the privacy and security forms. The request for their verifiable patient summary is terminated.
-- If process was completed, the VHL requester makes the request with defined parameters of PIN, passcode, validity time etc to the VHL creator
-- VHL creator issues VHL
-
-**Post-conditions:**
-
-A QR code, with a VHL, is created and displayed to the patient for accessing and sharing their patient summary.  
+1. The patient or authorized caregiver logs into the patient-facing application.
+2. The user navigates to a section offering the ability to generate a shareable health summary.
+3. The system presents privacy and security options, which may include:
+    - Acceptance of a consent statement
+    - Setting a PIN or passcode
+    - Selecting a validity period
+    - Scoping the data to be included
+4. The user reviews and confirms the selected sharing options.
+5. If the user consents:
+    - The application submits a request to the VHL issuer (e.g., the jurisdictional system or EHR backend) with the defined parameters.
+    - The VHL issuer generates a signed VHL referencing the selected documents.
+6. The system returns the VHL, rendering it as a QR code or downloadable artifact.
+7. If the user declines, the process is terminated and no VHL is created.
+    
+**Postconditions:**
+- A signed Verifiable Health Link (VHL) is created and rendered as a QR code or URL.  
+- The patient is able to display, print, or transmit the VHL for use by authorized third parties (e.g., the receiving healthcare provider). 
 
 
 <a name="security-considerations"> </a>

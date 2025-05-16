@@ -23,8 +23,14 @@
 
 ### 2:XX.1 Scope
 
-The Retrieve PKI Material transaction returns a list of trusted public key material to be used by a trust network participant to validate document singatures, establish secure connections, or decrypt data.
-A {{ linkvhlh }} or a {{ linkvhls }} initiates the Retrieve PKI Material against a {{ linkta }}.
+The Retrieve PKI Material transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted cryptographic material from the {{ linkta }}. This material includes:
+
+- Public key certificates (e.g., X.509),
+- Certificate revocation data (e.g., CRLs or OCSP responses),
+- JSON Web Keys (JWKs) or equivalent,
+- and associated metadata required to validate the authenticity of a Verified Health Link (VHL) and to establish mutually authenticated TLS (mTLS) sessions.
+    
+Retrieved material SHALL be used to determine the trustworthiness of VHL artifacts and service endpoints in accordance with the governing trust framework.
 
 ### 2:XX.2 Actor Roles
 
@@ -60,14 +66,32 @@ OPTIONS TO DISCUSS:
 A [Trust Anchor](ActorDefinition-TrustAnchor.html) initiates an Retrieve PKI Material Response Message once it has completed, to the extent possible, the expected actions upon receipt of a Retrieve PKI Material Request message.
 
 ##### 2:XX.4.2.2  Message Semantics
-None defined. Up to a content profile to define.
+The Retrieve PKI Material request MAY take one of several forms, depending on the transport and representation models adopted by the content profile. Potential representations include:
+
+- A FHIR Parameters resource with serialized public key material (e.g., PEM, DER, or JWK)
+- A DID Document conforming to [W3C DID Core](https://www.w3.org/TR/did-core/)
+- A pointer to a .well-known URI under organizational control, with machine-readable key data
+    
+The payload SHOULD include sufficient metadata to identify the submitting entity and bind the key material to its intended usage context (e.g., use: "sig", keyOps, x5c chain).
+
+Content profiles SHALL define exact payload constraints, validation rules, and error behaviors.
 
 ##### 2:XX.4.2.3 Expected Actions
 {{ reqReceivePKIdescription.valueMarkdown }}
 
 
 ### 2:XX.5 Security Considerations 
-Depends on the content profile.
+All Retrieve PKI Material interactions SHOULD occur over secure channels using TLS 1.2 or higher, with mTLS recommended for enhanced endpoint authentication. The Trust Anchor SHOULD validate the authenticity, scope, and expiration of all retrieved key material before publishing or caching.
+
+Clients (e.g., {{ linkvhlr }}s and {{ linkvhls }}s) SHOULD verify the signature chain or integrity envelope of the material prior to using it for signature verification or secure session establishment.
+
+Implementers SHOULD ensure that any out-of-band trust anchors or directory sources (e.g., .well-known/ endpoints) are tamper-resistant and publicly resolvable.
+
+Content profiles MAY define additional constraints, such as:
+- Minimum key lengths
+- Permitted algorithms (e.g., RSA-2048, ECDSA P-256)
+- CRL/OCSP freshness requirements
+- Retry and caching behavior
 
 
 

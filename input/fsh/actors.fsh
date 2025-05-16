@@ -3,7 +3,7 @@ InstanceOf: ActorDefinition
 Usage: #definition
 * name = "TrustAnchor"
 * title = "Trust Anchor"
-* description = "The Trust Anchor receives, aggregates and distributes PKI material to the participants within a trust network, specifically the VHL Reciver and VHL Sharer."
+* description = "An authorized organization in the trust framework that manages and distributes PKI material—such as public key certificates and revocation lists—to participants in the network. It ensures that this material is trustworthy and available, enabling VHL Sharers and VHL Receivers to verify digital signatures and authenticate the origin of shared data."
 * status = $pubStatus#active
 * publisher = "IHE"
 * type = $actorType#system
@@ -14,7 +14,7 @@ InstanceOf: ActorDefinition
 Usage: #definition
 * name = "VHLHolder"
 * title = "VHL Holder"
-* description = "The VHL Holder is an individual that is holding an authorization mechanism, a VHL, which allows a VHL Receiver to access a (set of) health document(s) held by a VHL Sharer.
+* description = "An individual—typically the patient or their delegate—who possesses a Verified Health Link (VHL), a signed data artifact that enables a VHL Receiver to verify its authenticity and access one or more health documents made available by a VHL Sharer.
 "
 * status = $pubStatus#active
 * publisher = "IHE"
@@ -25,7 +25,7 @@ InstanceOf: ActorDefinition
 Usage: #definition
 * name = "VHLReceiver"
 * title = "VHL Receiver"
-* description = "The VHL Receiver receives a VHL from a VHL Holder which it utilizes to request access to health documents from a VHL Sharer.
+* description = "A system or organization that receives a Verified Health Link (VHL) from a VHL Holder and uses it to retrieve health documents from a VHL Sharer, after verifying the authenticity and integrity of the VHL.
 "
 * status = $pubStatus#active
 * publisher = "IHE"
