@@ -127,7 +127,10 @@ This transactions is used by a {{ linkvhlr }} or {{ linkvhls }} to publish PKI m
 For more details see the detailed [transaction description](ITI-YY1.html)
 
 This transaction is captured as the following requirement:
-* [Publish PKI Material](Requirements-PublishPKIMaterial.html)
+* [Submit PKI Material](Requirements-SubmitPKIMaterial.html)
+
+<pre>{{ site.data.Requirements-SubmitPKIMaterial  | escape }}</pre>
+{% include requirements-list-statements.liquid site=site requirement=site.data.Requirements-SubmitPKIMaterial %}
 
 
 #### XX.1.2.2 Retrieve PKI Material

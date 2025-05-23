@@ -7,7 +7,6 @@
 ## 2:XX Publish PKI Material
 
 {% assign reqSubmitPKI = site.data.Requirements-SubmitPKIMaterial %}
-{% assign r1 = site.data.Requirements-SubmitPKIMaterial %}
 {% assign reqDistributePKI = site.data.Requirements-DistributePKIMaterial %}
 
 
@@ -45,7 +44,8 @@ A {{ linkvhlh }} or a {{ linkvhls }} initiates the Publish PKI Material on a {{ 
 #### 2:XX.4.1 Publish PKI Material Request Message
 ##### 2:XX.4.1.1 Trigger Events
 {{ reqSubmitPKIdescription.valueMarkdown}}
-{% include requirements-list-statements.liquid site=site requirement=r1 %}
+
+{% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
 
 ##### 2:XX.4.1.2 Message Semantics
 The message semantics for the submission of key material is left to the implementing jurisdiction of the trust network.  Within a trust network there may be different requirements for submission of key material depending on the usage of that key material,  For example:
@@ -57,7 +57,8 @@ The message semantics for the submission of key material is left to the implemen
 
 ##### 2:XX.4.1.3 Expected Actions
 {{ reqDistributePKIdescription.valueMarkdown }}
-{% include requirements-list-statements.liquid site=site requirement=reqDistributePKI %}
+
+{% include requirements-list-statements.liquid req=reqDistributePKI site=site  %}
 
 #### 2:XX.4.2 Publish PKI Material Response Message 
 
