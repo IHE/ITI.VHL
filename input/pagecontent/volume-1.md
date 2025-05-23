@@ -4,7 +4,7 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 {% assign linkgeneratevhl = '<a href="volume-2.html#GenerateVHL">Generate VHL</a>' %}
-{% assign linkpublishpki = '<a href="volume-2.html#PublishPKIMaterial">Publish PKI Material</a>' %}
+{% assign linkpublishpki = '<a href="volume-2.html#SubmitPKIMaterial">Submit PKI Material</a>' %}
 {% assign linkretrievepki = '<a href="volume-2.html#RetrievePKIMaterial">Retreive PKI Material</a>' %}
 {% assign linkprovidevhl = '<a href="volume-2.html#ProvideVHL">Provide VHL</a>' %}
 {% assign linkrequestdocument = '<a href="volume-2.html#RequestDocument">Request Document</a>' %}
@@ -120,9 +120,9 @@ The actors in this profile are described in more detail in the sections below.
 
 The transactions in this profile are summarized in the sections below.
 
-#### XX.1.2.1 Publish PKI Material
+#### XX.1.2.1 Submit PKI Material
 
-This transactions is used by a {{ linkvhlr }} or {{ linkvhls }} to publish PKI material to a {{ linkta }}.  
+This transactions is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }}.
 
 For more details see the detailed [transaction description](ITI-YY1.html)
 
