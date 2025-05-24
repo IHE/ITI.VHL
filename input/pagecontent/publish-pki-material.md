@@ -7,7 +7,6 @@
 ## 2:XX Publish PKI Material
 
 {% assign reqSubmitPKI = site.data.Requirements-SubmitPKIMaterial %}
-{% assign r1 = site.data.Requirements-SubmitPKIMaterial %}
 {% assign reqDistributePKI = site.data.Requirements-DistributePKIMaterial %}
 
 
@@ -43,7 +42,8 @@ The Publish PKI Material transaction enables entities within a trust network—s
 #### 2:XX.4.1 Publish PKI Material Request Message
 ##### 2:XX.4.1.1 Trigger Events
 {{ reqSubmitPKIdescription.valueMarkdown}}
-{% include requirements-list-statements.liquid site=site requirement=r1 %}
+
+{% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
 
 ##### 2:XX.4.1.2 Message Semantics
 The message semantics and transport mechanism for the **submission** of public key material to the {{ linkta }} SHALL be defined by the implementing jurisdiction of the trust network. The {{ linkta }} is responsible for validating, cataloging, and securely redistributing key material as part of the canonical Trust List.
@@ -73,7 +73,8 @@ Jurisdictions MAY further constrain the permitted submission methods based on po
 
 ##### 2:XX.4.1.3 Expected Actions
 {{ reqDistributePKIdescription.valueMarkdown }}
-{% include requirements-list-statements.liquid site=site requirement=reqDistributePKI %}
+
+{% include requirements-list-statements.liquid req=reqDistributePKI site=site  %}
 
 #### 2:XX.4.2 Publish PKI Material Response Message 
 

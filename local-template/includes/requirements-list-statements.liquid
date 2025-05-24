@@ -1,6 +1,6 @@
 
+
 {% assign statements = requirement.extension | where: 'url', 'http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.statement' %}
-<pre>{{ requirement | escape }}</pre>
 {% unless statements == empty or statements == nil %}
 Steps in the requirement:
 <ol>
@@ -31,3 +31,4 @@ Steps in the requirement:
  {% endfor %}
 </ol>
 {% endunless %}
+
