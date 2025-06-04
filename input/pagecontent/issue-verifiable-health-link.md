@@ -4,7 +4,7 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-## 2:XX Issue Verfiable Health Link
+## 2:XX Issue Verifiable Health Link
 
 {% assign reqRequestVHL = site.data.Requirements-RequestVHL %}
 {% assign reqGenerateVHL = site.data.Requirements-GenerateVHL %}
@@ -21,7 +21,7 @@
 
 ### 2:XX.1 Scope
 
-The Issue Verfiable Health Link transaction returns a Verifiable Health Link authorization mechanism which can be used to provide access to one or more documents.  A {{ linkvhlh }} initiates the Issue VHL transaction against a {{ linkvhls }}.
+The Issue Verifiable Health Link transaction returns a Verifiable Health Link authorization mechanism which can be used to provide access to one or more documents.  A {{ linkvhlh }} initiates the Issue VHL transaction against a {{ linkvhls }}.
  
 ### 2:XX.2 Actor Roles
 
