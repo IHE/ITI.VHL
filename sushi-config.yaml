@@ -5,7 +5,7 @@ id: ihe.iti.vhl
 canonical: https://profiles.ihe.net/ITI/VHL
 version: 0.0.2-current
 name: IHE_ITI_VHL
-title: "Verified Health Link"
+title: "Verifiable Health Link"
 description: Patient Mediated sharing of their health information using internet accessible verifiable health link.
 releaseLabel: ci-build
 #releaseLabel: ballot

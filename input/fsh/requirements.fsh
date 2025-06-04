@@ -14,9 +14,22 @@ The public key used for this verification MAY:
 * Originate from a different trust network than the one used to validate the VHL
 * Be unrelated to the key used to validate the VHL signature
 
-Implementers SHOULD consult cross-profile guidance regarding interoperability with the [IHE Document Digital Signature (DSG) profile](https://profiles.ihe.net/ITI/TF/Volume1/ch-38.html), particularly in cases where additional attestation, long-term non-repudiation, or multi-party signatures are involved.
+Implementers SHOULD consult cross-profile guidance regarding interoperability with the [IHE Document Digital Signature (DSG) profile](https://profiles.ihe.net/ITI/TF/Volume1/ch-37.html), particularly in cases where additional attestation, long-term non-repudiation, or multi-party signatures are involved.
 """
 * actor[+] = Canonical(VHLReceiver)
+* statement[+].key = "extract-signature-keyid"
+* statement[=].label = "Extract Signature and Key ID"
+* statement[=].requirement = """
+Upon receipt of a digitally signed health document, extract signature, key id, and participant code.
+"""
+* statement[+].key = "lookup-DSC"
+* statement[=].label = "Lookup DSC"
+* statement[=].requirement = """
+Lookup Document Signing Certificate (DSC) public key by key id and participant code"""
+* statement[+].key = "verify-signature"
+* statement[=].label = "Verify Signature"
+* statement[=].requirement = """
+Verify signature using the public key"""
 
 
 Instance: RecordConsent
@@ -43,7 +56,17 @@ The ITI-108 transaction SHOULD be invoked as part of the actions triggered by a 
 This requirement enables lawful, transparent sharing of personal health information across organizations and trust domains.
 """
 * actor[+] = Canonical(VHLSharer)
-
+* statement[+].key = "record-consent"
+* statement[=].label = "Record Consent"
+* statement[=].requirement = """
+Record consent as FHIR Consent resource that records the data subject, purpose of use, authorized data recipients, scope of data, duration or validity period of the consent"""
+* statement[=].conformance = #SHALL
+* statement[+].key = "update-consent"
+* statement[=].label = "Update Consent"
+* statement[=].requirement = """
+VHL Sharer SHALL support updation of Consent by the VHL Holder, which may include even revocation of consent.
+"""
+* statement[=].conformance = #SHALL
 
 Instance: RecordAccessToHealthData
 InstanceOf: Requirements 
@@ -227,7 +250,18 @@ This transaction SHALL be conducted over a mutually authenticated TLS (mTLS) cha
 * The VHL Sharer MAY record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement.
 """
 * actor[+] = Canonical(VHLReceiver)
-
+* statement[+].key = "retrieve-health-documents"
+* statement[=].label = "Retrieve health documents"
+* statement[=].requirement = "Initiate a request to retrieve a set of health documents"
+* statement[=].conformance = #SHALL
+* statement[+].key = "initiate-mTLS-connection"
+* statement[=].label = "Initiate mTLS connection"
+* statement[=].requirement = "Initiate mTLS connection and validate participation in the trust network using PKI material published by the trust anchor."
+* statement[=].conformance = #SHALL
+* statement[+].key = "record-audit-event"
+* statement[=].label = "Record audit event"
+* statement[=].requirement = "Record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement"
+* statement[=].conformance = #MAY
 
 Instance: RequestVHLDocument
 InstanceOf: Requirements
@@ -246,7 +280,18 @@ This transaction SHALL be conducted over a mutually authenticated TLS (mTLS) cha
 * The VHL Sharer MAY record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement.
 """
 * actor[+] = Canonical(VHLReceiver)
-
+* statement[+].key = "retrieve-health-document"
+* statement[=].label = "Retrieve single health document"
+* statement[=].requirement = "Initiate a request to retrieve a single health document from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL)"
+* statement[=].conformance = #SHALL
+* statement[+].key = "verify-digital-signature"
+* statement[=].label = "Verify digital signature"
+* statement[=].requirement = "Verify the digital signature of the returned health document to confirm its authenticity, integrity, and provenance, as defined in the [Verify Document Signature](Requirements-VerifyDocumentSignature.html) requirement"
+* statement[=].conformance = #MAY
+* statement[+].key = "record-audit-event"
+* statement[=].label = "Record audit event"
+* statement[=].requirement = "Record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement"
+* statement[=].conformance = #MAY
 
 Instance: ProvideVHL
 InstanceOf: Requirements
@@ -313,7 +358,21 @@ Participants SHOULD:
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(VHLSharer)
 * actor[+] = Canonical(VHLReceiver)
-
+* statement[+].key = "cache-received-trust-list"
+* statement[=].label = "Cache received Trust list"
+* statement[=].requirement = """
+Cache the received trust list or certificate material to reduce network and server load
+"""
+* statement[+].key = "validate-digital-signatures"
+* statement[=].label = "Validate digital signatures"
+* statement[=].requirement = """
+Validate digital signatures or trust paths
+"""
+* statement[+].key = "monitor-certificate-expiration"
+* statement[=].label = "Monitor certificate expiration"
+* statement[=].requirement = """
+Monitor certificate expiration or revocation status where applicable
+"""
 
 Instance:   RequestPKIMaterial
 InstanceOf: Requirements
