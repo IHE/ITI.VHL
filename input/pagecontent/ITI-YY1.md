@@ -4,7 +4,7 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-## 2:XX Publish PKI Material
+## 2:XX Submit PKI Material
 
 {% assign reqSubmitPKI = site.data.Requirements-SubmitPKIMaterial %}
 {% assign reqDistributePKI = site.data.Requirements-DistributePKIMaterial %}
@@ -21,7 +21,7 @@
 
 ### 2:XX.1 Scope
 
-The Publish PKI Material transaction enables entities within a trust network—specifically, {{ linkvhls }}s and {{ linkvhlr }}s—to submit their public key material to a designated {{ linkta }}. This process facilitates the {{ linkta }}’s role in aggregating, validating, and distributing a trusted list of public keys (Trust List) essential for verifying digital signatures and establishing secure communications within the VHL ecosystem.
+The Submit PKI Material transaction enables entities within a trust network—specifically, {{ linkvhls }}s and {{ linkvhlr }}s—to submit their public key material to a designated {{ linkta }}. This process facilitates the {{ linkta }}’s role in aggregating, validating, and distributing a trusted list of public keys (Trust List) essential for verifying digital signatures and establishing secure communications within the VHL ecosystem.
 
 ### 2:XX.2 Actor Roles
 
@@ -39,7 +39,7 @@ The Publish PKI Material transaction enables entities within a trust network—s
 
 ### 2:XX.4 Messages
 
-#### 2:XX.4.1 Publish PKI Material Request Message
+#### 2:XX.4.1 Submit PKI Material Request Message
 ##### 2:XX.4.1.1 Trigger Events
 {{ reqSubmitPKIdescription.valueMarkdown}}
 
@@ -76,9 +76,9 @@ Jurisdictions MAY further constrain the permitted submission methods based on po
 
 {% include requirements-list-statements.liquid req=reqDistributePKI site=site  %}
 
-#### 2:XX.4.2 Publish PKI Material Response Message 
+#### 2:XX.4.2 Submit PKI Material Response Message 
 
-There is no Publish PKI Material Repsonse Message defined in this profile.  This is up to the implementing jurisidiction of the {{ linkta }}
+There is no Submit PKI Material Response Message defined in this profile.  This is up to the implementing jurisdiction of the {{ linkta }}
 
 
 ### 2:XX.5 Security Considerations 

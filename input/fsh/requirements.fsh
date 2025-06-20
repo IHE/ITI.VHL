@@ -1,4 +1,4 @@
-Instance: VerifyDocumentSignature
+/* Instance: VerifyDocumentSignature
 InstanceOf: Requirements 
 Usage: #definition 
 * name = "VerifyDocumentSignature"
@@ -29,7 +29,7 @@ Lookup Document Signing Certificate (DSC) public key by key id and participant c
 * statement[+].key = "verify-signature"
 * statement[=].label = "Verify Signature"
 * statement[=].requirement = """
-Verify signature using the public key"""
+Verify signature using the public key""" */
 
 
 Instance: RecordConsent
@@ -467,7 +467,7 @@ Successful completion of the mTLS handshake is a prerequisite for all subsequent
 Instance:   RequestVHL
 InstanceOf: Requirements
 Usage: #definition
-* name = "RquestVHL"
+* name = "RequestVHL"
 * title = "Request that a VHL authorization mechanism be issued"
 * status = $pubStatus#active
 * publisher = "IHE"

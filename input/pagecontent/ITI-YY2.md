@@ -4,7 +4,7 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-## 2:XX Retrieve PKI Material
+## 2:XX Request PKI Material
 
 {% assign reqRequestPKI = site.data.Requirements-RequestPKIMaterial %}
 {% assign reqProvidePKI = site.data.Requirements-ProvidePKIMaterial %}
@@ -23,7 +23,7 @@
 
 ### 2:XX.1 Scope
 
-The Retrieve PKI Material transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted cryptographic material from the {{ linkta }}. This material includes:
+The Request PKI Material transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted cryptographic material from the {{ linkta }}. This material includes:
 
 - Public key certificates (e.g., X.509),
 - Certificate revocation data (e.g., CRLs or OCSP responses),
@@ -47,7 +47,7 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 
 ### 2:XX.4 Messages
 
-#### 2:XX.4.1 Retrieve PKI Material Request Message
+#### 2:XX.4.1 Request PKI Material Request Message
 ##### 2:XX.4.1.1 Trigger Events
 {{ reqRequestPKIdescription.valueMarkdown}}
 
@@ -59,14 +59,14 @@ OPTIONS TO DISCUSS:
 ##### 2:XX.4.1.3 Expected Actions
 {{ reqProvidePKIdescription.valueMarkown}}
 
-#### 2:XX.4.2 Retrieve PKI Material Response Message 
+#### 2:XX.4.2 Request PKI Material Response Message 
 
 ##### 2:XX.4.2.1 Trigger Events
 
-A [Trust Anchor](ActorDefinition-TrustAnchor.html) initiates an Retrieve PKI Material Response Message once it has completed, to the extent possible, the expected actions upon receipt of a Retrieve PKI Material Request message.
+A [Trust Anchor](ActorDefinition-TrustAnchor.html) initiates an Request PKI Material Response Message once it has completed, to the extent possible, the expected actions upon receipt of a Request PKI Material Request message.
 
 ##### 2:XX.4.2.2  Message Semantics
-The Retrieve PKI Material request MAY take one of several forms, depending on the transport and representation models adopted by the content profile. Potential representations include:
+The Request PKI Material request MAY take one of several forms, depending on the transport and representation models adopted by the content profile. Potential representations include:
 
 - A FHIR Parameters resource with serialized public key material (e.g., PEM, DER, or JWK)
 - A DID Document conforming to [W3C DID Core](https://www.w3.org/TR/did-core/)
@@ -81,7 +81,7 @@ Content profiles SHALL define exact payload constraints, validation rules, and e
 
 
 ### 2:XX.5 Security Considerations 
-All Retrieve PKI Material interactions SHOULD occur over secure channels using TLS 1.2 or higher, with mTLS recommended for enhanced endpoint authentication. The Trust Anchor SHOULD validate the authenticity, scope, and expiration of all retrieved key material before publishing or caching.
+All Request PKI Material interactions SHOULD occur over secure channels using TLS 1.2 or higher, with mTLS recommended for enhanced endpoint authentication. The Trust Anchor SHOULD validate the authenticity, scope, and expiration of all retrieved key material before publishing or caching.
 
 Clients (e.g., {{ linkvhlr }}s and {{ linkvhls }}s) SHOULD verify the signature chain or integrity envelope of the material prior to using it for signature verification or secure session establishment.
 
