@@ -8,6 +8,28 @@ First draft of Volume 1 is [in a google document](https://docs.google.com/docume
 
 Below is a table summarizing the provided Verified Health Link (VHL) requirements, with columns for Requirement Name, Purpose, Actor(s), Key Actions, and Derived From.
 
+| Requirement Name | Purpose | Actor(s) | Key Actions | Derived From | Related Transaction |
+|------------------|---------|----------|-------------|--------------|--------------------|
+| InitiateVHLGenerationRequest | Request VHL generation with optional constraints. | VHL Holder | Initiate VHL generation request with parameters (e.g., expiration, scope). | - | GenerateVHL |
+| RespondtoGenerateVHLRequest | Generate signed VHL based on query parameters. | VHL Sharer | Collect/generate content, create and sign VHL payload, optionally record consent or audit events. | - | GenerateVHL |
+| RecordConsent | Record VHL Holder’s consent for lawful and transparent health data sharing. | VHL Sharer | Use ITI-108 transaction, record FHIR Consent resource (data subject, purpose, recipients, scope, validity), support consent updates/revocation. | - | ITI-108 |
+| RecordAccessToHealthData | Log audit events for health data access to ensure accountability and compliance. | VHL Sharer | Record FHIR AuditEvent with metadata (timestamp, accessor, resource type, purpose, outcome). | - | |
+| AuditEventAccess | Record audit events for document access or VHL generation requests. | VHL Sharer | Log events for VHL generation or document retrieval requests. | RecordAccessToHealthData | |
+| AuditEventReceived | Log audit events for VHL receipt, verification, and document retrieval. | VHL Receiver | Record events for VHL receipt, signature verification, document access. | RecordAccessToHealthData | |
+| EstablishTrust | Establish trust relationship via Trust Anchor’s public key material. | VHL Sharer, VHL Receiver | Validate digital signatures using keys from trust framework via Retrieve Trust List Response. | - | |
+| InitiateSubmitPKIMaterialRequest | Submit public key material to Trust Anchor for trust list inclusion. | VHL Sharer, VHL Receiver | Generate key pairs, prepare metadata, submit to Trust Anchor, ensure material supports distribution. | EstablishTrust | SubmitPKIMaterial|
+| RespondtoSubmitPKIMaterialRequest | Validate and process submitted PKI material for trust list inclusion. | Trust Anchor | Validate PKI material per governance policies. | EstablishTrust |SubmitPKIMaterial |
+| InitiateRetrieveTrustListRequest | Request PKI material from Trust Anchor. | VHL Sharer, VHL Receiver | Request and cache PKI material (certificates, revocation data, metadata) for signature validation or mTLS. | EstablishTrust |RetrieveTrustList |
+| RespondtoRetrieveTrustListRequest | Provide validated PKI material as a signed trust list. | Trust Anchor | Receive request, assemble and sign trust list, expose via distribution endpoints. | EstablishTrust | RetrieveTrustList|
+| ProvideVHL | Provide VHL to VHL Receiver for secure document sharing. | VHL Holder | Prepare content, construct and sign VHL payload, transmit via QR code, Verifiable Credentials, Bluetooth, or NFC. | - | ProvideVHL|
+| RespondtoProvideVHL | Receive and validate VHL from VHL Holder. | VHL Receiver | Parse VHL, validate signature, prepare for document retrieval. | - | ProvideVHL|
+| RequestVHLDocuments | Request multiple health documents using VHL over a secure channel. | VHL Receiver | Initiate request, establish secure connection via ITI-19, optionally record audit events. | - | |
+| RequestVHLDocument | Request a single health document using VHL over secure mTLS. | VHL Receiver | Initiate request, establish mTLS, optionally verify document signature, record audit events. | - | |
+| ReceiveTrustList | Validate and process PKI material from Trust Anchor. | VHL Sharer, VHL Receiver | Cache trust lists, validate signatures, monitor certificate status. | EstablishTrust | |
+| CreateTrustedChannel | Establish secure mTLS connection for VHL transactions. | VHL Sharer, VHL Receiver | Initiate and accept mTLS, present and validate X.509 certificates. | EstablishTrust | |
+| AcceptMTLSConnection | Accept mTLS connection as server in VHL transactions. | VHL Sharer | Present server certificate, validate client certificate, establish secure channel. | CreateTrustedChannel | |
+| InitiateMTLSConnection | Initiate mTLS connection as client in VHL transactions. | VHL Receiver | Present client certificate, validate server certificate, establish secure channel. | CreateTrustedChannel | |
+| VerifyDocumentSignature | Verify digital signature of health documents for authenticity, integrity, and provenance. | VHL Receiver | Extract signature and key ID, lookup DSC public key, verify signature. | - | |
 
 | Requirement Name | Purpose | Actor(s) | Key Actions | Derived From | Related Transactions |
 |------------------|---------|----------|-------------|--------------|---------------------|

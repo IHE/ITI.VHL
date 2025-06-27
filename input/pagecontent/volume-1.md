@@ -7,8 +7,7 @@
 {% assign linksubmitpki = '<a href="volume-2.html#SubmitPKIMaterial">Submit PKI Material</a>' %}
 {% assign linkrequestpki = '<a href="volume-2.html#RequestTrustList">Request Trust List</a>' %}
 {% assign linkprovidevhl = '<a href="volume-2.html#ProvideVHL">Provide VHL</a>' %}
-{% assign linkrequestdocument = '<a href="volume-2.html#RequestDocument">Request VHL Document</a>' %}
-{% assign linkrequestdocuments = '<a href="volume-2.html#RequestDocuments">Request VHL Documents</a>' %}
+
 
 
 As individuals move within or across jurisdictional boundaries, they may wish to provide access to clinical or other health-related documents to a defined set of trusted parties who are authorized to access their records. This access may be granted for a single document or for a set of related documents.
@@ -53,8 +52,6 @@ This section defines the actors, transactions, and/or content modules in this pr
 		<li> {{ linksubmitpki }}</li>
 		<li> {{ linkrequestpki }}</li>
 		<li> {{ linkgeneratevhl }} </li>
-		<li> {{ linkrequestdocuments }}</li>
-		<li> {{ linkrequestdocument }}</li>
 		<li> {{ linkprovidevhl }}</li>
 	</ul>
   </li>
@@ -95,17 +92,13 @@ The interaction between a VHL Holder requesting a VHL to a single health documen
 | {{ linkta }}   | {{ linksubmitpki }}          | Responder              | R          | ITI TF-2: YY1 |
 |                | {{ linkrequestpki }}         | Responder              | R          | ITI TF-2: YY2 |
 | {{ linkvhlh }} | {{ linkgeneratevhl }}        | Initiator              | R          | ITI TF-2: YY3 |
-|                | {{ linkprovidevhl }}         | Initiator              | R          | ITI TF-2: YY6 |
+|                | {{ linkprovidevhl }}         | Initiator              | R          | ITI TF-2: YY4 |
 | {{ linkvhlr }} | {{ linksubmitpki }}          | Initiator              | R          | ITI TF-2: YY1 |
 |                | {{ linkrequestpki }}         | Initiator              | R          | ITI TF-2: YY2 |
-|                | {{ linkprovidevhl }}         | Responder              | R          | ITI TF-2: YY6 |
-|                | {{ linkrequestdocuments }}   | Initiator              | R          | ITI TF-2: YY4 |
-|                | {{ linkrequestdocument }}    | Initiator              | R          | ITI TF-2: YY5 |
+|                | {{ linkprovidevhl }}         | Responder              | R          | ITI TF-2: YY4 |
 | {{ linkvhls }} | {{ linksubmitpki }}          | Initiator              | R          | ITI TF-2: YY1 |
 |                | {{ linkrequestpki }}         | Initiator              | R          | ITI TF-2: YY2 |
 |                | {{ linkgeneratevhl }}        | Responder              | R          | ITI TF-2: YY3 |
-|                | {{ linkrequestdocuments }}   | Responder              | R          | ITI TF-2: YY4 |
-|                | {{ linkrequestdocuments }}   | Responder              | R          | ITI TF-2: YY5 |
 {: .grid}
 
 

@@ -3,7 +3,8 @@
 
 # 2:X.1 Transactions
 
-{% include publish-pki-material.md %}
-{% include retrieve-pki-material.md %}
-{% include issue-verifiable-health-link.md %}
+{% include ITI-YY1.md %}
+{% include ITI-YY2.md %}
+{% include ITI-YY3.md %}
+{% include ITI-YY4.md %}
 
