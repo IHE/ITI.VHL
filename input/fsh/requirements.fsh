@@ -14,6 +14,10 @@ The Holder MAY include optional parameters to constrain or protect the issued VH
   * Optionally, the [VHL Holder](ActorDefinition-VHLHolder.html) has selected consent directives or selective disclosure preferences, as permitted by the applicable content profile. 
 """
 * actor[+] = Canonical(VHLHolder)
+* statement[+].key = "initiate-request"
+* statement[=].label = "Initiate Request"
+* statement[=].requirement = "Initiate a request to generate a Verified Health Link (VHL)"
+* statement[=].conformance = #SHALL
 
 Instance: RespondtoGenerateVHLRequest
 InstanceOf: Requirements

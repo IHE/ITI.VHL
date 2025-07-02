@@ -5,7 +5,7 @@
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 {% assign linkgeneratevhl = '<a href="volume-2.html#GenerateVHL">Generate VHL</a>' %}
 {% assign linksubmitpki = '<a href="volume-2.html#SubmitPKIMaterial">Submit PKI Material</a>' %}
-{% assign linkrequestpki = '<a href="volume-2.html#RequestTrustList">Request Trust List</a>' %}
+{% assign linkrequestpki = '<a href="volume-2.html#RetrieveTrustList">Retrieve Trust List</a>' %}
 {% assign linkprovidevhl = '<a href="volume-2.html#ProvideVHL">Provide VHL</a>' %}
 
 
