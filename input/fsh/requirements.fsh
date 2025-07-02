@@ -75,7 +75,7 @@ The ITI-108 transaction SHOULD be invoked as part of the actions triggered by a 
 This requirement enables lawful, transparent sharing of personal health information across organizations and trust domains.
 """
 * actor[+] = Canonical(VHLSharer)
-* statement[+].key = "Use ITI-108"
+* statement[+].key = "Use-ITI-108"
 * statement[=].label = "Use ITI 108"
 * statement[=].requirement = """
 ITI-108 Transaction is invoked by VHL Sharer.
