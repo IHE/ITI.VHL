@@ -78,7 +78,7 @@ pages:
     title: Changes to Other IHE Specifications
     generation: markdown
   vhl_vs_shl.md:
-    title: "Appendix A: Comparision of health links"
+    title: "Appendix A: Comparison of health links"
   download.md:
     title: "Download and Analysis"
     generation: markdown
@@ -97,9 +97,10 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    Publish PKI: volume-2.html#publish-pki-material
-    Retrieve PKI: volume-2.html#retrieve-pki-material
-    Issue VHL: volume-2.html#issue-verifiable-health-link
+    Generate VHL [ITI-YY1]: volume-2.html#2xx-generate-vhl
+    Submit PKI Material [ITI-YY2]: volume-2.html#2xx-submit-pki-material
+    Retrieve Trust List [ITI-YY3]: volume-2.html#retrieve-pki-material
+    Provide VHL [ITI-YY4]: volume-2.html#2xx-provide-vhl
   Volume 3:
     Content Profiles: volume-3.html
   Artifacts: artifacts.html

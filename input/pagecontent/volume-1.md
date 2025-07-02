@@ -763,6 +763,7 @@ This use case has the following business requirement:
 #### XX.4.2.7 Use Case \#6: Smart Health Links
 <bold>Note:</bold>  Not sure if we want to include "Verifiable" health link as an option and Smart Health Link as another option.  If so, we should recap SHL use case here. (No pre-coordination of trust)
 
+<a name = "security-considerations"></a>
 ## XX.5 ToDo Security Considerations
 
 <i>
@@ -851,7 +852,7 @@ This use case has the following business requirement:
     
     Where audit logging is specified, a StructureDefinition profile(s) should be included, and Examples of those logs might be included.
     
-    <a name="other-grouping"> </a>
+    
 </i>
 
 VHL is a building block that is meant to be used together with added security measures, otherwise it is not suitable for exchange in environments where security and provenance cannot be reliably established by other means.
@@ -859,7 +860,7 @@ VHL is a building block that is meant to be used together with added security me
 - The European Health Data Space can be found here https://www.europarl.europa.eu/doceo/document/TA-9-2024-0331_EN.pdf .  In particular, provisions 8f) and 12a) outline the requirements for the auditability of data access.  This means that there needs to be a means to identify the entity/organization that is acting as a VHL Receiving Application.  
 - Before a Receiver Application initiates a VHL request, it should be able to determine the provenance of the VHL that it was presented. 
 
-
+<a name="other-grouping"> </a>
 ## XX.6 Cross-Profile Considerations
 
 This section is informative, not normative. It is intended to put
