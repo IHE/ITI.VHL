@@ -3,10 +3,10 @@
 {% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
-{% assign linkgeneratevhl = '<a href="volume-2.html#GenerateVHL">Generate VHL</a>' %}
-{% assign linksubmitpki = '<a href="volume-2.html#SubmitPKIMaterial">Submit PKI Material</a>' %}
-{% assign linkretrievepki = '<a href="volume-2.html#RetrieveTrustList">Retrieve Trust List</a>' %}
-{% assign linkprovidevhl = '<a href="volume-2.html#ProvideVHL">Provide VHL</a>' %}
+{% assign linkgeneratevhl = '<a href="volume-2.html#2xx-generate-vhl">Generate VHL</a>' %}
+{% assign linksubmitpki = '<a href="volume-2.html#2xx-submit-pki-material">Submit PKI Material</a>' %}
+{% assign linkretrievepki = '<a href="volume-2.html#2xx-retrieve-trust-list">Retrieve Trust List</a>' %}
+{% assign linkprovidevhl = '<a href="volume-2.html#2xx-provide-vhl">Provide VHL</a>' %}
 
 
 
