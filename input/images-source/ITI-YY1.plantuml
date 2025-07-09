@@ -3,7 +3,6 @@ skinparam svgDimensionStyle false
 hide footbox
 participant "VHL Sharer" as VHLS
 participant "VHL Holder" as VHLH
-participant "VHL Receiver" as VHLR
 
 activate VHLH
 activate VHLS
@@ -11,11 +10,6 @@ activate VHLS
 
 VHLH -> VHLS : Generate VHL request [ITI-YY1]
 VHLS -> VHLH : Generate VHL response [ITI-YY1]
-
-activate VHLR
-VHLH -> VHLR : Provide VHL  [ITI-YY4]
-VHLR -> VHLS : Request VHL Document request
-VHLS -> VHLR : Request VHL Document response
 
 
 @enduml

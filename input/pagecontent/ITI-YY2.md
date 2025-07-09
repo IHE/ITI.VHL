@@ -5,8 +5,8 @@
 
 ## 2:XX Submit PKI Material
 
-{% assign reqSubmitPKI = site.data.Requirements-SubmitPKIMaterial %}
-{% assign reqDistributePKI = site.data.Requirements-DistributePKIMaterial %}
+{% assign reqSubmitPKI = site.data.Requirements-InitiateSubmitPKIMaterialRequest %}
+{% assign reqDistributePKI = site.data.Requirements-RespondtoSubmitPKIMaterialRequest %}
 
 
 {% assign reqSubmitPKItitle = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}

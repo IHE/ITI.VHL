@@ -10,19 +10,19 @@
 
 ### 2:XX.1 Scope
 
-{% assign reqGenerateVHLRequesttitle = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
-{% assign reqGenerateVHLResponsetitle = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
+{% assign reqGenerateVHLRequestTitle = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
+{% assign reqGenerateVHLResponseTitle = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
 
 
-{% assign reqGenerateVHLRequestdescription = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
-{% assign reqGenerateVHLResponsedescription = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
+{% assign reqGenerateVHLRequestDescription = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
+{% assign reqGenerateVHLResponseDescription = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 
 ### 2:XX.2 Actor Roles
 
 | Actor | Role |
 |-------|------|
-| {{ linkvhlh}} | {{ reqGenerateVHLRequesttitle.valueString }}     |
-| {{ linkvhls }}            | {{ reqGenerateVHLResponsetitle.valueString }} |
+| {{ linkvhlh}} | {{ reqGenerateVHLRequestTitle.valueString }}     |
+| {{ linkvhls }}            | {{ reqGenerateVHLResponseTitle.valueString }} |
 {: .grid}
 
 
@@ -31,9 +31,16 @@
 
 ### 2:XX.4 Messages
 
-#### 2:XX.4.1 Re Generate VHL Request Message
+<figure >
+  <div style="width:35em; max-width:100%;">
+     {%include ITI-YY1.svg%}
+  </div>
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Interaction Diagram</p>
+</figure>
+
+#### 2:XX.4.1 Generate VHL Request Message
 ##### 2:XX.4.1.1 Trigger Events
-{{ reqGenerateVHLRequestdescription.valueMarkdown}}
+{{ reqGenerateVHLRequestDescription.valueMarkdown}}
 
 {% include requirements-list-statements.liquid site=site req=reqGenerateVHLRequest  %}
 ##### 2:XX.4.1.2 Message Semantics
@@ -41,14 +48,15 @@ OPTIONS TO DISCUSS:
 
 
 ##### 2:XX.4.1.3 Expected Actions
-{{ reqGenerateVHLResponsedescription.valueMarkdown }}
+{{ reqGenerateVHLResponseDescription.valueMarkdown }}
 
 {% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
 
 #### 2:XX.4.2  Generate VHL Response Message 
+The {{ linkvhls }} generates and returns a VHL. Depending on the use case, the VHL maybe rendered using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC.
 
 ##### 2:XX.4.2.1 Trigger Events
-
+This message shall be sent when a request initiated by the {{linkvhlh}} has been processed successfully. 
 
 ##### 2:XX.4.2.2  Message Semantics
 

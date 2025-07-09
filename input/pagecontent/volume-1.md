@@ -57,7 +57,7 @@ This section defines the actors, transactions, and/or content modules in this pr
   </li>
 </ul>
 
-As a pre-condition to transactions ITI-YY3, ITI-YY4 and ITI-YY5, the {{ linkvhlr }} and {{ linkvhls }} must exchange the appropriate PKI in order to verify their trust relationship at the time of the utilization of the VHL.  As the identities of the {{ linkvhlr }}  and {{ linkvhls }} are not directly know to each other in advance of a request to utilize a VHL, the {{ linkvhlr }} and {{ linkvhls }} publish and retrieve key material from a third party, the {{ linkta }}.    This is illustrated in Figure X.X.X.X-1
+As a pre-condition to transactions ITI-YY4, the {{ linkvhlr }} and {{ linkvhls }} must exchange the appropriate PKI in order to verify their trust relationship at the time of the utilization of the VHL.  As the identities of the {{ linkvhlr }}  and {{ linkvhls }} are not directly know to each other in advance of a request to utilize a VHL, the {{ linkvhlr }} and {{ linkvhls }} publish and retrieve key material from a third party, the {{ linkta }}.    This is illustrated in Figure X.X.X.X-1
 
 
 <figure >
@@ -90,14 +90,14 @@ The interaction between a VHL Holder requesting a VHL to a single health documen
 | Actors         | Transactions                 | Initiator or Responder | Optionality| Reference                 |
 |----------------|------------------------------|------------------------|------------|---------------------------|
 | {{ linkta }}   | {{ linksubmitpki }}          | Responder              | R          | ITI TF-2: YY1 |
-|                | {{ linkrequestpki }}         | Responder              | R          | ITI TF-2: YY2 |
+|                | {{ linkretrievepki }}         | Responder              | R          | ITI TF-2: YY2 |
 | {{ linkvhlh }} | {{ linkgeneratevhl }}        | Initiator              | R          | ITI TF-2: YY3 |
 |                | {{ linkprovidevhl }}         | Initiator              | R          | ITI TF-2: YY4 |
 | {{ linkvhlr }} | {{ linksubmitpki }}          | Initiator              | R          | ITI TF-2: YY1 |
-|                | {{ linkrequestpki }}         | Initiator              | R          | ITI TF-2: YY2 |
+|                | {{ linkretrievepki }}         | Initiator              | R          | ITI TF-2: YY2 |
 |                | {{ linkprovidevhl }}         | Responder              | R          | ITI TF-2: YY4 |
 | {{ linkvhls }} | {{ linksubmitpki }}          | Initiator              | R          | ITI TF-2: YY1 |
-|                | {{ linkrequestpki }}         | Initiator              | R          | ITI TF-2: YY2 |
+|                | {{ linkretrievepki }}         | Initiator              | R          | ITI TF-2: YY2 |
 |                | {{ linkgeneratevhl }}        | Responder              | R          | ITI TF-2: YY3 |
 {: .grid}
 
@@ -118,74 +118,39 @@ The actors in this profile are described in more detail in the sections below.
 
 The transactions in this profile are summarized in the sections below.
 
-#### XX.1.2.1 Submit PKI Material
+#### XX.1.2.1 Generate VHL
 
-This transactions is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }}.
+This transactions is used by a VHL Holder to request that a {{ linkvhls }} generate a VHL.  A {{ linkvhls }} may optionally record the consent of the individual to share their information under the Record Consent option. A {{ linkvhls }} may optionally create an audit trail of the creation of the VHL under the Audit Event option. The individual shall trust that {{ linkvhls }} has been authorized by its jurisdiction to authorize and provide access to health documents.   
 
 For more details see the detailed [transaction description](ITI-YY1.html)
 
 This transaction is captured as the following requirement:
-* [Submit PKI Material](Requirements-SubmitPKIMaterial.html)
+* [Initiate VHL Generation Request](Requirements-InitiateVHLGenerationRequest.html)
+* [Respond to VHL Generation Request](Requirements-RespondtoGenerateVHLRequest.html)
 
-{% assign requirement = site.data.Requirements-SubmitPKIMaterial  %}
-{% include requirements-list-statements.liquid %}
+#### XX.1.2.2 Submit PKI Material
 
-
-#### XX.1.2.2 Receive PKI Material
-
-This transactions is used by a {{ linkvhlr }} or {{ linkvhls }} to receive PKI material previously published to a {{ linkta }}. Received key material should be able to be distinguised by the participating jurisdiction, use case context, and key usage. 
+This transactions is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }}.
 
 For more details see the detailed [transaction description](ITI-YY2.html)
 
 This transaction is captured as the following requirement:
-* [Receive PKI Material](Requirements-ReceivePKIMaterial.html)
-
-{% assign requirement = site.data.Requirements-ReceivePKIMaterial  %}
-{% include requirements-list-statements.liquid %}
+* [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
+* [Respond to Submit PKI Material Request](Requirements-RespondtoSubmitPKIMaterialRequest.html)
 
 
-#### XX.1.2.3 Generate VHL
+#### XX.1.2.3 Retrieve Trust List
 
-This transactions is used by a VHL Holder to request that a {{ linkvhls }} generate a VHL.  A {{ linkvhls }} may optionally record the consent of the individual to share their information under the Record Consent option. A {{ linkvhls }} may optionally create an audit trail of the creation of the VHL under the Audit Event option. The individual shall trust that {{ linkvhls }} has been authorized by its jurisdiction to authorize and provide access to health documents.   
+This transactions is used by a {{ linkvhlr }} or {{ linkvhls }} to retrieve Trust List previously published to a {{ linkta }}. Received key material should be able to be distinguished by the participating jurisdiction, use case context, and key usage. 
 
-For more details see the detailed [transaction description](generate_vhl.html)
+For more details see the detailed [transaction description](ITI-YY3.html)
 
 This transaction is captured as the following requirement:
-* [Generate VHL](Requirements-GenerateVHL.html)
-
-{% assign requirement = site.data.Requirements-GenerateVHL  %}
-{% include requirements-list-statements.liquid %}
+* [Initiate Retrieve Trust List Request](Requirements-InitiateRetrieveTrustListRequest.html)
+* [Respond to Retrieve Trust List Request](Requirements-RespondtoRetrieveTrustListRequest.html)
 
 
-#### XX.1.2.4 Request VHL Documents
-
-This transactions is initiated by a {{ linkvhlr }} to request a set of health documents from a {{ linkvhls }}.  This transaction should be conducted in such a manner that the {{ linkvhlr }} and {{ linkvhls }} can validate one another's participation in the same trust network. The {{ linkvhls }} shall optionally be able to record an audit event for the access of the folder by the {{ linkvhlr }} upon the transaction request under the Audit Event option.
-
-
-For more details see the detailed [transaction description](ITI-YY4.html)
-
-
-This transaction is captured as the following requirement:
-* [Request VHL Documents](Requirements-RequestVHLDocuments.html)
-
-{% assign requirement = site.data.Requirements-RequestVHLDocuments  %}
-{% include requirements-list-statements.liquid %}
-
-
-#### XX.1.2.5 Request VHL Document
-
-This transactions is initiated by a {{ linkvhlr }} to request a single health document from a {{ linkvhls }}.  This transaction should be conducted in such a manner that the {{ linkvhlr }} and {{ linkvhls }} can validate one another's participation in the same trust network.  The {{ linkvhlr }} shall optionally be able to validate that the veracity of the health document received through this transaction under the Verify Document Signature option.  The {{ linkvhls }} shall optionally be able to record an audit event for the access of the folder by the {{ linkvhlr }} upon the transaction request under the Audit Event option.
-
-For more details see the detailed [transaction description](ITI-YY4.html)
-
-This transaction is captured as the following requirement:
-* [Request VHL Document](Requirements-RequestVHLDocuments.html)
-
-{% assign requirement = site.data.Requirements-RequestVHLDocuments  %}
-{% include requirements-list-statements.liquid %}
-
-
-#### XX.1.2.6 Provide VHL
+#### XX.1.2.4 Provide VHL
 
 This transaction is initiated by a VHL Holder to transmit a VHL to the {{ linkvhlr }}.   Depending on the use case and context, the payload comprising the VHL may be rendered/serialized and transmitted through various mechanisms, for example as a QR-code, Verifiable Credentials, bluetooth or near-field communication protocols.  These mechanisms are described in [Volume 3](volume-3.html)
 
@@ -195,11 +160,9 @@ For more details see the detailed [transaction description](ITI-YY4.html)
 
 This transaction is captured as the following requirement:
 * [Provide VHL](Requirements-ProvideVHL.html)
+* [Respond to Provide VHL](Requirements-RespondtoProvideVHL.html)
 
 <a name="actor-options"> </a>
-
-{% assign requirement = site.data.Requirements-ProvideVHL  %}
-{% include requirements-list-statements.liquid %}
 
 ## XX.2  Actor Options
 
@@ -242,13 +205,11 @@ In this option the {{ linkvhls }} records an audit event for critical events in 
 * Request for the generation of a VHL by a VHL Holder; and
 * Request for access to a (set of) health document(s) by a {{ linkvhlr }}.
 
-
-<a name="required-groupings"> </a>
-
 This option is captured in the following business requirement:
 * [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
 
 
+<a name="required-groupings"> </a>
 
 ## XX.3 Required Actor Groupings
 
@@ -557,7 +518,6 @@ The application guides Ms. SJ through privacy and security options: she is prese
 - The patient is able to display, print, or transmit the VHL for use by authorized third parties (e.g., the receiving healthcare provider). 
 
 
-<a name="security-considerations"> </a>
 
 
 #### XX.4.2.2 Use Case \#2: Holder Generates and Uses a VHL 
@@ -571,20 +531,20 @@ The patient provides access to their encrypted patient summary via the QR code o
 **Pre-conditions**:
 - Patient has a QR code or VHL with access to a patient summary.
 - HCP has the necessary tools to scan the QR code or access the VHL (e.g., a QR code scanner, Health Information System).
-- VHL Responder and VHL Consumer have shared their public keys to a trust network
-- VHL Consumer is in the same trust network as as the VHL Responder.
+- VHL Sharer and VHL Receiver have shared their public keys to a trust network
+- VHL Receiver is in the same trust network as as the VHL Sharer.
 
 **Main Flow**:
 - Patient has a medical encounter with a health care provider (HCP) virtually or in-person to obtain health care services. 
 - Patient displays their patient summary QR code on their mobile device or shares a verifiable health link (e.g., via email) with the HCP and provides them with the passcode/PIN that they created (in Part A of this use case) to access the patient summary.
 - HCP scans the QR code or accesses the VHL in a browser to retrieve the patient summary. 
 - HCP is presented with applicable privacy and/or security form and they enter required security prompts (e.g., passcode, expiration time frame etc.,) according to jurisdictional policies.
-- VHL consumer verifies the provenance of the shared link and confirms that the link originated from a trusted source before making a request to retrieve health document
-- VHL responder verifies the manifest request was made by a trusted organization/entity
-- VHL responder verifies the information submitted by the HCP in response to the security prompts (e.g., passcode/PIN). 
+- VHL Receiver verifies the provenance of the shared link and confirms that the link originated from a trusted source before making a request to retrieve health document
+- VHL Sharer verifies the manifest request was made by a trusted organization/entity
+- VHL Sharer verifies the information submitted by the HCP in response to the security prompts (e.g., passcode/PIN). 
   - If the security prompts are correct, proceed to retrieve patient summary.
-  - If the security prompts are incorrect, VHL responder denies access and prompts the user to re-submit the security prompts. If multiple failed attempts occur or the HCP abandons the process, the request for the patient summary is terminated. Process complete.
-- VHL consumer retrieves the patient summary. Note: This process typically involves two steps: initially, a manifest file is provided containing the link to the patient summary. The patient summary is then retrieved in a subsequent step.
+  - If the security prompts are incorrect, VHL Sharer denies access and prompts the user to re-submit the security prompts. If multiple failed attempts occur or the HCP abandons the process, the request for the patient summary is terminated. Process complete.
+- VHL Receiver retrieves the patient summary. Note: This process typically involves two steps: initially, a manifest file is provided containing the link to the patient summary. The patient summary is then retrieved in a subsequent step.
 - HCP views and optionally saves/imports the patient summary in their clinical system.
 
 **Post-conditions:**
@@ -675,14 +635,14 @@ For similar reasons, the verifiable health link may refer to:
 * a folder containing at least the PDF of JSON rendering of the IPS as well associated digital signatures.
 
 
-During a care encounter in KSA, the pilgrim provides their verifiable health link as a QR code to their care provider.  Once a VHL is shared by a pilgrim during a care enounter in KSA:
+During a care encounter in KSA, the pilgrim provides their verifiable health link as a QR code to their care provider.  Once a VHL is shared by a pilgrim during a care encounter in KSA:
 * the VHL is verified through the GDHCN infrastructure
 * an mTLS connection is established between the KSA EMRs and the origin country national infrastructure using key material exchanged via GDHCN
-* a manifest of IPS relataed files including a PDF and JSON renderings and associated digital signatures
+* a manifest of IPS related files including a PDF and JSON renderings and associated digital signatures
 * The EMR retrieves the requisite files,
 
 Some of the challenges faced during the pilot implementation, though not necessarily to be taken up in this profile, include:
-- while not the main point of security, levergaing the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorizaiton methods)
+- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods)
 - in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit.  
 - how to scale and automate some of the health checks  (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS). 
 
