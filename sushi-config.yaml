@@ -99,7 +99,7 @@ menu:
   Volume 2:
     Generate VHL [ITI-YY1]: volume-2.html#2xx-generate-vhl
     Submit PKI Material [ITI-YY2]: volume-2.html#2xx-submit-pki-material
-    Retrieve Trust List [ITI-YY3]: volume-2.html#2xx-retrieve-pki-material
+    Retrieve Trust List [ITI-YY3]: volume-2.html#2xx-retrieve-trust-list
     Provide VHL [ITI-YY4]: volume-2.html#2xx-provide-vhl
   Volume 3:
     Content Profiles: volume-3.html

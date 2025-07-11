@@ -3,11 +3,11 @@ InstanceOf: OperationDefinition
 Usage: #definition
 * url = "http://example.org/fhir/OperationDefinition/generate-vhl"
 * title = "Generate VHL"
-* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display. Input must include either:\n- a patient identifier (e.g., an official national identifier), or\n- a Bundle with the patient's clinical information (e.g., IPS).\n\nThe `goal` parameter specifies what to generate: the VHL, QR code, or both."
-* name = "GenerateSignedVHL"
+* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display. Input must include either:\n- a patient identifier (e.g., an official national identifier), \n- a targetSystem.\n - flag \n - expirationTime \n - The `goal` parameter specifies what to generate: the VHL, QR code, or both."
+* name = "GenerateVHL"
 * status = #active
 * kind = #operation
-* code = #generate-signed-vhl
+* code = #generate-vhl
 * system = false
 * type = true
 * instance = false
@@ -26,32 +26,19 @@ Usage: #definition
   * type = #uri
   * documentation = "The target Patient Identifier Assigning Authority from which the returned identifiers should be selected."
 * parameter[+]
-  * name = #goal
+  * name = #expirationTime
   * use = #in
-  * min = 1
+  * min = 0
   * max = "1"
-  * type = #code
-  * documentation = "What to generate: 'vhl', 'qrcode', or 'both'."
-  * binding
-    * strength = #required
-    * valueSet = "http://example.org/fhir/ValueSet/vhl-generation-goal"
+  * type = #uri
+  * documentation = "expiration time in Epoch seconds"
 * parameter[+]
-  * name = #goal
+  * name = #flag
   * use = #in
   * min = 1
   * max = "1"
   * type = #code
-  * documentation = "What to generate: 'vhl', 'qrcode', or 'both'."
-  * binding
-    * strength = #required
-    * valueSet = "http://example.org/fhir/ValueSet/vhl-generation-goal"
-* parameter[+]
-  * name = #goal
-  * use = #in
-  * min = 1
-  * max = "1"
-  * type = #code
-  * documentation = "What to generate: 'vhl', 'qrcode', or 'both'."
+  * documentation = "Flag to indicate if Passcode is required"
   * binding
     * strength = #required
     * valueSet = "http://example.org/fhir/ValueSet/vhl-generation-goal"
