@@ -772,6 +772,70 @@ This use case has the following business requirement:
 
 ## XX.5 ToDo Security Considerations
 
+### **XX.5 Security, Privacy, and Safety Considerations**
+
+Verified Health Links (VHL) are signed FHIR bundles that rely on appropriate safeguards. This section outlines security considerations aligned with the VHL workflow.
+#### **XX.5.1 Scope and References**
+
+For detailed security implementations, see
+- [FHIR Security & Privacy Module](https://hl7.org/fhir/R4/secpriv-module.html)
+- [IHE ITI TF-2x Appendix Z.8](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.8)
+- [IHE XDS.b Profile](https://profiles.ihe.net/ITI/TF/Volume1/ch-10.html)
+- [SMART Health Links IG](https://hl7.org/fhir/uv/smart-health-cards-and-links/2024Sep/links-specification.html)
+#### **XX.5.2 Threat Model & Countermeasures**
+
+|Threat|Impact on VHL|Recommended Countermeasures|
+|---|---|---|
+|**Eavesdropping**|Disclosure of URL|Use TLS 1.3, encrypt data at rest|
+|**Replay**|Unauthorized reuse of VHL|Include expiry timestamps, use short-lived tokens|
+|**Tampering**|Data modification|Apply detached JWS signatures|
+|**Man-in-the-Middle**|Interception/substitution|Use mTLS or certificate pinning|
+|**Denial of Service**|Resource exhaustion|Validate requests, limit size, apply rate limits|
+|**Supply-chain attack**|Compromised libraries|Follow Secure-SDLC, use signed software|
+|**Weak Passcodes**|Unauthorized access|Generate strong passcodes, apply retry limits|
+|**Brute-force URLs**|Unauthorized manifest URL discovery|Use high-entropy URLs|
+
+#### **XX.5.3 Security Considerations by VHL Workflow**
+
+**1. Preliminary: Signature Verification and Trust Anchor Use**
+
+Before sending or consuming VHLs, systems should be configured to validate digital signatures against trusted public keys. Signing keys should be issued and stored in accordance with a recognized trust framework and anchored to a trusted root certificate or key registry.
+
+Receivers should retrieve and validate signing certificates or public keys using secure, authenticated channels. Certificates should be evaluated for validity, including chain-of-trust, revocation status, and expiration. Use of certificate transparency logs or pinned trust anchors is encouraged where supported.
+
+Signing systems should protect private keys using secure storage mechanisms such as hardware security modules (HSMs), secure enclaves, or OS-integrated keystores.
+
+**2. Sending VHL (Envelope Delivery)**
+
+When sending VHL envelopes, it is recommended to use Transport Layer Security (TLS) version 1.3 or higher to secure data transmission. Refer to the IHE ITI TF-2x Appendix Z.8 for implementation guidance. Communications should use HTTPS, and enabling HTTP Strict Transport Security (HSTS) is considered best practice.
+
+Authentication and authorization processes should use OAuth 2.1 tokens or another reliable mechanism. Access credentials should expire when the associated VHL expires (when expiry is used).
+
+In deployments where bearer tokens are not feasible (e.g., patient-to-provider sharing), the use of passcodes is recommended. These passcodes should be randomly generated, at least 12 characters long, and delivered securely using an out-of-band channel such as SMS or secure messaging. Systems should enforce rate limiting for incorrect attempts and apply temporary lockout after multiple failures.
+
+**3. Consuming VHL (Manifest Retrieval)**
+
+Before using VHL data, the receiving system should verify the integrity and authenticity of the content. This includes checking the detached JSON Web Signature (JWS) per RFC 7515, using algorithms such as PS256 or EdDSA. JSON content should be canonicalized using RFC 8785 prior to verification.
+
+Authorization checks should verify the intended audience and expiry. If passcodes are used, they should follow the same strength and delivery expectations outlined above.
+
+To help prevent replay attacks, VHLs should include expiration timestamps. Receiving systems should monitor and limit repeated access attempts.
+#### **XX.5.4 Data Storage Security**
+It is recommended that systems and devices storing VHL data use full-disk encryption. VHL-related data should also be encrypted in accordance with applicable organizational policies.
+#### **XX.5.5 Audit Logging**
+Systems exchanging VHLs should log access events using the BasicAuditEvent profile from IHE. Logs should include fields such as agent ID, VHL ID, JWT ID, and access metadata.
+#### **XX.5.6 Privacy & Consent**
+Implementers should minimize the data included in each VHL to what is necessary for the intended use. It is recommended to record explicit patient consent using the FHIR Consent resource before sharing any VHL content.
+#### **XX.5.7 Safety Considerations**
+If a VHL signature fails verification, the system should stop further processing and trigger a security response. Applications should clearly show when the VHL was issued and when it expires. Interfaces should indicate that VHLs represent a snapshot in time and may not reflect the full patient record.
+#### **XX.5.8 Residual Risks**
+- **Endpoint Security Compromise:** Systems may be vulnerable if local access controls or device protections are weak.
+- **Trust-anchor Compromise:** Forged signatures are possible if certificate trust chains are compromised; monitoring and revocation mechanisms should be in place.
+- **User Misclassification:** Access permissions may be too broad if user roles are misconfigured. Regular reviews of user entitlements are recommended.
+#### **XX.5.9 Digital Wallet Considerations (Informative)**
+When VHLs are stored in digital wallets, selective-disclosure features are preferred to limit data exposure. Wallets should store private keys in a secure enclave or hardware-backed keystore as per DIACC recommendations.
+
+
 <i>
     See ITI TF-2x: [Appendix Z.8 "Mobile Security Considerations"](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.8-mobile-security-considerations)
     
