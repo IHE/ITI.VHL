@@ -4,7 +4,7 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-## 2:XX Retrieve PKI Material
+## 2:3.YY2 Retrieve PKI Material
 
 {% assign reqRequestPKI = site.data.Requirements-RequestPKIMaterial %}
 {% assign reqProvidePKI = site.data.Requirements-ProvidePKIMaterial %}
@@ -21,7 +21,7 @@
 {% assign reqReceivePKIdescription = reqReceivePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 
 
-### 2:XX.1 Scope
+### 2:3.YY2.1 Scope
 
 The Retrieve PKI Material transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted cryptographic material from the {{ linkta }}. This material includes:
 
@@ -32,7 +32,7 @@ The Retrieve PKI Material transaction allows both {{ linkvhls }}s and {{ linkvhl
     
 Retrieved material SHALL be used to determine the trustworthiness of VHL artifacts and service endpoints in accordance with the governing trust framework.
 
-### 2:XX.2 Actor Roles
+### 2:3.YY2.2 Actor Roles
 
 
 | Actor | Role |
@@ -42,30 +42,30 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 | Trust Anchor             | {{ reqProvidePKItitle.valueString }} |
 {: .grid}
 
-### 2:XX.3 Referenced Standards
+### 2:3.YY2.3 Referenced Standards
 
 
-### 2:XX.4 Messages
+### 2:3.YY2.4 Messages
 
-#### 2:XX.4.1 Retrieve PKI Material Request Message
-##### 2:XX.4.1.1 Trigger Events
+#### 2:3.YY2.4.1 Retrieve PKI Material Request Message
+##### 2:3.YY2.4.1.1 Trigger Events
 {{ reqRequestPKIdescription.valueMarkdown}}
 
-##### 2:XX.4.1.2 Message Semantics
+##### 2:3.YY2.4.1.2 Message Semantics
 OPTIONS TO DISCUSS:
 * DID / JSON Web Keys
 * mCSD Endpoint
 
-##### 2:XX.4.1.3 Expected Actions
+##### 2:3.YY2.4.1.3 Expected Actions
 {{ reqProvidePKIdescription.valueMarkown}}
 
-#### 2:XX.4.2 Retrieve PKI Material Response Message 
+#### 2:3.YY2.4.2 Retrieve PKI Material Response Message 
 
-##### 2:XX.4.2.1 Trigger Events
+##### 2:3.YY2.4.2.1 Trigger Events
 
 A [Trust Anchor](ActorDefinition-TrustAnchor.html) initiates an Retrieve PKI Material Response Message once it has completed, to the extent possible, the expected actions upon receipt of a Retrieve PKI Material Request message.
 
-##### 2:XX.4.2.2  Message Semantics
+##### 2:3.YY2.4.2.2  Message Semantics
 The Retrieve PKI Material request MAY take one of several forms, depending on the transport and representation models adopted by the content profile. Potential representations include:
 
 - A FHIR Parameters resource with serialized public key material (e.g., PEM, DER, or JWK)
@@ -76,11 +76,11 @@ The payload SHOULD include sufficient metadata to identify the submitting entity
 
 Content profiles SHALL define exact payload constraints, validation rules, and error behaviors.
 
-##### 2:XX.4.2.3 Expected Actions
+##### 2:3.YY2.4.2.3 Expected Actions
 {{ reqReceivePKIdescription.valueMarkdown }}
 
 
-### 2:XX.5 Security Considerations 
+### 2:3.YY2.5 Security Considerations 
 All Retrieve PKI Material interactions SHOULD occur over secure channels using TLS 1.2 or higher, with mTLS recommended for enhanced endpoint authentication. The Trust Anchor SHOULD validate the authenticity, scope, and expiration of all retrieved key material before publishing or caching.
 
 Clients (e.g., {{ linkvhlr }}s and {{ linkvhls }}s) SHOULD verify the signature chain or integrity envelope of the material prior to using it for signature verification or secure session establishment.
