@@ -5,9 +5,9 @@
 
 ## 2:XX Retrieve Trust List
 
-{% assign reqRetrievePKI = site.data.Requirements-RequestPKIMaterial %}
-{% assign reqRetrievePKIResp = site.data.Requirements-ProvidePKIMaterial %}
-{% assign reqReceivePKI = site.data.Requirements-ReceivePKIMaterial %}
+{% assign reqRetrievePKI = site.data.Requirements-InitiateRetrieveTrustListRequest %}
+{% assign reqRetrievePKIResp = site.data.Requirements-RespondtoRetrieveTrustListRequest %}
+{% assign reqReceivePKI = site.data.Requirements-ReceiveTrustList %}
 
 
 {% assign reqRetrievePKItitle = reqRetrievePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
