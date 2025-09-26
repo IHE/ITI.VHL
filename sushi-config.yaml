@@ -54,6 +54,8 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 # list every example here with a name, description and that exampleBoolean is true; These are used to populate the artifacts page, and are needed to eliminate build warnings
 # You may delay filling out this section until you approach publication as it is merely a nice to have and eliminates build warnings -- If you do this then you will need above the autoload-resources true
 
+dependencies:
+hl7.fhir.uv.extensions : 5.2.0 
 
 pages:
 # itemize here each narrative page. Include assigned section numbers when appropriate. The order they appear here is the order they will appear in the TOC and on the next/prev navigation.
@@ -64,13 +66,16 @@ pages:
     title: 1:XX Verifiable Health Links (VHL) - Volume 1
     generation: markdown
   ITI-YY1.md:
-    title: 2:3.YY1 Publish PKI Material
+    title: 2:3.YY1 Generate VHL
     generation: markdown
   ITI-YY2.md:
-    title: 2:3.YY2 Retrieve PKI Material
+    title: 2:3.YY2 Submit PKI Material
     generation: markdown
   ITI-YY3.md:
-    title: 2:3.YY3 Issue Verifiable Health Link
+    title: 2:3.YY3 Retrieve Trust List
+    generation: markdown
+  ITI-YY4.md:
+    title: 2:3.YY4 Provide VHL
     generation: markdown
   volume-3.md:
     title: 3:3 Verifiable Health Links (VHL) - Volume 3
@@ -82,7 +87,7 @@ pages:
     title: Changes to Other IHE Specifications
     generation: markdown
   vhl_vs_shl.md:
-    title: "Appendix A: Comparision of health links"
+    title: "Appendix A: Comparison of health links"
   download.md:
     title: "Download and Analysis"
     generation: markdown
@@ -101,9 +106,10 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    "Publish PKI [ITI-YY1]": ITI-YY1.html
-    "Retrieve PKI [ITI-YY2]": ITI-YY2.html
-    "Issue VHL [ITI-YY3]": ITI-YY3.html
+    Generate VHL [ITI-YY1]: ITI-YY1.html
+    Submit PKI Material [ITI-YY2]: ITI-YY2.html
+    Retrieve Trust List [ITI-YY3]: ITI-YY3.html
+    Provide VHL [ITI-YY4]: ITI-YY4.html
   Volume 3:
     Content Profiles: volume-3.html
   Artifacts: artifacts.html

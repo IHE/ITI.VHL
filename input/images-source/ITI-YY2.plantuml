@@ -1,0 +1,19 @@
+@startuml
+skinparam svgDimensionStyle false
+hide footbox
+participant "VHL Sharer" as VHLS
+participant "VHL Receiver" as VHLR
+participant "Trust Anchor" as TA
+
+activate VHLS
+activate TA
+activate VHLR
+
+
+VHLS -> TA : Submit PKI Material request [ITI-YY2]
+TA -> VHLS : Submit PKI Material response [ITI-YY2]
+VHLR -> TA : Submit PKI Material request [ITI-YY2]
+TA -> VHLR : Submit PKI Material response [ITI-YY2]
+
+
+@enduml

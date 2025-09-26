@@ -1,37 +1,28 @@
 
-{% assign linkta = '<a href="ActorDefinition-TrustAnchor.html">Trust Anchor</a>' %}
 {% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
-{% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
-
-## 2:3.YY1 Publish PKI Material
-
-{% assign reqSubmitPKI = site.data.Requirements-SubmitPKIMaterial %}
-{% assign reqDistributePKI = site.data.Requirements-DistributePKIMaterial %}
 
 
-{% assign reqSubmitPKItitle = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
-{% assign reqDistributePKItitle = reqDistributePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
-
-
-{% assign reqSubmitPKIdescription = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
-{% assign reqDistributePKIdescription = reqDistributePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
-
+## 2:3.YY1 Generate VHL
+ {% assign reqGenerateVHLRequest = site.data.Requirements-InitiateVHLGenerationRequest %}
+ {% assign reqGenerateVHLResponse = site.data.Requirements-RespondtoGenerateVHLRequest %}
 
 
 ### 2:3.YY1.1 Scope
 
-The Publish PKI Material transaction enables entities within a trust network—specifically, {{ linkvhls }}s and {{ linkvhlr }}s—to submit their public key material to a designated {{ linkta }}. This process facilitates the {{ linkta }}’s role in aggregating, validating, and distributing a trusted list of public keys (Trust List) essential for verifying digital signatures and establishing secure communications within the VHL ecosystem.
+{% assign reqGenerateVHLRequestTitle = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
+{% assign reqGenerateVHLResponseTitle = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
+
+
+{% assign reqGenerateVHLRequestDescription = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
+{% assign reqGenerateVHLResponseDescription = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 
 ### 2:3.YY1.2 Actor Roles
 
-
-
 | Actor | Role |
 |-------|------|
-| {{ linkvhlr}} | {{ reqSubmitPKItitle.valueString }}     |
-| {{ linkvhls}} | {{ reqSubmitPKItitle.valueString }}     |
-| {{ linkta }}  | {{ reqDistributePKItitle.valueString }} |
+| {{ linkvhlh}} | {{ reqGenerateVHLRequestTitle.valueString }}     |
+| {{ linkvhls }}            | {{ reqGenerateVHLResponseTitle.valueString }} |
 {: .grid}
 
 
@@ -40,64 +31,74 @@ The Publish PKI Material transaction enables entities within a trust network—s
 
 ### 2:3.YY1.4 Messages
 
-#### 2:3.YY1.4.1 Publish PKI Material Request Message
+<figure >
+  <div style="width:35em; max-width:100%;">
+     {%include ITI-YY1.svg%}
+  </div>
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Interaction Diagram</p>
+</figure>
+
+#### 2:3.YY1.4.1 Generate VHL Request Message
+This message is implemented as an HTTP GET operation from the client app used by the Holder to the VHL Sharer using the FHIR $generate-vhl operation described in [2:3.YY1.4.1.2 Message Semantics](#23yy1412-message-semantics).
+
+
 ##### 2:3.YY1.4.1.1 Trigger Events
-{{ reqSubmitPKIdescription.valueMarkdown}}
+{{ reqGenerateVHLRequestDescription.valueMarkdown}}
 
-{% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
-
+{% include requirements-list-statements.liquid site=site req=reqGenerateVHLRequest  %}
 ##### 2:3.YY1.4.1.2 Message Semantics
-The message semantics and transport mechanism for the **submission** of public key material to the {{ linkta }} SHALL be defined by the implementing jurisdiction of the trust network. The {{ linkta }} is responsible for validating, cataloging, and securely redistributing key material as part of the canonical Trust List.
+The Get Corresponding Identifiers message is a FHIR operation request as
+defined in FHIR (<http://hl7.org/fhir/operations.html>) with the [$generate-vhl operation definition](OperationDefinition-Generate.VHL.html)
+and the input parameters shown in Table 2:3.83.4.1.2-1.
 
-Different submission pathways MAY be defined based on the sensitivity, intended use, or organizational classification of the key material. For example:
+Given that the parameters are not complex types, the HTTP GET operation shall be used as defined in FHIR (<http://hl7.org/fhir/operations.html#request>).
 
-- **Indirect publication**: Key material is published at a URL under the control of the submitting organization and its location is communicated to the {{ linkta }} via:
-    - Publication on a well-known, jurisdictionally recognized website
-    - Secure transmission of the URL through official channels (e.g., signed correspondence, notarized documentation)
-        
-- **Direct submission**: Key material is submitted directly to the {{ linkta }} over a secure, mutually authenticated connection:
-    - Use of an API endpoint exposed by the {{ linkta }} requiring mTLS or other credentialed authentication
-    - Use of a secure upload portal with logging and role-based access controls
-        
-- **Offline submission**: In scenarios requiring maximal assurance of origin and identity:
-    - Submission of key material on a secure physical medium (e.g., USB token, smart card) during a verified in-person encounter, with formal identity attestation
+The name of the operation is `$generate-vhl`, and it is applied to FHIR Patient Resource type.
 
-All submission mechanisms SHOULD be accompanied by sufficient **provenance metadata** to support validation by the {{ linkta }}. At minimum, this SHOULD include:
+The URL for this operation is: `[base]/Patient/$generate-vhl`
 
-- The asserted identity of the submitting entity
-- The intended usage scope of the key(s) (e.g., signature, encryption, mTLS)
-- An expiry date or revocation mechanism, if applicable
-- A digital signature or certification path establishing the authenticity of the submission
-    
-Jurisdictions MAY further constrain the permitted submission methods based on policy, threat models, or operational constraints. The Trust Anchor SHOULD reject submissions that do not meet the validation criteria defined within the trust framework.
+Where **[base]** is the URL of VHL Sharer Service provider.
+
+The Generate VHL message is performed by an HTTP GET command shown below:
+
+```
+GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&_format=[token]}
+```
+
+**Table 2:3.83.4.1.2-1: $generate-vhl Message HTTP query Parameters**
+
+| Query parameter Name | Cardinality | Search Type | Description                                                                                                                                                                                                      |
+| -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| sourceIdentifier     | \[1..1\]    | token       | The Patient Identifier that will be used by the Patient Identifier Cross-reference Manager to find cross matching identifiers associated with the Patient. See Section 2:3.83.4.1.2.1. |
+| targetSystem         | \[0..\*\]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected. See Section 2:3.83.4.1.2.2.                                                                    |
+| \_goal             | \[0..1\]    | token       | returned VHL rendering type |
+| expirationTime      |  \[0..1\]  | token        | expiration time in Epoch seconds |
+| flag |  \[0..1\]  | token        | Flag to indicate if Passcode is required |
 
 
 ##### 2:3.YY1.4.1.3 Expected Actions
-{{ reqDistributePKIdescription.valueMarkdown }}
+{{ reqGenerateVHLResponseDescription.valueMarkdown }}
 
-{% include requirements-list-statements.liquid req=reqDistributePKI site=site  %}
+{% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
 
-#### 2:3.YY1.4.2 Publish PKI Material Response Message 
+#### 2:3.YY1.4.2  Generate VHL Response Message 
+The {{ linkvhls }} returns failure, or generates and returns zero to many VHL. Depending on the use case, the VHL maybe rendered using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC.
 
-There is no Publish PKI Material Repsonse Message defined in this profile.  This is up to the implementing jurisidiction of the {{ linkta }}
+##### 2:3.YY1.4.2.1 Trigger Events
+This message shall be sent when a request initiated by the {{linkvhlh}} has been processed successfully. 
+
+##### 2:3.YY1.4.2.2  Message Semantics
+
+See [ITI TF-2: Appendix Z.6](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.6-populating-the-expected-response-format) for more details on response format handling.
+
+The response message is a FHIR operation response (<http://hl7.org/fhir/operations.html#response>).
+
+On Failure, the response message is an HTTP status code of 4xx or 5xx
+indicates an error, and an OperationOutcome Resource shall be returned
+with details.
+
+##### 2:3.YY1.4.2.3 Expected Actions
+The VHL Sharer processes the results according to application-defined rules.
 
 
 ### 2:3.YY1.5 Security Considerations 
-The secure and verifiable exchange of public key infrastructure (PKI) material is foundational to the operation of a Verified Health Link (VHL) trust network. Any compromise in the integrity, authenticity, or provenance of this material undermines the ability of network participants to verify digital signatures, authenticate service endpoints, or enforce trust relationships.
-
-Accordingly, implementers SHOULD ensure that:
-
-- Submission and retrieval of PKI material occurs only over secure channels (e.g., mutually authenticated TLS),
-- Submitted key material includes cryptographic proof of origin (e.g., embedded signatures or certification paths),
-- Each key’s usage scope and validity period are clearly defined and enforced,
-- All accepted material is validated against the criteria and policies established by the Trust Anchor’s governance authority.
-    
-Jurisdictions MAY define additional security controls, such as key size requirements, certificate chaining policies, Certificate Revocation List (CRL) or OCSP usage, offline verification workflows, or restrictions on submission endpoints.
-
-The {{ linkta }} SHOULD reject key material that fails to meet the validation requirements established by the trust framework or the implementing jurisdiction.
-
-
-
-
-
-
