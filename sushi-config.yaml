@@ -65,8 +65,17 @@ pages:
   volume-1.md:
     title: 1:XX Verifiable Health Links (VHL) - Volume 1
     generation: markdown
-  volume-2.md:
-    title: "2: Verifiable Health Links (VHL) - Volume 2"
+  ITI-YY1.md:
+    title: 2:3.YY1 Generate VHL
+    generation: markdown
+  ITI-YY2.md:
+    title: 2:3.YY2 Submit PKI Material
+    generation: markdown
+  ITI-YY3.md:
+    title: 2:3.YY3 Retrieve Trust List
+    generation: markdown
+  ITI-YY4.md:
+    title: 2:3.YY4 Provide VHL
     generation: markdown
   volume-3.md:
     title: 3:3 Verifiable Health Links (VHL) - Volume 3
@@ -97,10 +106,10 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    Generate VHL [ITI-YY1]: volume-2.html#2xx-generate-vhl
-    Submit PKI Material [ITI-YY2]: volume-2.html#2xx-submit-pki-material
-    Retrieve Trust List [ITI-YY3]: volume-2.html#2xx-retrieve-trust-list
-    Provide VHL [ITI-YY4]: volume-2.html#2xx-provide-vhl
+    Generate VHL [ITI-YY1]: ITI-YY1.html
+    Submit PKI Material [ITI-YY2]: ITI-YY2.html
+    Retrieve Trust List [ITI-YY3]: ITI-YY3.html
+    Provide VHL [ITI-YY4]: ITI-YY4.html
   Volume 3:
     Content Profiles: volume-3.html
   Artifacts: artifacts.html

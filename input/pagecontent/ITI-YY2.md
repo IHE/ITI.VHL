@@ -3,7 +3,7 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-## 2:XX Submit PKI Material
+## 2:3.YY2 Submit PKI Material
 
 {% assign reqSubmitPKI = site.data.Requirements-InitiateSubmitPKIMaterialRequest %}
 {% assign reqDistributePKI = site.data.Requirements-RespondtoSubmitPKIMaterialRequest %}
@@ -18,11 +18,11 @@
 
 
 
-### 2:XX.1 Scope
+### 2:3.YY2.1 Scope
 
 The Submit PKI Material transaction enables entities within a trust network—specifically, {{ linkvhls }}s and {{ linkvhlr }}s—to submit their public key material to a designated {{ linkta }}. This process facilitates the {{ linkta }}’s role in aggregating, validating, and distributing a trusted list of public keys (Trust List) essential for verifying digital signatures and establishing secure communications within the VHL ecosystem.
 
-### 2:XX.2 Actor Roles
+### 2:3.YY2.2 Actor Roles
 
 
 
@@ -33,10 +33,10 @@ The Submit PKI Material transaction enables entities within a trust network—sp
 {: .grid}
 
 
-### 2:XX.3 Referenced Standards
+### 2:3.YY2.3 Referenced Standards
 
 
-### 2:XX.4 Messages
+### 2:3.YY2.4 Messages
 
 <figure >
   <div style="width:35em; max-width:100%;">
@@ -46,13 +46,13 @@ The Submit PKI Material transaction enables entities within a trust network—sp
   <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Interaction Diagram</p>
 </figure>
 
-#### 2:XX.4.1 Submit PKI Material Request Message
-##### 2:XX.4.1.1 Trigger Events
+#### 2:3.YY2.4.1 Submit PKI Material Request Message
+##### 2:3.YY2.4.1.1 Trigger Events
 {{ reqSubmitPKIdescription.valueMarkdown}}
 
 {% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
 
-##### 2:XX.4.1.2 Message Semantics
+##### 2:3.YY2.4.1.2 Message Semantics
 The message semantics and transport mechanism for the **submission** of public key material to the {{ linkta }} SHALL be defined by the implementing jurisdiction of the trust network. The {{ linkta }} is responsible for validating, cataloging, and securely redistributing key material as part of the canonical Trust List.
 
 Different submission pathways MAY be defined based on the sensitivity, intended use, or organizational classification of the key material. For example:
@@ -78,17 +78,17 @@ All submission mechanisms SHOULD be accompanied by sufficient **provenance metad
 Jurisdictions MAY further constrain the permitted submission methods based on policy, threat models, or operational constraints. The Trust Anchor SHOULD reject submissions that do not meet the validation criteria defined within the trust framework.
 
 
-##### 2:XX.4.1.3 Expected Actions
+##### 2:3.YY2.4.1.3 Expected Actions
 {{ reqDistributePKIdescription.valueMarkdown }}
 
 {% include requirements-list-statements.liquid req=reqDistributePKI site=site  %}
 
-#### 2:XX.4.2 Submit PKI Material Response Message 
+#### 2:3.YY2.4.2 Submit PKI Material Response Message 
 
 There is no Submit PKI Material Response Message defined in this profile.  This is up to the implementing jurisdiction of the {{ linkta }}
 
 
-### 2:XX.5 Security Considerations 
+### 2:3.YY2.5 Security Considerations 
 The secure and verifiable exchange of public key infrastructure (PKI) material is foundational to the operation of a Verified Health Link (VHL) trust network. Any compromise in the integrity, authenticity, or provenance of this material undermines the ability of network participants to verify digital signatures, authenticate service endpoints, or enforce trust relationships.
 
 Accordingly, implementers SHOULD ensure that:
@@ -101,9 +101,3 @@ Accordingly, implementers SHOULD ensure that:
 Jurisdictions MAY define additional security controls, such as key size requirements, certificate chaining policies, Certificate Revocation List (CRL) or OCSP usage, offline verification workflows, or restrictions on submission endpoints.
 
 The {{ linkta }} SHOULD reject key material that fails to meet the validation requirements established by the trust framework or the implementing jurisdiction.
-
-
-
-
-
-
