@@ -40,8 +40,7 @@ The Submit PKI Material transaction enables entities within a trust network—sp
 
 <figure >
   <div style="width:35em; max-width:100%;">
-     {%include ITI-YY2
-     .svg%}
+     {%include ITI-YY2.svg%}
   </div>
   <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Interaction Diagram</p>
 </figure>
