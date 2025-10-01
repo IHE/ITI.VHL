@@ -2,8 +2,8 @@
 skinparam svgDimensionStyle false
 hide footbox
 participant "VHL Sharer" as VHLS
-participant "VHL Receiver" as VHLR
 participant "Trust Anchor" as TA
+participant "VHL Receiver" as VHLR
 
 activate VHLS
 activate TA
