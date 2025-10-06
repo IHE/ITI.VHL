@@ -2,6 +2,7 @@
 ;; To create a file, visit it with C-x C-f and enter text in its buffer.
 
 ## 3:X.1 Content Profiles
+* [PKI Submission](PKI_Submission.html)
 
 ### 3:X.1.1 Signed QR codes (HCert)
 
