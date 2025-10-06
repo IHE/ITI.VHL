@@ -835,3 +835,10 @@ Audit events SHALL comply with ATNA requirements.
 ## PlantUML Diagram Source
 
 (New diagram reflecting document retrieval flow to be created)
+
+<figure >
+  <div style="width:35em; max-width:100%;">
+     {%include ITI-YY4copy.svg%}
+  </div>
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Interaction Diagram</p>
+</figure>

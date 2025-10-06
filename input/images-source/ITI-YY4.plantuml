@@ -2,140 +2,20 @@
 skinparam svgDimensionStyle false
 hide footbox
 
+participant "VHL Holder" as Holder
 participant "VHL Receiver" as Receiver
-participant "VHL Sharer" as Sharer
-participant "Trust Anchor\n(PKI Infrastructure)" as TA
+participant
 
+activate Holder
 activate Receiver
 activate Sharer
 
-== Prerequisites (Out of Scope) ==
 
-note over Receiver
-  VHL Receiver has already:
-  • Received VHL from VHL Holder
-  • Validated VHL signature
-  • Extracted manifest URL
-end note
+Holder -> Receiver: Provide VHL
 
-== Establish Secure Channel (ATNA ITI-19) ==
+Receiver -> Sharer: Retrieve Manifest Request [ITI-YY4]
 
-Receiver -> Sharer: **Authenticate Node** [ITI-19]\n(Initiate secure channel)
-note right
-  VHL Receiver initiates
-  ATNA secure channel
-  presenting credentials from
-  Trust Anchor trust network
-end note
+Sharer --> Receiver : Retrieve Manifest Response [ITI-YY4]
 
-Sharer -> TA: Validate credentials
-note left
-  Via cached trust list
-  from ITI-YY3
-end note
-TA --> Sharer: Credentials valid
-
-Sharer -> Receiver: **Complete Authentication**\n(Present credentials)
-
-Receiver -> TA: Validate credentials
-TA --> Receiver: Credentials valid
-
-note over Receiver, Sharer
-  Secure channel established per ATNA
-  Both parties authenticated
-  Confidentiality and integrity ensured
-end note
-
-== Retrieve VHL Manifest ==
-
-Receiver -> Receiver: Construct signed request:\n• Include VHL token\n• Add search parameters\n• Sign with private key (JWS)
-
-Receiver -> Sharer: **Retrieve VHL Manifest Request** [ITI-YY4]\nPOST /vhl/manifest/{id}\n(Signed search request)
-note right
-  Content-Type: application/jose+json
-  Authorization: Bearer {vhl-token}
-  
-  JWS-signed payload containing:
-  • Issuer (VHL Receiver ID)
-  • VHL token
-  • Search parameters
-  • Passcode (if required)
-end note
-
-Sharer -> TA: Lookup VHL Receiver's\npublic key
-note left
-  Via cached trust list
-  from ITI-YY3
-end note
-TA --> Sharer: Public key material
-
-Sharer -> Sharer: **Authenticate & Authorize**:\n1. Verify request signature\n2. Validate VHL token\n3. Check VHL expiration\n4. Verify passcode (if required)\n5. Confirm VHL scope
-
-alt Authorization Successful
-  Sharer -> Sharer: Execute search:\n• Query document repository\n• Apply VHL scope\n• Apply search filters
-  
-  Sharer --> Receiver: **Retrieve VHL Manifest Response**\nHTTP 200 OK\n(FHIR Bundle with DocumentReferences)
-  note left
-    Bundle contains:
-    • DocumentReference resources
-    • Document URLs
-    • Document metadata
-    • Content hashes
-  end note
-  
-  Receiver -> Receiver: Parse manifest:\n• Extract DocumentReferences\n• Cache for document retrieval
-  
-  opt Audit Logging
-    Sharer -> Sharer: Record audit event:\nManifest accessed
-  end
-  
-else Authorization Failed
-  alt Invalid Signature
-    Sharer --> Receiver: HTTP 401 Unauthorized\n(Invalid request signature)
-  else VHL Expired or Revoked
-    Sharer --> Receiver: HTTP 403 Forbidden\n(VHL expired or unauthorized)
-  else Invalid Passcode
-    Sharer --> Receiver: HTTP 422 Unprocessable\n(Invalid passcode)
-  end
-  
-  Sharer -> Sharer: Log failed attempt
-end
-
-== Retrieve Specific Document ==
-
-opt Document Retrieval
-  Receiver -> Receiver: Select document from manifest\nExtract document URL
-  
-  Receiver -> Receiver: Prepare signed request\nwith VHL token
-  
-  Receiver -> Sharer: **Retrieve VHL Document Request** [ITI-YY4]\nGET or POST /vhl/document/{doc-id}\n(Signed request with VHL token)
-  
-  Sharer -> Sharer: Re-validate:\n• Request signature\n• VHL authorization\n• Document scope
-  
-  alt Document Authorized
-    Sharer -> Sharer: Retrieve document content
-    
-    Sharer --> Receiver: **Retrieve VHL Document Response**\nHTTP 200 OK\n(Document content)
-    note left
-      Content-Type: application/fhir+json
-      or application/pdf, etc.
-      
-      MAY include digital signature
-    end note
-    
-    Receiver -> Receiver: Process document:\n• Validate integrity (hash)\n• Verify signature (optional)\n• Render or import
-    
-    opt Audit Logging
-      Sharer -> Sharer: Record audit event:\nDocument retrieved
-      Receiver -> Receiver: Record audit event:\nDocument received
-    end
-    
-  else Document Not Authorized
-    Sharer --> Receiver: HTTP 403 Forbidden
-  end
-end
-
-deactivate Receiver
-deactivate Sharer
 
 @enduml
