@@ -1,0 +1,19 @@
+@startuml
+skinparam svgDimensionStyle false
+hide footbox
+
+participant "VHL Holder" as Holder
+participant "VHL Receiver" as Receiver
+
+activate Holder
+activate Receiver
+
+== VHL Provision ==
+
+
+Holder -> Receiver: Provide VHL [ITI-YY4]
+
+Receiver --> Holder: Provide VHL Response [ITI-YY4]
+
+
+@enduml
