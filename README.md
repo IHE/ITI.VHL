@@ -1,4 +1,4 @@
-# Status
+# Status 
  
 CI build available at [ITI VHL](https://build.fhir.org/ig/IHE/ITI.VHL/branches/master/index.html) 
 
