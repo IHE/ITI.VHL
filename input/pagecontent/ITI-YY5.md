@@ -14,7 +14,7 @@ The Retrieve Manifest transaction enables a {{ linkvhlr }} to retrieve a manifes
 
 This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL Holder (via ITI-YY4 Provide VHL) and validated the VHL signature.
 
-This transaction SHALL be conducted over a secure channel as defined by the IHE Audit Trail and Node Authentication (ATNA) Profile. Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's participation in the trust network. The {{ linkvhls }} validates that the requesting {{ linkvhlr }} is authorized to access the documents before responding.
+Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's participation in the trust network. The {{ linkvhls }} validates that the requesting {{ linkvhlr }} is authorized to access the documents before responding.This transaction MAY be optionally conducted over a secure channel as defined by the IHE Audit Trail and Node Authentication (ATNA) Profile. 
 
 ### 2:3.YY5.2 Actor Roles
 
@@ -60,28 +60,18 @@ This transaction SHALL be conducted over a secure channel as defined by the IHE 
 
 A {{ linkvhlr }} initiates the Retrieve Manifest Request when:
 - The {{ linkvhlr }} has received and validated a VHL containing a manifest URL
-- The {{ linkvhlr }} has established a secure channel with the {{ linkvhls }} per ATNA
 - The {{ linkvhlr }} needs to discover available documents before retrieving specific content
 
 ##### 2:3.YY5.4.1.2 Message Semantics
-
-**Transport and Security**
-
-The request SHALL be transmitted over a secure channel as defined by ATNA Authenticate Node [ITI-19]:
-- **Protocol**: HTTPS
-- **Method**: POST
-- **Secure Channel**: As defined by ATNA
-- **Mutual Authentication**: Both parties authenticate via credentials validated against Trust Anchor
 
 **Request Structure**
 
 POST to manifest URL extracted from VHL:
 
 ```http
-POST /vhl/manifest/{manifest-id} HTTP/1.1
+POST https://[base]/DocumentReference?[search-params]&_vhl=[vhl-id] HTTP/1.1
 Host: vhl-sharer.example.org
 Content-Type: application/jose+json
-Authorization: Bearer {vhl-token}
 Accept: application/fhir+json
 ```
 
@@ -107,15 +97,8 @@ The {{ linkvhlr }} SHALL sign the request using JWS to enable {{ linkvhls }} to 
   },
   "payload": {
     "iss": "https://receiver.example.org",
-    "aud": "https://vhl-sharer.example.org",
     "iat": 1704067200,
     "jti": "req-unique-id-456",
-    "vhl": "{original-vhl-token}",
-    "search": {
-      "type": "DocumentReference",
-      "patient": "Patient/123",
-      "status": "current"
-    },
     "passcode": "user-provided-pin"
   }
 }
@@ -126,11 +109,8 @@ The {{ linkvhlr }} SHALL sign the request using JWS to enable {{ linkvhls }} to 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
 | iss | 1..1 | Identifier of VHL Receiver |
-| aud | 1..1 | Identifier of VHL Sharer |
 | iat | 1..1 | Timestamp when request issued |
 | jti | 1..1 | Unique request identifier (replay protection) |
-| vhl | 1..1 | Original VHL token for authorization |
-| search | 0..1 | FHIR search parameters |
 | passcode | 0..1 | User-provided passcode if VHL requires it |
 {: .grid}
 
@@ -138,11 +118,6 @@ The {{ linkvhlr }} SHALL sign the request using JWS to enable {{ linkvhls }} to 
 
 The {{ linkvhlr }} SHALL:
 
-1. **Establish Secure Channel**:
-   - Initiate ATNA Authenticate Node [ITI-19] with {{ linkvhls }}
-   - Present credentials validated against Trust Anchor
-   - Validate {{ linkvhls }} credentials
-   - Ensure successful mutual authentication per ATNA
 
 2. **Prepare Signed Request**:
    - Extract manifest URL from validated VHL
@@ -166,11 +141,7 @@ The {{ linkvhlr }} MAY:
 
 Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 
-1. **Authenticate Secure Channel**:
-   - Complete ATNA Authenticate Node [ITI-19]
-   - Validate {{ linkvhlr }} credentials against Trust Anchor
-   - Confirm {{ linkvhlr }} is valid participant
-   - Reject if validation fails
+
 
 2. **Verify Request Signature**:
    - Extract `kid` from JWS header

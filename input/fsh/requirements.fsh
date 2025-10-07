@@ -359,10 +359,11 @@ Usage: #definition
 * description = """
 The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL initiate a request to retrieve a set of health documents from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL).
 
-This transaction SHALL be conducted over a secure channel, as defined in the [Audit Trail and Node Authentication (ATNA)](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html#9.1) Profile. Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
+ Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
 
 **Optional behaviors:**
 * The VHL Sharer MAY record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement.
+* This transaction MAY be conducted over a secure channel, as defined in the [Audit Trail and Node Authentication (ATNA)](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html#9.1) Profile.
 """
 * actor[+] = Canonical(VHLReceiver)
 * statement[+].key = "retrieve-health-documents"
@@ -372,7 +373,7 @@ This transaction SHALL be conducted over a secure channel, as defined in the [Au
 * statement[+].key = "initiate-authenticate-node"
 * statement[=].label = "Initiate Authenticate Node"
 * statement[=].requirement = "Initiate Authenticate Node [ITI-19](https://profiles.ihe.net/ITI/TF/Volume2/ITI-19.html#3.19) transaction to establish a secure connection and validate participation in the trust network using PKI material published by the trust anchor."
-* statement[=].conformance = #SHALL
+* statement[=].conformance = #MAY
 * statement[+].key = "record-audit-event"
 * statement[=].label = "Record audit event"
 * statement[=].requirement = "Record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement"

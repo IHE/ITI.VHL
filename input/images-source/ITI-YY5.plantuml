@@ -11,7 +11,7 @@ note right
   - VHL token
   - Search parameters
   - Passcode (if required)
-  Over ATNA secure channel
+  Over ATNA secure channel (optional)
 end note
 
 Sharer --> Receiver: Retrieve Manifest Response
