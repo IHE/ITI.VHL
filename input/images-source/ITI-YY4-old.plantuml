@@ -1,0 +1,21 @@
+@startuml
+skinparam svgDimensionStyle false
+hide footbox
+
+participant "VHL Holder" as Holder
+participant "VHL Receiver" as Receiver
+participant
+
+activate Holder
+activate Receiver
+activate Sharer
+
+
+Holder -> Receiver: Provide VHL
+
+Receiver -> Sharer: Retrieve Manifest Request [ITI-YY4]
+
+Sharer --> Receiver : Retrieve Manifest Response [ITI-YY4]
+
+
+@enduml
