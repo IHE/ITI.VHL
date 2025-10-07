@@ -11,7 +11,7 @@ note right
   (certificates, keys, CRLs)
 end note
 
-TA --> Client: Retrieve Trust List Response
+TA --> Client: Retrieve Trust List Response [ITI-YY2]
 note left
   Trust List with
   validated PKI material

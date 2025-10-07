@@ -6,11 +6,7 @@ participant "VHL Sharer\nor\nVHL Receiver" as Submitter
 participant "Trust Anchor" as TA
 
 Submitter -> TA: Submit PKI Material Request [ITI-YY1]
-note right
-  Submit public key material
-  with provenance metadata
-end note
 
-TA --> Submitter: (Optional Acknowledgment)
+TA --> Submitter: Submit PKI Material Response [ITI-YY1]
 
 @enduml
