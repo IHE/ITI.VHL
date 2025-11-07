@@ -168,15 +168,24 @@ Options that may be selected for each actor in this implementation guide are lis
 
 <p id ="tXX.2-1" class="tableTitle">Table XX.2-1: Actor Options</p>
 
-| Actor        | Option Name               |
-|--------------|---------------------------|
-| {{ linkvhlr }} | Verify Document Signature |
-| {{ linkvhls }}   | Record Consent            |
-|              | Audit Event               |
+| Actor          | Option Name               |
+|----------------|---------------------------|
+| {{ linkvhlr }} | Submit PKI Material       |
+| ^              | Verify Document Signature |
+| {{ linkvhls }} | Submit PKI Material       |
+| ^              | Record Consent            |
+| ^              | Audit Event               |
 {: .grid}
 
 
-### XX.2.1 Verify Document Signature Option
+### XX.2.1 Submit PKI Material Option
+
+In this option the {{ linkvhlr }} or {{ linkvhls }}, as part of establishing trust within the trust network, shall submit PKI material to the {{ linkta }}. This material includes public keys and associated metadata that will be included in the Trust List for verification by other participants in the trust network.
+
+This option is captured in the following business requirement:
+* [Establish Trust](Requirements-EstablishTrust.html)
+
+### XX.2.2 Verify Document Signature Option
 
 In this option the {{ linkvhlr }}, after receipt of a digitally signed document from a {{ linkvhls }}, shall verify the digital signature using previously retrieved PKI material. This key material may or may not be distributed under the same trust network under which the VHL was distributed. This key material may or may not be the same key material that was used to verify the VHL.
 
@@ -185,14 +194,14 @@ See cross-profile considerations for a discussion of the relationship of this op
 This option is captured in the following business requirement:
 * [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
 
-### XX.2.2 Record Consent Option
+### XX.2.3 Record Consent Option
 
 In this option the {{ linkvhls }} acts as a Consent Recorder from the Privacy Consent on FHIR (PCF) profile. In this option, the {{ linkvhls }} SHALL initiate an [Access Consent: ITI-108](https://profiles.ihe.net/ITI/PCF/ITI-108.html) transaction as part of the Expected Actions after receipt of a Generate VHL request. The Access Consent transaction is used to record the consent declarations by the VHL Holder for the sharing of the (set of) health document(s) by the {{ linkvhls }} to any authorized {{ linkvhlr }} within the trust network for a specified use case.
 
 This option is captured in the following business requirement:
 * [Record Consent](Requirements-RecordConsent.html)
 
-### XX.2.3 Audit Event Option
+### XX.2.4 Audit Event Option
 
 In this option the {{ linkvhls }} records an audit event for critical events in the access of health documents including:
 * Request for the generation of a VHL by a VHL Holder; and
