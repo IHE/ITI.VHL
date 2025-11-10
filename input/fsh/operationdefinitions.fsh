@@ -56,6 +56,57 @@ Usage: #definition
   * max = "*"
   * type = #Binary
   * documentation = "A Binary resource containing the QR code (e.g., PNG or SVG format)."
+
+
+Instance: OperationDefinition-retrieve-manifest
+InstanceOf: OperationDefinition
+Usage: #definition
+* url = "http://example.org/fhir/OperationDefinition/retrieve-manifest"
+* title = "Retrieve Manifest"
+* description = "This operation retrieves a manifest (searchset Bundle) of available health documents using a previously obtained and validated Verifiable Health Link (VHL). The operation is authenticated via a signed request that includes the VHL token and optional passcode."
+* name = "RetrieveManifest"
+* status = #active
+* kind = #operation
+* code = #retrieve-manifest
+* resource[0] = #DocumentReference
+* system = false
+* type = true
+* instance = false
+* parameter[0]
+  * name = #vhlToken
+  * use = #in
+  * min = 1
+  * max = "1"
+  * type = #string
+  * documentation = "The VHL token obtained from the VHL Holder, used to authorize access to documents."
+* parameter[+]
+  * name = #passcode
+  * use = #in
+  * min = 0
+  * max = "1"
+  * type = #string
+  * documentation = "User-provided passcode if the VHL is passcode-protected."
+* parameter[+]
+  * name = #receiverSignature
+  * use = #in
+  * min = 1
+  * max = "1"
+  * type = #string
+  * documentation = "JWS signature from the VHL Receiver containing issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode."
+* parameter[+]
+  * name = #searchParams
+  * use = #in
+  * min = 0
+  * max = "*"
+  * type = #string
+  * documentation = "Optional FHIR search parameters to filter the document manifest (e.g., type, date, status)."
+* parameter[+]
+  * name = #return
+  * use = #out
+  * min = 1
+  * max = "1"
+  * type = #Bundle
+  * documentation = "A FHIR Bundle of type 'searchset' containing DocumentReference resources for documents authorized by the VHL."
   
   
 ValueSet: VHLGenerationGoal

@@ -64,27 +64,54 @@ A {{ linkvhlr }} initiates the Retrieve Manifest Request when:
 
 ##### 2:3.YY5.4.1.2 Message Semantics
 
+This message is implemented as a FHIR operation request using the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
+
 **Request Structure**
 
-POST to manifest URL extracted from VHL:
+POST to the DocumentReference endpoint:
 
 ```http
-POST https://[base]/DocumentReference?[search-params]&_vhl=[vhl-id] HTTP/1.1
+POST [base]/DocumentReference/$retrieve-manifest HTTP/1.1
 Host: vhl-sharer.example.org
-Content-Type: application/jose+json
+Content-Type: application/fhir+json
 Accept: application/fhir+json
 ```
 
-**Required HTTP Headers:**
+Where **[base]** is the URL of the VHL Sharer Service provider.
 
-| Header | Description |
-|--------|-------------|
-| Content-Type | SHALL be `application/jose+json` for JWS-signed requests |
-| Authorization | SHALL contain VHL token from VHL Holder |
-| Accept | SHALL be `application/fhir+json` for FHIR Bundle responses |
+**Table 2:3.YY5.4.1.2-1: $retrieve-manifest Operation Input Parameters**
+
+| Parameter Name | Cardinality | Type | Description |
+|----------------|-------------|------|-------------|
+| vhlToken | [1..1] | string | The VHL token obtained from the VHL Holder, used to authorize access to documents |
+| passcode | [0..1] | string | User-provided passcode if the VHL is passcode-protected |
+| receiverSignature | [1..1] | string | JWS signature from the VHL Receiver containing issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode |
+| searchParams | [0..*] | string | Optional FHIR search parameters to filter the document manifest (e.g., type, date, status) |
 {: .grid}
 
-**Signed Request Body**
+**Request Example:**
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [
+    {
+      "name": "vhlToken",
+      "valueString": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+    },
+    {
+      "name": "passcode",
+      "valueString": "123456"
+    },
+    {
+      "name": "receiverSignature",
+      "valueString": "eyJhbGciOiJFUzI1NiIsImtpZCI6InJlY2VpdmVyLWtleS0xMjMiLCJ0eXAiOiJ2aGwtcmVxdWVzdCtqd3QifQ..."
+    }
+  ]
+}
+```
+
+**Signed Request Payload (receiverSignature content):**
 
 The {{ linkvhlr }} SHALL sign the request using JWS to enable {{ linkvhls }} to authenticate:
 
@@ -196,6 +223,15 @@ The {{ linkvhls }} MAY:
 
 ##### 2:3.YY5.4.2.2 Message Semantics
 
+The response is a FHIR Parameters resource containing a Bundle as specified in the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
+
+**Table 2:3.YY5.4.1.2-2: $retrieve-manifest Operation Output Parameters**
+
+| Parameter Name | Cardinality | Type | Description |
+|----------------|-------------|------|-------------|
+| return | [1..1] | Bundle | A FHIR Bundle of type 'searchset' containing DocumentReference resources for documents authorized by the VHL |
+{: .grid}
+
 **Success Response (HTTP 200):**
 
 ```http
@@ -204,41 +240,49 @@ Content-Type: application/fhir+json
 ETag: "W/\"version-123\""
 ```
 
-**Response Body - FHIR Bundle:**
+**Response Body - FHIR Parameters with Bundle:**
 
 ```json
 {
-  "resourceType": "Bundle",
-  "type": "searchset",
-  "total": 2,
-  "link": [{
-    "relation": "self",
-    "url": "https://vhl-sharer.example.org/vhl/manifest/abc123"
-  }],
-  "entry": [
+  "resourceType": "Parameters",
+  "parameter": [
     {
-      "fullUrl": "https://vhl-sharer.example.org/DocumentReference/doc1",
+      "name": "return",
       "resource": {
-        "resourceType": "DocumentReference",
-        "id": "doc1",
-        "status": "current",
-        "type": {
-          "coding": [{
-            "system": "http://loinc.org",
-            "code": "60591-5",
-            "display": "Patient Summary Document"
-          }]
-        },
-        "subject": {"reference": "Patient/123"},
-        "date": "2024-01-15T10:30:00Z",
-        "content": [{
-          "attachment": {
-            "contentType": "application/fhir+json",
-            "url": "https://vhl-sharer.example.org/vhl/document/doc1",
-            "size": 15234,
-            "hash": "07a2f6e5f8b3c9d4..."
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": 2,
+        "link": [{
+          "relation": "self",
+          "url": "https://vhl-sharer.example.org/DocumentReference/$retrieve-manifest"
+        }],
+        "entry": [
+          {
+            "fullUrl": "https://vhl-sharer.example.org/DocumentReference/doc1",
+            "resource": {
+              "resourceType": "DocumentReference",
+              "id": "doc1",
+              "status": "current",
+              "type": {
+                "coding": [{
+                  "system": "http://loinc.org",
+                  "code": "60591-5",
+                  "display": "Patient Summary Document"
+                }]
+              },
+              "subject": {"reference": "Patient/123"},
+              "date": "2024-01-15T10:30:00Z",
+              "content": [{
+                "attachment": {
+                  "contentType": "application/fhir+json",
+                  "url": "https://vhl-sharer.example.org/vhl/document/doc1",
+                  "size": 15234,
+                  "hash": "07a2f6e5f8b3c9d4..."
+                }
+              }]
+            }
           }
-        }]
+        ]
       }
     }
   ]
@@ -307,10 +351,3 @@ Both actors SHOULD record:
 
 Both actors SHALL be grouped with ATNA Secure Node or Secure Application actor.
 
-### 2:3.YY5.7 Relationship to Other Transactions
-
-**ITI-YY3 Generate VHL**: VHL used in this transaction generated via ITI-YY3
-
-**ITI-YY2 Retrieve Trust List**: Public keys for signature validation obtained via ITI-YY2
-
-**ITI-YY4 Provide VHL**: VHL Holder provides VHL to VHL Receiver via ITI-YY4 before this transaction

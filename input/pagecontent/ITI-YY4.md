@@ -17,9 +17,11 @@
 
 The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
-Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC. Supported mechanisms are defined in [Volume 3](volume-3.html).
+Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC.
 
 ### 2:3.YY4.2 Actor Roles
+
+
 | Actor | Role |
 |-------|------|
 | {{ linkvhlh }} | Provides the VHL to a VHL Receiver through a supported transmission mechanism |
@@ -103,7 +105,7 @@ Upon receiving a VHL, the VHL Receiver SHALL:
    - Identify VHL Sharer from issuer identifier
 
 2. **Validate Digital Signature Against Trusted Key**:
-   - Obtain VHL Sharer's public key from Trust Anchor (ITI-YY2 Retrieve Trust List)
+   - Obtain VHL Sharer's public key from Trust Anchor
    - Verify JWS signature using VHL Sharer's public key
    - Confirm VHL Sharer is valid participant in trust network
    - Ensure VHL payload has not been tampered with
@@ -112,7 +114,7 @@ Upon receiving a VHL, the VHL Receiver SHALL:
    - Extract manifest URL from validated VHL payload
    - Validate expiration timestamp if present
    - Validate usage constraints if present
-   - Prepare to initiate document retrieval (ITI-YY5)
+   - Prepare to initiate document retrieval [(ITI-YY5)](ITI-YY5.html)
 
 The VHL Receiver MAY:
 - Prompt user for passcode if required (validated during document retrieval)
@@ -211,8 +213,6 @@ VHL Receivers MUST:
 ### 2:3.YY4.6 Conformance
 
 **VHL Holder SHALL:**
-- Support at least one transmission option
-- Transmit VHL payloads conforming to Volume 3
 - Provide passcodes out-of-band when required
 
 **VHL Receiver SHALL:**
