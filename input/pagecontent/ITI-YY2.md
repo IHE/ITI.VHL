@@ -31,7 +31,7 @@ The Retrieve Trust List transaction allows both {{ linkvhls }}s and {{ linkvhlr 
 Retrieved material SHALL be used to determine the trustworthiness of VHL artifacts and service endpoints in accordance with the governing trust framework.
 
 <figure>
-{%include ITI-YY2-seq.svg%}
+{%include ITI-YY2.svg%}
 <p id="figure-2.3.YY2-1" class="figureTitle">Figure 2:3.YY2-1: Retrieve Trust List Interaction Diagram</p>
 </figure>
 <br clear="all">
