@@ -81,6 +81,10 @@ Content profiles SHALL define exact payload constraints, validation rules, and e
 ##### 2:3.YY2.4.2.3 Expected Actions
 {{ reqReceivePKIdescription.valueMarkdown }}
 
+{% include requirements-list-statements.liquid req=reqReceivePKI site=site  %}
+
+Upon receiving the Trust List response, the {{ linkvhlr }} or {{ linkvhls }} SHALL process the received PKI material as specified in the [Receive Trust List](Requirements-ReceiveTrustList.html) requirement.
+
 
 ### 2:3.YY2.5 Security Considerations 
 All Retrieve Trust List interactions SHOULD occur over secure channels. The Trust Anchor SHOULD validate the authenticity, scope, and expiration of all retrieved key material before publishing or caching.
