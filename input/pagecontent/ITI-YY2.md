@@ -42,7 +42,6 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 | Actor | Role |
 |-------|--------|
 | VHL Receiver, VHL Sharer | {{ reqRetrievePKItitle.valueString }} |
-|                          | {{ reqReceivePKItitle.valueString }} |
 | Trust Anchor             | {{ reqRetrievePKIResptitle.valueString }} |
 {: .grid}
 
@@ -56,10 +55,10 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 {{ reqRetrievePKIdescription.valueMarkdown}}
 
 ##### 2:3.YY2.4.1.2 Message Semantics
-The message semantics for the Retrieve Trust List Request SHALL be defined by the jurisdiction and are dependent on the choices made for the Submit PKI Material transaction [ITI-YY1]. The request format SHALL align with the PKI material representation chosen by the trust network (e.g., DID Documents, JSON Web Keys, mCSD Endpoints, or other jurisdiction-specific mechanisms).
+The message semantics for the Retrieve Trust List Request SHALL be defined by the jurisdiction. The request format SHALL align with the PKI material representation chosen by the trust network (e.g., DID Documents, JSON Web Keys, mCSD Endpoints, or other jurisdiction-specific mechanisms).
 
 ##### 2:3.YY2.4.1.3 Expected Actions
-{{ reqRetrievePKIRespdescription.valueMarkown}}
+{{ reqRetrievePKIRespdescription.valueMarkdown}}
 
 #### 2:3.YY2.4.2 Retrieve Trust List Response Message 
 

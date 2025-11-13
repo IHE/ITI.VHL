@@ -51,26 +51,72 @@ The Submit PKI Material transaction enables entities within a trust network—sp
 
 {% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
 
-##### 2:3.YY1.4.1.2 Message Semantics
-The message semantics and transport mechanism for the **submission** of public key material to the {{ linkta }} SHALL be defined by the implementing jurisdiction of the trust network. The {{ linkta }} is responsible for validating, cataloging, and securely redistributing key material as part of the canonical Trust List.
+**Submission Pathways**
 
-Different submission pathways MAY be defined based on the sensitivity, intended use, or organizational classification of the key material. For example:
+Different submission pathways MAY be defined based on the sensitivity, intended use, or organizational classification of the key material. The implementing jurisdiction determines which submission pathways are supported. Options include:
 
 - **Indirect publication**: Key material is published at a URL under the control of the submitting organization and its location is communicated to the {{ linkta }} via:
     - Publication on a well-known, jurisdictionally recognized website
     - Secure transmission of the URL through official channels (e.g., signed correspondence, notarized documentation)
         
 - **Direct submission**: Key material is submitted directly to the {{ linkta }} over a secure, mutually authenticated connection:
-    - Use of an API endpoint exposed by the {{ linkta }} requiring mTLS or other credentialed authentication
+    - Use of an API endpoint exposed by the {{ linkta }} requiring secure channel authentication
     - Use of a secure upload portal with logging and role-based access controls
         
 - **Offline submission**: In scenarios requiring maximal assurance of origin and identity:
     - Submission of key material on a secure physical medium (e.g., USB token, smart card) during a verified in-person encounter, with formal identity attestation
 
-All submission mechanisms SHOULD be accompanied by sufficient **provenance metadata** to support validation by the {{ linkta }}. At minimum, this SHOULD include:
+##### 2:3.YY1.4.1.2 Message Semantics
+
+The message semantics and transport mechanism for the **submission** of public key material to the {{ linkta }} SHALL be defined by the implementing jurisdiction of the trust network. The {{ linkta }} is responsible for validating, cataloging, and securely redistributing key material as part of the canonical Trust List.
+
+**Message Semantic Options**
+
+Implementations MAY define their own semantics or choose from the following message semantic option based on jurisdictional requirements and technical capabilities:
+
+#### DID Option
+
+Implementations using the DID (Decentralized Identifier) option SHALL submit PKI material formatted as a [DID Document](https://www.w3.org/TR/did-core/) conforming to W3C DID Core specification. The DID Document SHALL contain:
+
+- A unique DID identifier for the submitting entity
+- One or more verification methods containing public key material
+- Service endpoints where the entity can be reached
+- Authentication and assertion methods as appropriate
+
+Example DID Document structure:
+```json
+{
+  "@context": ["https://www.w3.org/ns/did/v1"],
+  "id": "did:example:123456789abcdefghi",
+  "verificationMethod": [{
+    "id": "did:example:123456789abcdefghi#keys-1",
+    "type": "JsonWebKey2020",
+    "controller": "did:example:123456789abcdefghi",
+    "publicKeyJwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "...",
+      "y": "..."
+    }
+  }],
+  "authentication": ["did:example:123456789abcdefghi#keys-1"]
+}
+```
+
+#### Other Options
+
+Jurisdictions MAY define other additional message semantic options, such as:
+
+- **X.509 Certificate Format**: Direct submission of X.509 certificates with associated metadata
+- **JWK Format**: Submission using JSON Web Key (JWK) format as defined in RFC 7517
+- **Custom Format**: Jurisdiction-specific formats that meet the trust network requirements
+
+**Required Metadata**
+
+Regardless of the message semantic option chosen, all submissions SHOULD include sufficient **provenance metadata** to support validation by the {{ linkta }}. At minimum, this SHOULD include:
 
 - The asserted identity of the submitting entity
-- The intended usage scope of the key(s) (e.g., signature, encryption, mTLS)
+- The intended usage scope of the key(s) (e.g., signature, encryption, secure channels)
 - An expiry date or revocation mechanism, if applicable
 - A digital signature or certification path establishing the authenticity of the submission
     

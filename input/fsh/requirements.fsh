@@ -253,7 +253,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-A [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html), as a participant in the trust network, SHALL be capable of requesting public key infrastructure (PKI) material from a designated [Trust Anchor](ActorDefinition-TrustAnchor.html).
+A [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html), as a participant in the trust network, SHALL be capable of retrieving public key infrastructure (PKI) material from a designated [Trust Anchor](ActorDefinition-TrustAnchor.html).
 
 The retrieved material MAY include:
 * Public key certificates and associated trust lists
