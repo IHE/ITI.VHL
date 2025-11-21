@@ -27,6 +27,12 @@
 
 ### 2:3.YY3.3 Referenced Standards
 
+- **SMART Health Links Specification**: [SMART Health Links and SMART Health Cards](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html)
+- **RFC 4648**: Base64url Encoding
+- **RFC 7515**: JSON Web Signature (JWS)
+- **ISO/IEC 18004:2015**: QR Code specification
+- **FHIR R4**: [HL7 FHIR Release 4](http://hl7.org/fhir/R4/)
+
 
 ### 2:3.YY3.4 Messages
 
@@ -45,9 +51,8 @@ This message is implemented as an HTTP GET operation from the client app used by
 
 {% include requirements-list-statements.liquid site=site req=reqGenerateVHLRequest  %}
 ##### 2:3.YY3.4.1.2 Message Semantics
-The Get Corresponding Identifiers message is a FHIR operation request as
-defined in FHIR (<http://hl7.org/fhir/operations.html>) with the [$generate-vhl operation definition](OperationDefinition-Generate.VHL.html)
-and the input parameters shown in Table 2:3.83.4.1.2-1.
+
+The Generate VHL message is a FHIR operation request as defined in FHIR (<http://hl7.org/fhir/operations.html>) with the [$generate-vhl operation definition](OperationDefinition-generate-vhl.html).
 
 Given that the parameters are not complex types, the HTTP GET operation shall be used as defined in FHIR (<http://hl7.org/fhir/operations.html#request>).
 
@@ -60,18 +65,29 @@ Where **[base]** is the URL of VHL Sharer Service provider.
 The Generate VHL message is performed by an HTTP GET command shown below:
 
 ```
-GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&_format=[token]}
+GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&_goal=[token]}{&expirationTime=[token]}{&flag=[token]}
 ```
 
-**Table 2:3.83.4.1.2-1: $generate-vhl Message HTTP query Parameters**
+**VHL Payload Construction**
 
-| Query parameter Name | Cardinality | Search Type | Description                                                                                                                                                                                                      |
+The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#construct-a-smart-health-link-payload). The VHL Sharer SHALL:
+
+1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier
+2. Construct the manifest URL as a query on the base List resource with `_include` parameter:
+   ```
+   [base]/List/$retrieve-manifest?url=[base]/List?_id=[folder-id]&_include=List:item
+   ```
+3. Include this manifest URL in the VHL payload along with optional parameters (label, exp, flag, v)
+
+**Table 2:3.YY3.4.1.2-1: $generate-vhl Message HTTP query Parameters**
+
+| Query parameter Name | Cardinality | Type | Description |
 | -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| sourceIdentifier     | \[1..1\]    | token       | The Patient Identifier that will be used by the Patient Identifier Cross-reference Manager to find cross matching identifiers associated with the Patient. See Section 2:3.83.4.1.2.1. |
-| targetSystem         | \[0..\*\]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected. See Section 2:3.83.4.1.2.2.                                                                    |
-| \_goal             | \[0..1\]    | token       | returned VHL rendering type |
-| expirationTime      |  \[0..1\]  | token        | expiration time in Epoch seconds |
-| flag |  \[0..1\]  | token        | Flag to indicate if Passcode is required |
+| sourceIdentifier     | [1..1]    | token       | The Patient Identifier that will be used to find documents associated with the Patient |
+| targetSystem         | [0..*]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected |
+| _goal             | [0..1]    | token       | Returned VHL rendering type (vhl, qrcode, or both) |
+| expirationTime      |  [0..1]  | integer        | Expiration time in Epoch seconds |
+| flag |  [0..1]  | token        | Flag to indicate if Passcode is required (P for passcode required) |
 
 
 ##### 2:3.YY3.4.1.3 Expected Actions
