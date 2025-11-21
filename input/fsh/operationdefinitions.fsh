@@ -63,22 +63,22 @@ InstanceOf: OperationDefinition
 Usage: #definition
 * url = "http://example.org/fhir/OperationDefinition/retrieve-manifest"
 * title = "Retrieve Manifest"
-* description = "This operation retrieves a manifest (searchset Bundle) of available health documents using a previously obtained and validated Verifiable Health Link (VHL). The operation is authenticated via a signed request that includes the VHL token and optional passcode."
+* description = "This operation retrieves a manifest (searchset Bundle) of available health documents using a previously obtained and validated Verifiable Health Link (VHL). The operation is authenticated via a signed request that includes the manifest URL and optional passcode."
 * name = "RetrieveManifest"
 * status = #active
 * kind = #operation
 * code = #retrieve-manifest
-* resource[0] = #DocumentReference
+* resource[0] = #List
 * system = false
 * type = true
 * instance = false
 * parameter[0]
-  * name = #vhlToken
+  * name = #url
   * use = #in
   * min = 1
   * max = "1"
   * type = #string
-  * documentation = "The VHL token obtained from the VHL Holder, used to authorize access to documents."
+  * documentation = "The manifest url obtained from the VHL payload"
 * parameter[+]
   * name = #passcode
   * use = #in
@@ -92,7 +92,7 @@ Usage: #definition
   * min = 1
   * max = "1"
   * type = #string
-  * documentation = "JWS signature from the VHL Receiver containing issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode."
+  * documentation = "JWS signature from the VHL Receiver containing url and optional passcode."
 * parameter[+]
   * name = #searchParams
   * use = #in

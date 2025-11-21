@@ -68,10 +68,10 @@ This message is implemented as a FHIR operation request using the [$retrieve-man
 
 **Request Structure**
 
-POST to the DocumentReference endpoint:
+POST to the List endpoint:
 
 ```http
-POST [base]/DocumentReference/$retrieve-manifest HTTP/1.1
+POST [base]/List/$retrieve-manifest HTTP/1.1
 Host: vhl-sharer.example.org
 Content-Type: application/fhir+json
 Accept: application/fhir+json
@@ -79,14 +79,16 @@ Accept: application/fhir+json
 
 Where **[base]** is the URL of the VHL Sharer Service provider.
 
-**Table 2:3.YY5.4.1.2-1: $retrieve-manifest Operation Input Parameters**
+**Table 2:3.YY5.4.1.2-1: $retrieve-manifest Operation Input /**
 
 | Parameter Name | Cardinality | Type | Description |
 |----------------|-------------|------|-------------|
-| vhlToken | [1..1] | string | The VHL token obtained from the VHL Holder, used to authorize access to documents |
+| url | [1..1] | string | The manifest url obtained from the VHL JSON payload |
 | passcode | [0..1] | string | User-provided passcode if the VHL is passcode-protected |
-| receiverSignature | [1..1] | string | JWS signature from the VHL Receiver containing issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode |
+| recipient | [1..1] | string | A string describing the recipient (e.g.,the name of an organization or person)|
+| receiverSignature | [1..1] | string | JWS signature from the VHL Receiver containing url and optional passcode ~~issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode~~ |
 | searchParams | [0..*] | string | Optional FHIR search parameters to filter the document manifest (e.g., type, date, status) |
+|embeddedLengthMax| [0..1]| integer| Integer upper bound on the length of embedded payloads|
 {: .grid}
 
 **Request Example:**
@@ -96,8 +98,8 @@ Where **[base]** is the URL of the VHL Sharer Service provider.
   "resourceType": "Parameters",
   "parameter": [
     {
-      "name": "vhlToken",
-      "valueString": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
+      "name": "url",
+      "valueString": "test.fhir.net/R4/fhir/List?patient=9876&code=folder&status=current&_include=List:item"
     },
     {
       "name": "passcode",
@@ -113,7 +115,7 @@ Where **[base]** is the URL of the VHL Sharer Service provider.
 
 **Signed Request Payload (receiverSignature content):**
 
-The {{ linkvhlr }} SHALL sign the request using JWS to enable {{ linkvhls }} to authenticate:
+The {{ linkvhlr }} SHALL sign the url and passcode using JWS to enable {{ linkvhls }} to authenticate:
 
 ```json
 {
@@ -123,9 +125,7 @@ The {{ linkvhlr }} SHALL sign the request using JWS to enable {{ linkvhls }} to 
     "typ": "vhl-request+jwt"
   },
   "payload": {
-    "iss": "https://receiver.example.org",
-    "iat": 1704067200,
-    "jti": "req-unique-id-456",
+    "url": "test.fhir.net/R4/fhir/List?patient=9876&code=folder&status=current&_include=List:item",
     "passcode": "user-provided-pin"
   }
 }
@@ -135,9 +135,7 @@ The {{ linkvhlr }} SHALL sign the request using JWS to enable {{ linkvhls }} to 
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
-| iss | 1..1 | Identifier of VHL Receiver |
-| iat | 1..1 | Timestamp when request issued |
-| jti | 1..1 | Unique request identifier (replay protection) |
+| url | 1..1 | manifest url of the VHL |
 | passcode | 0..1 | User-provided passcode if VHL requires it |
 {: .grid}
 
@@ -150,15 +148,13 @@ The {{ linkvhlr }} SHALL:
    - Extract manifest URL from validated VHL
    - Construct search parameters (if filtering)
    - Sign request payload using {{ linkvhlr }} private key
-   - Include original VHL token
-   - Include passcode if VHL is passcode-protected
 
 3. **Submit Request**:
    - POST signed request to manifest URL
    - Handle HTTP responses (200, 401, 403, 404, 500)
 
 4. **Process Response**:
-   - Parse FHIR Bundle with DocumentReference resources
+   - Parse FHIR Bundle with List resources
    - Cache manifest for subsequent document retrievals
 
 The {{ linkvhlr }} MAY:
@@ -177,7 +173,7 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
    - Reject if signature invalid
 
 3. **Authorize Request**:
-   - Extract and validate VHL token
+   - Extract and validate manifest URL
    - Verify VHL signature using {{ linkvhls }} own issuance keys
    - Confirm VHL not expired
    - Verify VHL not revoked
@@ -223,13 +219,13 @@ The {{ linkvhls }} MAY:
 
 ##### 2:3.YY5.4.2.2 Message Semantics
 
-The response is a FHIR Parameters resource containing a Bundle as specified in the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
+The response is a a Bundle Resouce as specified in the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
 
 **Table 2:3.YY5.4.1.2-2: $retrieve-manifest Operation Output Parameters**
 
 | Parameter Name | Cardinality | Type | Description |
 |----------------|-------------|------|-------------|
-| return | [1..1] | Bundle | A FHIR Bundle of type 'searchset' containing DocumentReference resources for documents authorized by the VHL |
+| return | [1..1] | Bundle | A FHIR Bundle of type 'searchset' containing Lists resources for documents authorized by the VHL |
 {: .grid}
 
 **Success Response (HTTP 200):**
@@ -293,7 +289,7 @@ ETag: "W/\"version-123\""
 
 **VHL Sharer:**
 - Return FHIR Bundle with search results
-- Include matching DocumentReference resources
+- Include matching List resources
 - Provide document URLs for subsequent retrieval
 
 **VHL Receiver:**
