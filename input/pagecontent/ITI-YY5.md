@@ -86,8 +86,8 @@ Where **[base]** is the URL of the VHL Sharer Service provider.
 | url | [1..1] | string | The manifest url obtained from the VHL JSON payload |
 | passcode | [0..1] | string | User-provided passcode if the VHL is passcode-protected |
 | recipient | [1..1] | string | A string describing the recipient (e.g.,the name of an organization or person)|
-| receiverSignature | [1..1] | string | JWS signature from the VHL Receiver containing url and optional passcode ~~issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode~~ |
-| searchParams | [0..*] | string | Optional FHIR search parameters to filter the document manifest (e.g., type, date, status) |
+| receiverSignature | [0..1] | string | JWS signature from the VHL Receiver containing url and optional passcode ~~issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode~~ |
+| searchParams | [0..*] | string | Optional FHIR search parameters to support additional query search parameters in alignment with ITI-66|
 |embeddedLengthMax| [0..1]| integer| Integer upper bound on the length of embedded payloads|
 {: .grid}
 
@@ -99,7 +99,7 @@ Where **[base]** is the URL of the VHL Sharer Service provider.
   "parameter": [
     {
       "name": "url",
-      "valueString": "test.fhir.net/R4/fhir/List?patient=9876&code=folder&status=current&_include=List:item"
+      "valueString": "test.fhir.net/R4/fhir/List?identifier=123&patient=9876&code=folder&status=current&_include=List:item"
     },
     {
       "name": "passcode",
@@ -242,7 +242,7 @@ ETag: "W/\"version-123\""
 {
   "resourceType": "Bundle",
   "type": "searchset",
-  "total": 1,
+  "total": 3,
   "link": [{
     "relation": "self",
     "url": "https://vhl-sharer.example.org/List/$retrieve-manifest"
@@ -275,6 +275,65 @@ ETag: "W/\"version-123\""
             }
           }
         ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "fullUrl": "https://vhl-sharer.example.org/DocumentReference/doc1",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "doc1",
+        "status": "current",
+        "type": {
+          "coding": [{
+            "system": "http://loinc.org",
+            "code": "60591-5",
+            "display": "Patient Summary Document"
+          }]
+        },
+        "subject": {"reference": "Patient/123"},
+        "date": "2024-01-15T10:30:00Z",
+        "content": [{
+          "attachment": {
+            "contentType": "application/fhir+json",
+            "url": "https://vhl-sharer.example.org/Binary/doc1-content",
+            "size": 15234,
+            "hash": "07a2f6e5f8b3c9d4e1a2b3c4d5e6f7a8b9c0d1e2"
+          }
+        }]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "fullUrl": "https://vhl-sharer.example.org/DocumentReference/doc2",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "doc2",
+        "status": "current",
+        "type": {
+          "coding": [{
+            "system": "http://loinc.org",
+            "code": "11503-0",
+            "display": "Laboratory Report"
+          }]
+        },
+        "subject": {"reference": "Patient/123"},
+        "date": "2024-01-10T14:20:00Z",
+        "content": [{
+          "attachment": {
+            "contentType": "application/pdf",
+            "url": "https://vhl-sharer.example.org/Binary/doc2-content",
+            "size": 45678,
+            "hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"
+          }
+        }]
+      },
+      "search": {
+        "mode": "include"
       }
     }
   ]
@@ -285,16 +344,19 @@ ETag: "W/\"version-123\""
 
 **VHL Sharer:**
 - Return FHIR Bundle with search results
-- Include matching List resources
-- List resources SHALL reference DocumentReference resources via List.entry
-- Provide document URLs for subsequent retrieval
+- Include matching List resource with search.mode = "match"
+- Include referenced DocumentReference resources with search.mode = "include"
+- List.entry.item SHALL contain references to DocumentReference resources
+- DocumentReference resources SHALL be included as separate Bundle entries per the `_include=List:item` parameter
+- Provide document content URLs in DocumentReference.content.attachment for subsequent retrieval
 
 **VHL Receiver:**
 - Parse FHIR Bundle
-- Extract List resources
-- Access DocumentReference resources referenced by List.entry
-- Cache manifest
-- Prepare to retrieve specific documents
+- Extract List resource (search.mode = "match")
+- Extract DocumentReference resources (search.mode = "include") that are referenced by the List
+- Map List.entry.item references to the corresponding DocumentReference resources in the Bundle
+- Cache manifest for subsequent document retrievals
+- Prepare to retrieve specific document content using URLs from DocumentReference.content.attachment
 
 ### 2:3.YY5.5 Security Considerations
 
