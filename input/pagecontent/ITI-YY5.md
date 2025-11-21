@@ -219,13 +219,13 @@ The {{ linkvhls }} MAY:
 
 ##### 2:3.YY5.4.2.2 Message Semantics
 
-The response is a a Bundle Resouce as specified in the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
+The response is a Bundle Resource as specified in the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
 
 **Table 2:3.YY5.4.1.2-2: $retrieve-manifest Operation Output Parameters**
 
 | Parameter Name | Cardinality | Type | Description |
 |----------------|-------------|------|-------------|
-| return | [1..1] | Bundle | A FHIR Bundle of type 'searchset' containing Lists resources for documents authorized by the VHL |
+| return | [1..1] | Bundle | A FHIR Bundle of type 'searchset' containing List resources for documents authorized by the VHL |
 {: .grid}
 
 **Success Response (HTTP 200):**
@@ -236,46 +236,42 @@ Content-Type: application/fhir+json
 ETag: "W/\"version-123\""
 ```
 
-**Response Body - FHIR Parameters with Bundle:**
+**Response Body - FHIR Bundle with List Resources:**
 
 ```json
 {
-  "resourceType": "Parameters",
-  "parameter": [
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "link": [{
+    "relation": "self",
+    "url": "https://vhl-sharer.example.org/List/$retrieve-manifest"
+  }],
+  "entry": [
     {
-      "name": "return",
+      "fullUrl": "https://vhl-sharer.example.org/List/manifest1",
       "resource": {
-        "resourceType": "Bundle",
-        "type": "searchset",
-        "total": 2,
-        "link": [{
-          "relation": "self",
-          "url": "https://vhl-sharer.example.org/DocumentReference/$retrieve-manifest"
-        }],
+        "resourceType": "List",
+        "id": "manifest1",
+        "status": "current",
+        "mode": "working",
+        "code": {
+          "coding": [{
+            "system": "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes",
+            "code": "folder"
+          }]
+        },
+        "subject": {"reference": "Patient/123"},
+        "date": "2024-01-15T10:30:00Z",
         "entry": [
           {
-            "fullUrl": "https://vhl-sharer.example.org/DocumentReference/doc1",
-            "resource": {
-              "resourceType": "DocumentReference",
-              "id": "doc1",
-              "status": "current",
-              "type": {
-                "coding": [{
-                  "system": "http://loinc.org",
-                  "code": "60591-5",
-                  "display": "Patient Summary Document"
-                }]
-              },
-              "subject": {"reference": "Patient/123"},
-              "date": "2024-01-15T10:30:00Z",
-              "content": [{
-                "attachment": {
-                  "contentType": "application/fhir+json",
-                  "url": "https://vhl-sharer.example.org/vhl/document/doc1",
-                  "size": 15234,
-                  "hash": "07a2f6e5f8b3c9d4..."
-                }
-              }]
+            "item": {
+              "reference": "DocumentReference/doc1"
+            }
+          },
+          {
+            "item": {
+              "reference": "DocumentReference/doc2"
             }
           }
         ]
@@ -290,11 +286,13 @@ ETag: "W/\"version-123\""
 **VHL Sharer:**
 - Return FHIR Bundle with search results
 - Include matching List resources
+- List resources SHALL reference DocumentReference resources via List.entry
 - Provide document URLs for subsequent retrieval
 
 **VHL Receiver:**
 - Parse FHIR Bundle
-- Extract DocumentReference resources
+- Extract List resources
+- Access DocumentReference resources referenced by List.entry
 - Cache manifest
 - Prepare to retrieve specific documents
 
@@ -305,8 +303,8 @@ All requests SHALL occur over ATNA-defined secure channel with mutual authentica
 
 #### 2:3.YY5.5.2 Request Authentication via JWS
 - Proves request origin from trusted {{ linkvhlr }}
-- Ensures integrity of request parameters
-- Provides replay protection via unique `jti`
+- Ensures integrity of request parameters (url and passcode)
+- Enables verification of the requesting party
 - Creates non-repudiable audit trail
 
 #### 2:3.YY5.5.3 VHL Token Validation
@@ -325,9 +323,9 @@ Both actors SHOULD record:
 - Timestamps and identifiers
 
 #### 2:3.YY5.5.5 Replay Attack Prevention
-- Unique `jti` in each request
-- {{ linkvhls }} MAY cache recent `jti` values
-- Short validity windows
+- VHL tokens include expiration timestamps
+- {{ linkvhls }} SHALL enforce VHL expiration
+- Short validity windows minimize replay risk
 - VHL expiration limits replay window
 
 ### 2:3.YY5.6 Conformance

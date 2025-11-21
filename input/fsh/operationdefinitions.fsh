@@ -63,7 +63,7 @@ InstanceOf: OperationDefinition
 Usage: #definition
 * url = "http://example.org/fhir/OperationDefinition/retrieve-manifest"
 * title = "Retrieve Manifest"
-* description = "This operation retrieves a manifest (searchset Bundle) of available health documents using a previously obtained and validated Verifiable Health Link (VHL). The operation is authenticated via a signed request that includes the manifest URL and optional passcode."
+* description = "This operation retrieves a manifest (searchset Bundle) of available health documents using a previously obtained and validated Verifiable Health Link (VHL). The operation is authenticated via a signed request that includes the manifest URL and optional passcode. This operation aligns with MHD ITI-66 Find Document Lists transaction."
 * name = "RetrieveManifest"
 * status = #active
 * kind = #operation
@@ -87,6 +87,13 @@ Usage: #definition
   * type = #string
   * documentation = "User-provided passcode if the VHL is passcode-protected."
 * parameter[+]
+  * name = #recipient
+  * use = #in
+  * min = 1
+  * max = "1"
+  * type = #string
+  * documentation = "A string describing the recipient (e.g., the name of an organization or person)."
+* parameter[+]
   * name = #receiverSignature
   * use = #in
   * min = 1
@@ -101,12 +108,19 @@ Usage: #definition
   * type = #string
   * documentation = "Optional FHIR search parameters to filter the document manifest (e.g., type, date, status)."
 * parameter[+]
+  * name = #embeddedLengthMax
+  * use = #in
+  * min = 0
+  * max = "1"
+  * type = #integer
+  * documentation = "Integer upper bound on the length of embedded payloads. Aligns with MHD ITI-66 parameter."
+* parameter[+]
   * name = #return
   * use = #out
   * min = 1
   * max = "1"
   * type = #Bundle
-  * documentation = "A FHIR Bundle of type 'searchset' containing DocumentReference resources for documents authorized by the VHL."
+  * documentation = "A FHIR Bundle of type 'searchset' containing List resources for documents authorized by the VHL. List resources reference DocumentReference resources via List.entry."
   
   
 ValueSet: VHLGenerationGoal

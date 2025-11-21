@@ -320,16 +320,14 @@ Usage: #definition
 * description = """
 The Provide VHL transaction enables a [VHL Holder](ActorDefinition-VHLHolder.html) to transmit a Verified Health Link (VHL) to a [VHL Receiver](ActorDefinition-VHLReceiver.html). The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer.
 
-Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC. 
+Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code or deep link (HTTPS URL). 
 """
 * actor[+] = Canonical(VHLHolder)
 * statement[+].key = "transmit-vhl"
 * statement[=].label = "Transmit VHL"
 * statement[=].requirement = "This transaction SHALL support at least one rendering and transmission mechanism to accommodate the use cases and deployment scenario, including:
 - QR codes displayed on mobile devices or printed materials
-- Deep links shared via secure messaging or email
-- Verifiable Credentials presented through digital wallets
-- Near-field communication (NFC) or Bluetooth transmission"
+- Deep links shared via secure messaging or email"
 * statement[=].conformance = #SHALL
 
 Instance:   RespondtoProvideVHL

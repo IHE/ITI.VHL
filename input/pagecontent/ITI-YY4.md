@@ -17,7 +17,7 @@
 
 The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
-Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC.
+Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code or deep link (HTTPS URL).
 
 ### 2:3.YY4.2 Actor Roles
 
@@ -32,7 +32,6 @@ Depending on the use case, the VHL MAY be rendered or transmitted using formats 
 - **RFC 7515**: JSON Web Signature (JWS)
 - **RFC 7519**: JSON Web Token (JWT)  
 - **ISO/IEC 18004:2015**: QR Code specification
-- **W3C Verifiable Credentials Data Model v1.1**: For VC-based transmission
 
 ### 2:3.YY4.4 Messages
 
@@ -72,14 +71,6 @@ Implementations SHALL support at least one of the following transmission mechani
 **Option 2: Deep Link Sharing**
 - VHL transmitted as HTTPS URL via secure messaging, email
 - Suitable for telehealth, asynchronous coordination
-
-**Option 3: Verifiable Credential Presentation**
-- VHL formatted as W3C Verifiable Credential
-- Suitable for wallet-based implementations
-
-**Option 4: Proximity-based Transmission (NFC/Bluetooth)**
-- VHL transmitted via NFC or Bluetooth LE
-- Suitable for contactless check-in scenarios
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
 
@@ -200,15 +191,6 @@ VHL Receivers MUST:
 - Use HTTPS
 - May be forwarded unintentionally
 - Include expiration/single-use constraints
-
-**Verifiable Credentials:**
-- Strongest binding to holder identity
-- Suitable for long-term use cases
-
-**Proximity Transmission:**
-- Physical access control
-- Use encrypted protocols
-- Suitable for high-security environments
 
 ### 2:3.YY4.6 Conformance
 
