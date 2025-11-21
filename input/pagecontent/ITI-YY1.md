@@ -130,7 +130,7 @@ Jurisdictions MAY further constrain the permitted submission methods based on po
 
 **DID Option Endpoint Requirements**
 
-When the DID option is used for PKI material submission, the {{ linkta }} SHALL maintain at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network for retrieving submitted DID Documents and PKI material.
+When the DID option is used for PKI material retrieval, the {{ linkta }} SHALL maintain at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network for retrieving submitted DID Documents and PKI material.
 
 The {{ linkta }} MAY provide:
 - A single common endpoint for all participants to retrieve PKI material, OR

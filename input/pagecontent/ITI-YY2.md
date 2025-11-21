@@ -56,7 +56,7 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 
 **Preconditions:**
 
-When the DID option is used for PKI material exchange, the {{ linkta }} SHALL have made available at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network. The requesting participant ({{ linkvhlr }} or {{ linkvhls }}) knows in advance the endpoint from which to retrieve PKI material.
+When the DID option is used for PKI material retrieval, the {{ linkta }} SHALL have made available at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network. The requesting participant ({{ linkvhlr }} or {{ linkvhls }}) knows in advance the endpoint from which to retrieve PKI material.
 
 The {{ linkta }} MAY provide:
 - A single common endpoint for all participants to retrieve PKI material, OR
