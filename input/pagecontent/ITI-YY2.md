@@ -54,6 +54,16 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 ##### 2:3.YY2.4.1.1 Trigger Events
 {{ reqRetrievePKIdescription.valueMarkdown}}
 
+**Preconditions:**
+
+When the DID option is used for PKI material exchange, the {{ linkta }} SHALL have made available at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network. The requesting participant ({{ linkvhlr }} or {{ linkvhls }}) knows in advance the endpoint from which to retrieve PKI material.
+
+The {{ linkta }} MAY provide:
+- A single common endpoint for all participants to retrieve PKI material, OR
+- Individual endpoints per participant, in addition to the common endpoint
+
+At minimum, one endpoint accessible to all participants SHALL be available.
+
 ##### 2:3.YY2.4.1.2 Message Semantics
 The message semantics for the Retrieve Trust List Request SHALL be defined by the jurisdiction. The request format SHALL align with the PKI material representation chosen by the trust network (e.g., DID Documents, JSON Web Keys, mCSD Endpoints, or other jurisdiction-specific mechanisms).
 

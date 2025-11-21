@@ -128,6 +128,16 @@ Jurisdictions MAY further constrain the permitted submission methods based on po
 
 {% include requirements-list-statements.liquid req=reqDistributePKI site=site  %}
 
+**DID Option Endpoint Requirements**
+
+When the DID option is used for PKI material submission, the {{ linkta }} SHALL maintain at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network for retrieving submitted DID Documents and PKI material.
+
+The {{ linkta }} MAY provide:
+- A single common endpoint for all participants to retrieve PKI material, OR
+- Individual endpoints per participant, in addition to the common endpoint
+
+At minimum, one endpoint accessible to all participants SHALL be available to ensure that any {{ linkvhlr }} or {{ linkvhls }} can retrieve the necessary trust material from the {{ linkta }}.
+
 #### 2:3.YY1.4.2 Submit PKI Material Response Message 
 
 There is no Submit PKI Material Response Message defined in this profile.  This is up to the implementing jurisdiction of the {{ linkta }}
