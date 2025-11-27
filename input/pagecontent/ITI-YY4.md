@@ -17,7 +17,7 @@
 
 The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
-Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code or deep link (HTTPS URL).
+Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code or deep link (HTTPS URL). Actors SHALL support at least one rendering/transmission option as described in Volume 1 Section XX.2.
 
 ### 2:3.YY4.2 Actor Roles
 
@@ -31,7 +31,9 @@ Depending on the use case, the VHL MAY be rendered or transmitted using formats 
 ### 2:3.YY4.3 Referenced Standards
 - **RFC 7515**: JSON Web Signature (JWS)
 - **RFC 7519**: JSON Web Token (JWT)  
+- **RFC 4648**: Base64url Encoding
 - **ISO/IEC 18004:2015**: QR Code specification
+- **SMART Health Links Specification**: [VHL Payload Structure](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html)
 
 ### 2:3.YY4.4 Messages
 
@@ -54,30 +56,39 @@ A VHL Holder initiates the Provide VHL transaction when:
 
 ##### 2:3.YY4.4.1.2 Message Semantics
 
-The VHL payload structure is defined in [Volume 3](volume-3.html). The VHL contains at minimum:
+The VHL payload structure is defined in [Volume 3](volume-3.html) and aligns with the SMART Health Links specification. The VHL contains at minimum:
 - Manifest URL (HTTPS URL pointing to document manifest)
 - Digital Signature (JWS signature by VHL Sharer)
 - Issuer Identifier (VHL Sharer identifier)
-- Optional: Expiration timestamp, passcode flag, usage constraints
+- Optional: Expiration timestamp, passcode flag, usage constraints, label
+
+**VHL Encoding:**
+
+The VHL payload is:
+1. Serialized as compact JSON
+2. Compressed using DEFLATE
+3. Base64url-encoded per RFC 4648
+4. Prefixed with `shlink:/`
 
 **Transmission Options**
 
-Implementations SHALL support at least one of the following transmission mechanisms:
+Implementations SHALL support at least one of the following transmission mechanisms (see Volume 1 Section XX.2 for option details):
 
-**Option 1: QR Code Rendering**
+**QR Code Rendering Option:**
 - VHL encoded as QR code (ISO/IEC 18004:2015)
 - Suitable for in-person encounters, walk-in clinics, emergency departments
+- QR code contains the complete `shlink:/` URL string
 
-**Option 2: Deep Link Sharing**
-- VHL transmitted as HTTPS URL via secure messaging, email
+**Deep Link Sharing Option:**
+- VHL transmitted as `shlink:/` URL via secure messaging, email, or web links
 - Suitable for telehealth, asynchronous coordination
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
 
 The VHL Holder SHALL:
 1. Verify VHL validity (not expired)
-2. Select appropriate transmission mechanism
-3. Render/transmit VHL
+2. Select appropriate transmission mechanism based on claimed options
+3. Render/transmit VHL according to option requirements
 4. Provide passcode out-of-band if VHL is passcode-protected
 
 The VHL Holder MAY:
@@ -88,18 +99,80 @@ The VHL Holder MAY:
 
 {{ provideVHLRespDescription.valueMarkdown }}
 
-Upon receiving a VHL, the VHL Receiver SHALL:
+Upon receiving a VHL, the VHL Receiver SHALL decode and validate it according to the claimed option:
 
-1. **Parse the VHL**: 
-   - Decode VHL from transmission format
-   - Extract JWS structure including header and payload
-   - Identify VHL Sharer from issuer identifier
+**For QR Code Scanning Option:**
+
+When the VHL Receiver claims the QR Code Scanning Option, the following steps SHALL be performed:
+
+1. **Scan QR Code**:
+   - Use QR code scanner (camera, dedicated scanner, or software library)
+   - Capture QR code image displayed on screen or printed on paper
+   - Provide visual feedback to user during scanning process
+
+2. **Decode QR Code to Extract shlink:/ URL**:
+   - Decode the QR code per ISO/IEC 18004:2015
+   - Extract the complete string from the QR code
+   - Verify the string begins with `shlink:/` prefix
+   - If prefix is missing or incorrect, reject and inform user
+
+3. **Extract Base64url-encoded Payload**:
+   - Remove the `shlink:/` prefix from the string
+   - The remaining string is the base64url-encoded compressed payload
+   - Example: `shlink:/eyJ1cmwiOiJodHRwczovL...` → `eyJ1cmwiOiJodHRwczovL...`
+
+4. **Base64url Decode**:
+   - Decode the base64url-encoded string per RFC 4648
+   - Result is a compressed (DEFLATE) byte array
+   - Handle any base64url decoding errors appropriately
+
+5. **Decompress Payload**:
+   - Decompress the byte array using DEFLATE algorithm
+   - Result is the JSON payload as a UTF-8 string
+   - Handle decompression errors (corrupted data, invalid format)
+
+6. **Parse JSON Payload**:
+   - Parse the decompressed string as JSON
+   - Extract VHL payload object containing:
+     - `url`: manifest URL (required)
+     - `flag`: flags such as "P" for passcode (optional)
+     - `label`: human-readable description (optional)
+     - `exp`: expiration timestamp in seconds since epoch (optional)
+     - `v`: version number (optional)
+   - Validate JSON structure conforms to SMART Health Links specification
+
+7. **Validate VHL Payload**:
+   - Verify `url` field is present and is a valid HTTPS URL
+   - Check `exp` (if present) - reject if current time > expiration
+   - Note `flag` value (e.g., "P" indicates passcode required)
+   - Validate `url` points to expected manifest endpoint format
+
+**For Deep Link Processing Option:**
+
+When the VHL Receiver claims the Deep Link Processing Option:
+
+1. **Receive shlink:/ URL**:
+   - Accept URL via secure messaging, email, web link, or direct input
+   - Verify URL begins with `shlink:/` prefix
+
+2. **Extract and Decode Payload**:
+   - Follow steps 3-7 from QR Code Scanning Option above
+   - (Base64url decode → Decompress → Parse JSON → Validate)
+
+**Common Post-Decoding Actions (Both Options):**
+
+After successfully decoding the VHL payload, the VHL Receiver SHALL:
+
+1. **Identify VHL Sharer**:
+   - Extract issuer identifier from VHL payload or JWS header
+   - Determine which VHL Sharer issued this VHL
 
 2. **Validate Digital Signature Against Trusted Key**:
-   - Obtain VHL Sharer's public key from Trust Anchor
+   - Obtain VHL Sharer's public key from Trust Anchor (cached trust list from ITI-YY2)
    - Verify JWS signature using VHL Sharer's public key
    - Confirm VHL Sharer is valid participant in trust network
    - Ensure VHL payload has not been tampered with
+   - Reject if signature invalid
 
 3. **Prepare to Retrieve Associated Health Documents**:
    - Extract manifest URL from validated VHL payload
@@ -113,7 +186,30 @@ The VHL Receiver MAY:
 - Record audit event per **[Audit Event – Received Health Data](Requirements-AuditEventReceived.html)**
 - Cache VHL for subsequent access attempts
 
+**Decoding Example:**
+
+```
+Input QR Code Content:
+shlink:/eyJ6aXAiOiJERUYiLCJhbGciOiJub25lIn0.eNqrVkpUslIyMjTQtVIwtDCyMDAwMNRRUEpNVLIy1FGqBQAtWQW4
+
+Step 1: Remove prefix → eyJ6aXAiOiJERUYiLCJhbGciOiJub25lIn0.eNqrVkpUslIyMjTQtVIwtDCyMDAwMNRRUEpNVLIy1FGqBQAtWQW4
+
+Step 2: Base64url decode → [compressed bytes]
+
+Step 3: DEFLATE decompress → {"url":"https://vhl-sharer.example.org/List/$retrieve-manifest?url=...","flag":"LP","exp":1735689600}
+
+Step 4: Parse JSON and extract:
+  - url: https://vhl-sharer.example.org/List/$retrieve-manifest?url=...
+  - flag: LP (Long-term + Passcode required)
+  - exp: 1735689600 (December 31, 2024)
+```
+
 **Error Handling:**
+
+If decoding fails (QR code unreadable, invalid base64url, decompression error, invalid JSON):
+- VHL Receiver SHALL reject the VHL
+- VHL Receiver SHOULD inform user with specific error message
+- VHL Receiver MAY request user to rescan or re-enter VHL
 
 If signature verification fails:
 - VHL Receiver SHALL reject the VHL
@@ -188,17 +284,18 @@ VHL Receivers MUST:
 - Suitable for supervised encounters
 
 **Deep Links:**
-- Use HTTPS
+- Use HTTPS for transmission
 - May be forwarded unintentionally
-- Include expiration/single-use constraints
+- Include expiration/single-use constraints to mitigate risks
 
 ### 2:3.YY4.6 Conformance
 
 **VHL Holder SHALL:**
+- Support at least one VHL rendering option (QR Code Rendering or Deep Link Sharing)
 - Provide passcodes out-of-band when required
 
 **VHL Receiver SHALL:**
-- Support at least one transmission option
+- Support at least one VHL processing option (QR Code Scanning or Deep Link Processing)
 - Verify VHL digital signatures before trusting content
 - Validate VHL expiration when present
 - Retrieve public keys from trusted Trust Anchors

@@ -2,8 +2,8 @@
 {% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
-{% assign linksubmitpki = '<a href="ITI-YY1.html">Submit PKI Material</a>' %}
-{% assign linkretrievepki = '<a href="ITI-YY2.html">Retrieve Trust List</a>' %}
+{% assign linksubmitpki = '<a href="ITI-YY1.html">Submit PKI Material with DID</a>' %}
+{% assign linkretrievepki = '<a href="ITI-YY2.html">Retrieve Trust List with DID</a>' %}
 {% assign linkgeneratevhl = '<a href="ITI-YY3.html">Generate VHL</a>' %}
 {% assign linkprovidevhl = '<a href="ITI-YY4.html">Provide VHL</a>' %}
 {% assign linkretrievemanifest = '<a href="ITI-YY5.html">Retrieve Manifest</a>' %}
@@ -55,7 +55,13 @@ This section defines the actors, transactions, and/or content modules in this pr
   </li>
 </ul>
 
-As a pre-condition to transactions ITI-YY4 and ITI-YY5, the {{ linkvhlr }} and {{ linkvhls }} must exchange the appropriate PKI material in order to verify their trust relationship. As the identities of the {{ linkvhlr }} and {{ linkvhls }} are not directly known to each other in advance, they publish and retrieve key material from a third party, the {{ linkta }}, via ITI-YY1 and ITI-YY2 transactions. This is illustrated in Figure X.X.X.X-1.
+As a pre-condition to transactions ITI-YY4 and ITI-YY5, the {{ linkvhlr }} and {{ linkvhls }} must have established trust relationships enabling mutual authentication and VHL signature verification.
+
+This trust MAY be established through:
+- Implementation of the optional Submit PKI Material with DID [ITI-YY1] and Retrieve Trust List with DID [ITI-YY2] transactions, OR
+- Alternative jurisdiction-specific PKI exchange mechanisms (out of scope for this profile)
+
+This is illustrated in Figure X.X.X.X-1.
 
 
 <figure >
@@ -111,9 +117,28 @@ The actors in this profile are described in more detail in the sections below.
 
 The transactions in this profile are summarized in the sections below.
 
-#### XX.1.2.1 Submit PKI Material [ITI-YY1]
+#### XX.1.2.1 Submit PKI Material with DID [ITI-YY1]
 
-This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }}. The submitted material includes public keys and associated metadata for validation and inclusion in the Trust List.
+This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }} using Decentralized Identifiers (DIDs). The submitted material is formatted as DID Documents containing public keys and associated metadata for validation and inclusion in the Trust List.
+
+**Transaction Optionality:**
+
+This transaction is:
+- **REQUIRED (R)** for Trust Anchor actors
+- **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors
+
+**When to Implement:**
+
+VHL Sharer and VHL Receiver actors SHALL implement this transaction when:
+- They do not have pre-established PKI material exchange mechanisms with the {{ linkta }}, OR
+- They wish to demonstrate interoperability at IHE Connectathons
+
+**Alternative Implementations:**
+
+Actors that do not implement this transaction MUST establish trust relationships through jurisdiction-specific mechanisms that are out of scope for this profile. Such implementations:
+- Cannot participate in IHE Connectathon testing for trust establishment
+- Must document their trust establishment mechanisms in their IHE Integration Statement
+- Are responsible for ensuring PKI material is available for VHL signature verification
 
 For more details see the detailed [transaction description](ITI-YY1.html)
 
@@ -121,9 +146,28 @@ This transaction is captured as the following requirements:
 * [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
 * [Respond to Submit PKI Material Request](Requirements-RespondtoSubmitPKIMaterialRequest.html)
 
-#### XX.1.2.2 Retrieve Trust List [ITI-YY2]
+#### XX.1.2.2 Retrieve Trust List with DID [ITI-YY2]
 
-This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to retrieve a Trust List from a {{ linkta }}. Received key material should be distinguished by the participating jurisdiction, use case context, and key usage. 
+This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to retrieve a Trust List from a {{ linkta }} containing DID Documents with PKI material. The retrieved DID Documents include public keys and metadata necessary for verifying digital signatures and establishing trust relationships. Received key material should be distinguished by the participating jurisdiction, use case context, and key usage.
+
+**Transaction Optionality:**
+
+This transaction is:
+- **REQUIRED (R)** for Trust Anchor actors
+- **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors
+
+**When to Implement:**
+
+VHL Sharer and VHL Receiver actors SHALL implement this transaction when:
+- They do not have pre-established mechanisms to retrieve PKI material from the {{ linkta }}, OR
+- They wish to demonstrate interoperability at IHE Connectathons
+
+**Alternative Implementations:**
+
+Actors that do not implement this transaction MUST retrieve trust material through jurisdiction-specific mechanisms that are out of scope for this profile. Such implementations:
+- Cannot participate in IHE Connectathon testing for trust material retrieval
+- Must document their trust material retrieval mechanisms in their IHE Integration Statement
+- Are responsible for obtaining current PKI material for VHL signature verification
 
 For more details see the detailed [transaction description](ITI-YY2.html)
 
@@ -170,22 +214,116 @@ Options that may be selected for each actor in this implementation guide are lis
 
 | Actor          | Option Name               |
 |----------------|---------------------------|
-| {{ linkvhlr }} | Submit PKI Material       |
+| {{ linkvhlh }} | QR Code Rendering         |
+| ^              | Deep Link Sharing         |
+| {{ linkvhlr }} | QR Code Scanning          |
+| ^              | Deep Link Processing      |
 | ^              | Verify Document Signature |
-| {{ linkvhls }} | Submit PKI Material       |
+| {{ linkvhls }} | QR Code Rendering         |
+| ^              | Deep Link Sharing         |
 | ^              | Record Consent            |
 | ^              | Audit Event               |
 {: .grid}
 
+Note 1: VHL Holder and VHL Sharer SHALL support at least one VHL rendering option (QR Code Rendering or Deep Link Sharing).
 
-### XX.2.1 Submit PKI Material Option
+Note 2: VHL Receiver SHALL support at least one VHL processing option (QR Code Scanning or Deep Link Processing) that corresponds to the rendering option(s) used by VHL Holders.
 
-In this option the {{ linkvhlr }} or {{ linkvhls }}, as part of establishing trust within the trust network, shall submit PKI material to the {{ linkta }}. This material includes public keys and associated metadata that will be included in the Trust List for verification by other participants in the trust network.
+### XX.2.1 Trust Establishment for VHL Sharer and VHL Receiver
 
-This option is captured in the following business requirement:
-* [Establish Trust](Requirements-EstablishTrust.html)
+VHL Sharer and VHL Receiver actors have two approaches to establish trust with the {{ linkta }}:
 
-### XX.2.2 Verify Document Signature Option
+**Approach 1: DID-based Trust Establishment (Recommended)**
+- Implement ITI-YY1 Submit PKI Material with DID
+- Implement ITI-YY2 Retrieve Trust List with DID
+- Enables interoperability testing at IHE Connectathons
+- Provides standardized, jurisdiction-independent trust establishment
+- Follows W3C DID Core specification
+
+**Approach 2: Alternative Trust Establishment**
+- Do not implement ITI-YY1 or ITI-YY2
+- Use jurisdiction-specific PKI exchange mechanisms (out of scope for this profile)
+- Cannot participate in IHE Connectathon testing for trust establishment
+- Must document mechanisms in IHE Integration Statement
+- Implementation-specific interoperability requirements
+
+**Interoperability Testing:**
+
+The VHL Profile defines trust establishment through the DID-based transactions ITI-YY1 and ITI-YY2. While these transactions are optional for VHL Sharer and VHL Receiver actors, they represent the ONLY standardized mechanism for demonstrating interoperability at IHE Connectathons.
+
+Implementations using alternative trust establishment mechanisms:
+- Are conformant to this profile
+- May be appropriate for specific jurisdictional deployments
+- Cannot demonstrate cross-jurisdiction interoperability at Connectathons
+- SHALL document their trust establishment approach in their IHE Integration Statement
+
+**IHE RECOMMENDS** that implementations support ITI-YY1 and ITI-YY2 to maximize interoperability potential.
+
+### XX.2.2 QR Code Rendering Option
+
+The QR Code Rendering Option enables the {{ linkvhlh }} or {{ linkvhls }} to render a VHL as a QR code that can be displayed on a screen or printed on paper.
+
+Actors claiming the QR Code Rendering Option SHALL:
+- Generate QR codes conforming to ISO/IEC 18004:2015
+- Encode the complete `shlink:/` URL string in the QR code
+- Use Error Correction Level L (Low) - approximately 7% error correction
+- Generate QR codes in PNG or SVG format
+- Ensure QR codes are of sufficient size and quality for reliable scanning (minimum 2cm x 2cm when printed)
+- Include adequate quiet zone (white border) around the QR code
+
+This option is suitable for:
+- In-person encounters where the VHL Holder can display their device to the VHL Receiver
+- Printed materials such as health cards or discharge summaries
+- Walk-in clinics, emergency departments, and point-of-care scenarios
+
+See ITI-YY3 Section 2:3.YY3.4.2.3 for detailed QR code generation requirements.
+
+### XX.2.3 Deep Link Sharing Option
+
+The Deep Link Sharing Option enables the {{ linkvhlh }} or {{ linkvhls }} to share a VHL as an HTTPS URL that can be transmitted via secure messaging, email, or other electronic communication channels.
+
+Actors claiming the Deep Link Sharing Option SHALL:
+- Generate VHLs as complete HTTPS URLs with the `shlink:/` prefix
+- Ensure URLs are transmitted over secure channels
+- Support URL formats compatible with standard web browsers and mobile applications
+
+This option is suitable for:
+- Telehealth and remote consultation scenarios
+- Asynchronous care coordination
+- Sharing via secure messaging platforms or patient portals
+- Email transmission (when appropriately secured)
+
+VHL Holders and VHL Sharers using this option SHOULD:
+- Include expiration timestamps in VHLs to limit the window of potential forwarding
+- Consider single-use VHLs for high-security scenarios
+- Inform users about the risks of unintended forwarding
+
+### XX.2.4 QR Code Scanning Option
+
+The QR Code Scanning Option enables the {{ linkvhlr }} to scan and decode QR codes containing VHLs.
+
+Actors claiming the QR Code Scanning Option SHALL:
+- Support scanning of QR codes conforming to ISO/IEC 18004:2015
+- Decode QR codes containing `shlink:/` URLs
+- Extract and validate the VHL payload according to the decoding process specified in ITI-YY4 Section 2:3.YY4.4.1.3
+- Handle QR codes displayed on screens or printed on paper
+- Provide appropriate user feedback during the scanning process
+
+The QR Code Scanning process is detailed in ITI-YY4 Expected Actions for VHL Receiver.
+
+### XX.2.5 Deep Link Processing Option
+
+The Deep Link Processing Option enables the {{ linkvhlr }} to receive and process VHLs transmitted as HTTPS URLs.
+
+Actors claiming the Deep Link Processing Option SHALL:
+- Accept VHL URLs with `shlink:/` prefix via secure channels
+- Parse and validate the URL structure
+- Extract and decode the VHL payload according to the process specified in ITI-YY4
+- Handle URLs received via secure messaging, email, or other electronic means
+
+This option is suitable for receiving VHLs in telehealth and asynchronous care scenarios.
+
+### XX.2.6 Verify Document Signature Option
 
 In this option the {{ linkvhlr }}, after receipt of a digitally signed document from a {{ linkvhls }}, shall verify the digital signature using previously retrieved PKI material. This key material may or may not be distributed under the same trust network under which the VHL was distributed. This key material may or may not be the same key material that was used to verify the VHL.
 
@@ -194,14 +332,14 @@ See cross-profile considerations for a discussion of the relationship of this op
 This option is captured in the following business requirement:
 * [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
 
-### XX.2.3 Record Consent Option
+### XX.2.7 Record Consent Option
 
 In this option the {{ linkvhls }} acts as a Consent Recorder from the Privacy Consent on FHIR (PCF) profile. In this option, the {{ linkvhls }} SHALL initiate an [Access Consent: ITI-108](https://profiles.ihe.net/ITI/PCF/ITI-108.html) transaction as part of the Expected Actions after receipt of a Generate VHL request. The Access Consent transaction is used to record the consent declarations by the VHL Holder for the sharing of the (set of) health document(s) by the {{ linkvhls }} to any authorized {{ linkvhlr }} within the trust network for a specified use case.
 
 This option is captured in the following business requirement:
 * [Record Consent](Requirements-RecordConsent.html)
 
-### XX.2.4 Audit Event Option
+### XX.2.8 Audit Event Option
 
 In this option the {{ linkvhls }} records an audit event for critical events in the access of health documents including:
 * Request for the generation of a VHL by a VHL Holder; and
