@@ -3,7 +3,7 @@ InstanceOf: OperationDefinition
 Usage: #definition
 * url = "http://example.org/fhir/OperationDefinition/generate-vhl"
 * title = "Generate VHL"
-* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display. Input must include either:\n- a patient identifier (e.g., an official national identifier), \n- a targetSystem.\n - flag \n - expirationTime \n - The `goal` parameter specifies what to generate: the VHL, QR code, or both."
+* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display. Input must include a patient identifier (e.g., an official national identifier). Optional parameters include targetSystem, exp (expiration time), flag (L/P/U flags), and label (description)."
 * name = "GenerateVHL"
 * status = #active
 * kind = #operation
@@ -26,22 +26,26 @@ Usage: #definition
   * type = #uri
   * documentation = "The target Patient Identifier Assigning Authority from which the returned identifiers should be selected."
 * parameter[+]
-  * name = #expirationTime
+  * name = #exp
   * use = #in
   * min = 0
   * max = "1"
-  * type = #uri
-  * documentation = "expiration time in Epoch seconds"
+  * type = #integer
+  * documentation = "Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Application determine if this QR is stale."
 * parameter[+]
   * name = #flag
   * use = #in
-  * min = 1
+  * min = 0
   * max = "1"
-  * type = #code
-  * documentation = "Flag to indicate if Passcode is required"
-  * binding
-    * strength = #required
-    * valueSet = "http://example.org/fhir/ValueSet/vhl-generation-goal"
+  * type = #string
+  * documentation = "Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access)."
+* parameter[+]
+  * name = #label
+  * use = #in
+  * min = 0
+  * max = "1"
+  * type = #string
+  * documentation = "Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink."
 * parameter[+]
   * name = #vhl
   * use = #out

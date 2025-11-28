@@ -2,7 +2,6 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 
 
-## 2:3.YY3 Generate VHL
  {% assign reqGenerateVHLRequest = site.data.Requirements-InitiateVHLGenerationRequest %}
  {% assign reqGenerateVHLResponse = site.data.Requirements-RespondtoGenerateVHLRequest %}
 
