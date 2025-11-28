@@ -14,7 +14,9 @@ The Retrieve Manifest transaction enables a {{ linkvhlr }} to retrieve a manifes
 
 This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL Holder (via ITI-YY4 Provide VHL) and validated the VHL signature.
 
-Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's participation in the trust network. The {{ linkvhls }} validates that the requesting {{ linkvhlr }} is authorized to access the documents before responding.This transaction MAY be optionally conducted over a secure channel as defined by the IHE Audit Trail and Node Authentication (ATNA) Profile. 
+This transaction follows the same pattern as MHD ITI-66 Find Document Lists, using a FHIR search on the List resource with the `_include` parameter to retrieve both the List and the referenced DocumentReference resources.
+
+Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's participation in the trust network. The {{ linkvhls }} validates that the requesting {{ linkvhlr }} is authorized to access the documents before responding. This transaction MAY be optionally conducted over a secure channel as defined by the IHE Audit Trail and Node Authentication (ATNA) Profile. 
 
 ### 2:3.YY5.2 Actor Roles
 
@@ -35,11 +37,14 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 
 **FHIR Specifications:**
 - **FHIR R4**: [HL7 FHIR Release 4](http://hl7.org/fhir/R4/)
-- **FHIR DocumentReference**: For document metadata
-- **FHIR Bundle**: For search set responses
+- **FHIR List Resource**: [List Resource](http://hl7.org/fhir/R4/list.html)
+- **FHIR DocumentReference**: [DocumentReference Resource](http://hl7.org/fhir/R4/documentreference.html)
+- **FHIR Bundle**: [Bundle Resource](http://hl7.org/fhir/R4/bundle.html)
+- **FHIR Search**: [Search Parameters](http://hl7.org/fhir/R4/search.html)
+- **FHIR _include**: [_include Parameter](http://hl7.org/fhir/R4/search.html#include)
 
 **IHE Profiles:**
-- **ITI TF-2: Mobile Health Document Sharing (MHD)**: Transaction patterns for document search
+- **ITI TF-2: Mobile Health Document Sharing (MHD)**: [ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html)
 - **ITI TF-1: Section 9**: ATNA Profile
 - **ITI TF-2: 3.19**: Authenticate Node transaction
 
@@ -64,97 +69,130 @@ A {{ linkvhlr }} initiates the Retrieve Manifest Request when:
 
 ##### 2:3.YY5.4.1.2 Message Semantics
 
-This message is implemented as a FHIR operation request using the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
+This transaction is a FHIR search on the List resource, similar to MHD ITI-66 Find Document Lists transaction. However, due to the need to transmit sensitive authorization parameters (passcode, receiver signature), this transaction uses HTTP POST with the `_search` interaction instead of HTTP GET.
 
 **Request Structure**
 
-POST to the List endpoint:
+The {{ linkvhlr }} performs an HTTP POST operation on the List resource `_search` endpoint with search parameters in the request body:
 
 ```http
-POST [base]/List/$retrieve-manifest HTTP/1.1
+POST [base]/List/_search
 Host: vhl-sharer.example.org
-Content-Type: application/fhir+json
+Content-Type: application/x-www-form-urlencoded
 Accept: application/fhir+json
 ```
 
-Where **[base]** is the URL of the VHL Sharer Service provider.
+Where **[base]** is the base URL of the VHL Sharer's FHIR server.
 
-**Table 2:3.YY5.4.1.2-1: $retrieve-manifest Operation Input /**
+**Search Parameters:**
 
-| Parameter Name | Cardinality | Type | Description |
-|----------------|-------------|------|-------------|
-| url | [1..1] | string | The manifest url obtained from the VHL JSON payload |
-| passcode | [0..1] | string | User-provided passcode if the VHL is passcode-protected |
-| recipient | [1..1] | string | A string describing the recipient (e.g.,the name of an organization or person)|
-| receiverSignature | [0..1] | string | JWS signature from the VHL Receiver containing url and optional passcode ~~issuer (iss), issued-at timestamp (iat), unique request identifier (jti), and optional passcode~~ |
-| searchParams | [0..*] | string | Optional FHIR search parameters to support additional query search parameters in alignment with ITI-66|
-|embeddedLengthMax| [0..1]| integer| Integer upper bound on the length of embedded payloads|
+The manifest URL obtained from the VHL contains the core search parameters. The {{ linkvhls }} SHALL support the following parameters:
+
+**Core FHIR Search Parameters:**
+
+| Parameter | Type | Cardinality | Description | Example |
+|-----------|------|-------------|-------------|---------|
+| _id | token | [1..1] | The folder ID (with 256-bit entropy) from the VHL | `_id=abc123def456` |
+| identifier | token | [0..1] | Business identifier for the List | `identifier=folder-2024-001` |
+| patient | reference | [0..1] | The patient whose documents are referenced | `patient=9876` |
+| code | token | [0..1] | The type of List (typically "folder") | `code=folder` |
+| status | token | [0..1] | The status of the List | `status=current` |
+| _include | special | [1..1] | Include referenced DocumentReference resources | `_include=List:item` |
 {: .grid}
 
-**Request Example:**
+**VHL Authorization Parameters:**
 
-```json
+| Parameter | Type | Cardinality | Description |
+|-----------|------|-------------|-------------|
+| passcode | string | [0..1] | User-provided passcode if the VHL is passcode-protected |
+| recipient | string | [1..1] | Identifier of the requesting organization or person |
+| receiverSignature | string | [0..1] | JWS signature from the VHL Receiver containing the manifest URL and passcode |
+| embeddedLengthMax | integer | [0..1] | Integer upper bound on the length of embedded payloads (aligns with MHD ITI-66) |
+{: .grid}
+
+**_include Parameter:**
+
+The {{ linkvhls }} SHALL support the `_include=List:item` parameter, which instructs the server to include the DocumentReference resources referenced by `List.entry.item` in the response Bundle.
+
+**Example Request:**
+
+```http
+POST https://vhl-sharer.example.org/List/_search
+Content-Type: application/x-www-form-urlencoded
+
+_id=abc123def456&_include=List:item&passcode=user-pin&recipient=Dr.+Smith+Hospital&receiverSignature=eyJhbGciOiJFUzI1NiIsImtpZCI6InJlY2VpdmVyLWtleS0xMjMifQ.eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2IiwicGFzc2NvZGUiOiJ1c2VyLXBpbiJ9.MEUCIQDxyz...
+```
+
+Alternative format using JSON (if server supports):
+```http
+POST https://vhl-sharer.example.org/List/_search
+Content-Type: application/json
+
 {
-  "resourceType": "Parameters",
-  "parameter": [
-    {
-      "name": "url",
-      "valueString": "test.fhir.net/R4/fhir/List?identifier=123&patient=9876&code=folder&status=current&_include=List:item"
-    },
-    {
-      "name": "passcode",
-      "valueString": "123456"
-    },
-    {
-      "name": "receiverSignature",
-      "valueString": "eyJhbGciOiJFUzI1NiIsImtpZCI6InJlY2VpdmVyLWtleS0xMjMiLCJ0eXAiOiJ2aGwtcmVxdWVzdCtqd3QifQ..."
-    }
-  ]
+  "_id": "abc123def456",
+  "_include": "List:item",
+  "passcode": "user-pin",
+  "recipient": "Dr. Smith Hospital",
+  "receiverSignature": "eyJhbGciOiJFUzI1NiIsImtpZCI6InJlY2VpdmVyLWtleS0xMjMifQ..."
 }
 ```
 
-**Signed Request Payload (receiverSignature content):**
+**Receiver Signature Content:**
 
-The {{ linkvhlr }} SHALL sign the url and passcode using JWS to enable {{ linkvhls }} to authenticate:
+When using the `receiverSignature` parameter, the JWS payload SHALL contain:
 
 ```json
 {
-  "header": {
-    "alg": "ES256",
-    "kid": "receiver-key-123",
-    "typ": "vhl-request+jwt"
-  },
-  "payload": {
-    "url": "test.fhir.net/R4/fhir/List?patient=9876&code=folder&status=current&_include=List:item",
-    "passcode": "user-provided-pin"
-  }
+  "url": "https://vhl-sharer.example.org/List?_id=abc123def456",
+  "passcode": "user-pin",
+  "recipient": "Dr. Smith Hospital",
+  "iat": 1704067200
 }
 ```
 
-**Signed Request Payload Elements:**
+**Authentication and Authorization:**
 
-| Element | Cardinality | Description |
-|---------|-------------|-------------|
-| url | 1..1 | manifest url of the VHL |
-| passcode | 0..1 | User-provided passcode if VHL requires it |
-{: .grid}
+The {{ linkvhlr }} SHALL authenticate the request using one or more of the following mechanisms:
+- **VHL-based Authorization**: The request parameters match those in the validated VHL
+- **Receiver Signature**: JWS signature in `receiverSignature` parameter proves the request originates from a trusted {{ linkvhlr }}
+- **Secure Channel**: Mutual TLS authentication per ATNA
+- **OAuth 2.0 Bearer Token**: If supported by the {{ linkvhls }}
 
 ##### 2:3.YY5.4.1.3 Expected Actions - VHL Receiver
 
 The {{ linkvhlr }} SHALL:
 
+1. **Extract Manifest URL from VHL**:
+   - Parse the validated VHL payload
+   - Extract the `url` field containing the manifest URL
+   - Parse the URL to identify the base endpoint and core search parameters
 
-2. **Prepare Signed Request**:
-   - Extract manifest URL from validated VHL
-   - Construct search parameters (if filtering)
-   - Sign request payload using {{ linkvhlr }} private key
+2. **Prepare Request Parameters**:
+   - Extract core FHIR search parameters (_id, patient, code, status, etc.) from manifest URL
+   - Prepare `_include=List:item` parameter
+   - Include `passcode` if VHL requires it (user-provided)
+   - Include `recipient` identifier (required)
+   - Include `embeddedLengthMax` if limiting embedded content size
 
-3. **Submit Request**:
-   - POST signed request to manifest URL
-   - Handle HTTP responses (200, 401, 403, 404, 500)
+3. **Prepare Signed Request** (if using receiver signature):
+   - Construct JWS payload containing:
+     - `url`: the manifest URL
+     - `passcode`: the user-provided passcode (if applicable)
+     - `recipient`: the recipient identifier
+     - `iat`: issued-at timestamp
+   - Sign payload using {{ linkvhlr }} private key
+   - Include signature in `receiverSignature` parameter
 
-4. **Process Response**:
-   - Parse FHIR Bundle with List resources
+4. **Submit Request**:
+   - Perform HTTP POST on the List `_search` endpoint
+   - Send parameters in request body (application/x-www-form-urlencoded or JSON)
+   - Include all required and optional parameters
+   - Handle HTTP responses (200, 401, 403, 404, 422, 429, 500)
+
+5. **Process Response**:
+   - Parse FHIR Bundle of type `searchset`
+   - Extract List resource (search.mode = "match")
+   - Extract DocumentReference resources (search.mode = "include")
    - Cache manifest for subsequent document retrievals
 
 The {{ linkvhlr }} MAY:
@@ -164,33 +202,32 @@ The {{ linkvhlr }} MAY:
 
 Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 
+1. **Authenticate Request**:
+   - Validate request originates from trusted {{ linkvhlr }}
+   - Verify secure channel credentials if ATNA is used
+   - Verify receiver signature if provided
 
-
-2. **Verify Request Signature**:
-   - Extract `kid` from JWS header
-   - Retrieve {{ linkvhlr }} public key from Trust Anchor (cached trust list from ITI-YY2)
-   - Verify JWS signature
-   - Reject if signature invalid
-
-3. **Authorize Request**:
-   - Extract and validate manifest URL
-   - Verify VHL signature using {{ linkvhls }} own issuance keys
-   - Confirm VHL not expired
+2. **Authorize Request**:
+   - Validate the folder ID (_id parameter) corresponds to a valid VHL
+   - Verify VHL signature matches the original issuance
+   - Confirm VHL not expired (check against issuance time + validity period)
    - Verify VHL not revoked
-   - Validate passcode if required
+   - Validate passcode if VHL requires it (compare against stored hash)
    - Confirm VHL authorizes requested documents
 
-4. **Execute Search**:
-   - Apply search parameters
-   - Query document repository
-   - Filter based on VHL scope and consent
+3. **Execute Search**:
+   - Query for List resource matching search parameters
+   - Validate List exists and is accessible
+   - Retrieve DocumentReference resources referenced by List.entry.item
+   - Apply VHL scope and consent filters
 
-5. **Prepare Response**:
-   - Construct FHIR Bundle (type: searchset) with DocumentReference resources
-   - Include document metadata
-   - MAY sign response Bundle
+4. **Prepare Response**:
+   - Construct FHIR Bundle of type `searchset`
+   - Include List resource with search.mode = "match"
+   - Include DocumentReference resources with search.mode = "include"
+   - Include only documents authorized by the VHL
 
-6. **Return Response**:
+5. **Return Response**:
    - Send HTTP 200 with FHIR Bundle
    - Handle errors appropriately
 
@@ -199,13 +236,25 @@ The {{ linkvhls }} MAY:
 - Implement rate limiting
 - Log failed attempts
 
+**Supported Search Parameters:**
+
+The {{ linkvhls }} SHALL support at minimum:
+- `_id` (token)
+- `_include=List:item`
+
+The {{ linkvhls }} SHOULD support:
+- `identifier` (token)
+- `patient` (reference)
+- `code` (token)
+- `status` (token)
+
 **Error Conditions:**
 
 | HTTP Status | Condition |
 |-------------|-----------|
 | 401 Unauthorized | Secure channel authentication failed or signature invalid |
 | 403 Forbidden | VHL expired, revoked, or doesn't authorize documents |
-| 404 Not Found | Manifest ID not found or VHL invalid |
+| 404 Not Found | List resource with specified _id not found or VHL invalid |
 | 422 Unprocessable Entity | Invalid passcode |
 | 429 Too Many Requests | Rate limit exceeded |
 | 500 Internal Server Error | Server-side error |
@@ -219,14 +268,7 @@ The {{ linkvhls }} MAY:
 
 ##### 2:3.YY5.4.2.2 Message Semantics
 
-The response is a Bundle Resource as specified in the [$retrieve-manifest operation definition](OperationDefinition-retrieve-manifest.html).
-
-**Table 2:3.YY5.4.1.2-2: $retrieve-manifest Operation Output Parameters**
-
-| Parameter Name | Cardinality | Type | Description |
-|----------------|-------------|------|-------------|
-| return | [1..1] | Bundle | A FHIR Bundle of type 'searchset' containing List resources for documents authorized by the VHL |
-{: .grid}
+The response is a FHIR Bundle of type `searchset` containing the List resource and included DocumentReference resources.
 
 **Success Response (HTTP 200):**
 
@@ -236,7 +278,7 @@ Content-Type: application/fhir+json
 ETag: "W/\"version-123\""
 ```
 
-**Response Body - FHIR Bundle with List Resources:**
+**Response Body - FHIR Bundle with List and DocumentReference Resources:**
 
 ```json
 {
@@ -245,23 +287,28 @@ ETag: "W/\"version-123\""
   "total": 3,
   "link": [{
     "relation": "self",
-    "url": "https://vhl-sharer.example.org/List/$retrieve-manifest"
+    "url": "https://vhl-sharer.example.org/List?_id=abc123def456&_include=List:item"
   }],
   "entry": [
     {
-      "fullUrl": "https://vhl-sharer.example.org/List/manifest1",
+      "fullUrl": "https://vhl-sharer.example.org/List/abc123def456",
       "resource": {
         "resourceType": "List",
-        "id": "manifest1",
+        "id": "abc123def456",
+        "identifier": [{
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:uuid:abc123def456"
+        }],
         "status": "current",
         "mode": "working",
         "code": {
           "coding": [{
             "system": "http://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes",
-            "code": "folder"
+            "code": "folder",
+            "display": "Folder as a FHIR List"
           }]
         },
-        "subject": {"reference": "Patient/123"},
+        "subject": {"reference": "Patient/9876"},
         "date": "2024-01-15T10:30:00Z",
         "entry": [
           {
@@ -285,6 +332,10 @@ ETag: "W/\"version-123\""
       "resource": {
         "resourceType": "DocumentReference",
         "id": "doc1",
+        "masterIdentifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:1.2.3.4.5.6.7.8.9.1"
+        },
         "status": "current",
         "type": {
           "coding": [{
@@ -293,14 +344,29 @@ ETag: "W/\"version-123\""
             "display": "Patient Summary Document"
           }]
         },
-        "subject": {"reference": "Patient/123"},
+        "category": [{
+          "coding": [{
+            "system": "http://ihe.net/connectathon/classCodes",
+            "code": "History and Physical"
+          }]
+        }],
+        "subject": {"reference": "Patient/9876"},
         "date": "2024-01-15T10:30:00Z",
+        "author": [{
+          "reference": "Practitioner/pract1"
+        }],
         "content": [{
           "attachment": {
             "contentType": "application/fhir+json",
             "url": "https://vhl-sharer.example.org/Binary/doc1-content",
             "size": 15234,
-            "hash": "07a2f6e5f8b3c9d4e1a2b3c4d5e6f7a8b9c0d1e2"
+            "hash": "07a2f6e5f8b3c9d4e1a2b3c4d5e6f7a8b9c0d1e2",
+            "title": "Patient Summary - John Doe"
+          },
+          "format": {
+            "system": "http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode",
+            "code": "urn:ihe:iti:xds:2017:mimeTypeSufficient",
+            "display": "mimeType Sufficient"
           }
         }]
       },
@@ -313,6 +379,10 @@ ETag: "W/\"version-123\""
       "resource": {
         "resourceType": "DocumentReference",
         "id": "doc2",
+        "masterIdentifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "urn:oid:1.2.3.4.5.6.7.8.9.2"
+        },
         "status": "current",
         "type": {
           "coding": [{
@@ -321,14 +391,29 @@ ETag: "W/\"version-123\""
             "display": "Laboratory Report"
           }]
         },
-        "subject": {"reference": "Patient/123"},
+        "category": [{
+          "coding": [{
+            "system": "http://ihe.net/connectathon/classCodes",
+            "code": "Laboratory"
+          }]
+        }],
+        "subject": {"reference": "Patient/9876"},
         "date": "2024-01-10T14:20:00Z",
+        "author": [{
+          "reference": "Practitioner/pract2"
+        }],
         "content": [{
           "attachment": {
             "contentType": "application/pdf",
             "url": "https://vhl-sharer.example.org/Binary/doc2-content",
             "size": 45678,
-            "hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"
+            "hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+            "title": "Lab Results - Complete Blood Count"
+          },
+          "format": {
+            "system": "http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode",
+            "code": "urn:ihe:iti:xds:2017:mimeTypeSufficient",
+            "display": "mimeType Sufficient"
           }
         }]
       },
@@ -339,6 +424,17 @@ ETag: "W/\"version-123\""
   ]
 }
 ```
+
+**Bundle Structure:**
+
+| Element | Description |
+|---------|-------------|
+| type | SHALL be "searchset" |
+| total | Total number of entries (List + included DocumentReferences) |
+| link | Self link to the search URL |
+| entry[0] | List resource with search.mode = "match" |
+| entry[1..n] | DocumentReference resources with search.mode = "include" |
+{: .grid}
 
 ##### 2:3.YY5.4.2.3 Expected Actions
 
@@ -363,24 +459,25 @@ ETag: "W/\"version-123\""
 #### 2:3.YY5.5.1 Secure Channel Requirements
 All requests SHALL occur over ATNA-defined secure channel with mutual authentication.
 
-#### 2:3.YY5.5.2 Request Authentication via JWS
-- Proves request origin from trusted {{ linkvhlr }}
-- Ensures integrity of request parameters (url and passcode)
+#### 2:3.YY5.5.2 Request Authentication via VHL
+- VHL proves authorization from VHL Holder to access documents
+- Manifest URL and parameters must match those in the validated VHL
+- Ensures integrity of request parameters (manifest URL and passcode)
 - Enables verification of the requesting party
 - Creates non-repudiable audit trail
 
 #### 2:3.YY5.5.3 VHL Token Validation
 {{ linkvhls }} MUST:
-- Validate VHL signature
-- Check expiration
-- Verify not revoked
-- Confirm scope authorizes documents
-- Validate passcode if protected
+- Validate folder ID corresponds to valid VHL issuance
+- Verify VHL signature before trusting authorization
+- Check VHL expiration timestamp
+- Validate passcode if VHL requires it
+- Confirm VHL scope authorizes requested documents
 
 #### 2:3.YY5.5.4 Audit Logging
-Both actors SHOULD record:
-- All access attempts
-- Authentication failures
+Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
+- Document access requests
+- Authorization decisions
 - Authorization denials
 - Timestamps and identifiers
 
@@ -393,17 +490,24 @@ Both actors SHOULD record:
 ### 2:3.YY5.6 Conformance
 
 **VHL Receiver SHALL:**
-- Establish secure channel per ATNA
-- Sign requests using JWS
-- Include VHL token in requests
-- Validate {{ linkvhls }} responses
+- Support HTTP POST on List `_search` endpoint with parameters in request body
+- Support `_include=List:item` parameter
+- Include `recipient` parameter in all requests
+- Include `passcode` parameter when VHL requires passcode
+- Optionally include `receiverSignature` for additional authentication
+- Parse searchset Bundle with included resources
+- Distinguish between List (match) and DocumentReference (include) entries
 
 **VHL Sharer SHALL:**
-- Accept secure channel connections per ATNA
-- Verify request signatures
-- Validate VHL tokens before authorizing
-- Return FHIR-conformant responses
-- Implement appropriate error responses
-
-Both actors SHALL be grouped with ATNA Secure Node or Secure Application actor.
+- Support HTTP POST on List `_search` endpoint
+- Accept parameters via application/x-www-form-urlencoded request body
+- Support search on List resource with parameters: _id, identifier, patient, code, status
+- Support `_include=List:item` parameter
+- Support VHL authorization parameters: passcode, recipient, receiverSignature, embeddedLengthMax
+- Return Bundle of type searchset
+- Include List resource with search.mode = "match"
+- Include DocumentReference resources with search.mode = "include"
+- Validate VHL authorization before returning documents
+- Verify passcode securely (if provided)
+- Optionally verify receiverSignature (if provided)
 
