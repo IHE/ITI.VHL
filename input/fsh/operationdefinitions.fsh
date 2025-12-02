@@ -62,14 +62,14 @@ Usage: #definition
   * min = 0
   * max = "*"
   * type = #uri
-  * documentation = "The signed VHL URL."
+  * documentation = "The signed VHL URL containing the SMART Health Link payload.\n\nVHL Generation Process:\n1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier\n2. Generate a 32-byte (256-bit) random encryption key, base64url-encode it (resulting in 43 characters) - this is the 'key' parameter\n3. Construct the manifest URL as a query on the base List resource with _include parameter:\n   [base]/List?_id=[folder-id]&_include=List:item\n4. Create the SHL payload as a JSON object with:\n   - url: the manifest URL from step 3\n   - key: the base64url-encoded encryption key from step 2\n   - exp: (optional) expiration time in Epoch seconds\n   - flag: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term)\n   - label: (optional) description string\n5. Minify the JSON (remove whitespace)\n6. Base64url-encode the minified JSON\n7. Construct the final SHL URL: shlink:/[base64url-encoded-payload]\n\nFor complete specification details, see: https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#construct-a-smart-health-link-payload"
 * parameter[+]
   * name = #qrcode
   * use = #out
   * min = 0
   * max = "*"
   * type = #Binary
-  * documentation = "A Binary resource containing the QR code (e.g., PNG or SVG format)."
+  * documentation = "A Binary resource containing the QR code image (PNG or SVG format) that encodes the VHL as a CWT with HCERT structure.\n\nQR Code Generation Process (HCERT/CWT encoding):\n1. Create a CBOR Web Token (CWT) structure per RFC 8392 with protected header containing:\n   - alg (algorithm): ES256 (primary) or PS256 (secondary)\n   - kid (key identifier): truncated SHA-256 fingerprint of DSC (first 8 bytes)\n2. Add CWT claims:\n   - iss (issuer, claim key 1): optional ISO 3166-1 alpha-2 country code\n   - iat (issued at, claim key 6): timestamp in NumericDate format\n   - exp (expiration, claim key 4): timestamp in NumericDate format\n   - hcert (health certificate, claim key -260): object containing:\n     * For SHL: claim key 5 with the SHL payload object\n3. Sign the CWT using asymmetric signature (COSE, RFC 8152)\n4. Compress the signed CWT using ZLIB (RFC 1950) with Deflate (RFC 1951)\n5. Encode compressed CWT as Base45\n6. Prefix with context identifier 'HC1:'\n7. Generate QR code using ISO/IEC 18004:2015:\n   - Error correction level: Q (25% recommended)\n   - Mode: Alphanumeric (Mode 2)\n   - Recommended diagonal size: 35-60mm\n\nFor complete HCERT specification, see: https://smart.who.int/trust/hcert_spec.html\nFor HCERT logical model, see: https://smart.who.int/trust/StructureDefinition-HCert.html"
 
 
 Instance: OperationDefinition-retrieve-manifest
