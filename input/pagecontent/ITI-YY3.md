@@ -35,9 +35,11 @@
 
 ### 2:3.YY3.4 Messages
 
-<figure>
-{%include ITI-YY3.svg%}
-<p id="figure-2.3.YY3-1" class="figureTitle">Figure 2:3.YY3-1: Generate VHL Interaction Diagram</p>
+<figure >
+  <div style="width:35em; max-width:100%;">
+     {%include ITI-YY3.svg%}
+  </div>
+  <p id="figure-2.3.YY3-1" class="figureTitle">Figure 2:3.YY3-1: Generate VHL Interaction Diagram</p>
 </figure>
 <br clear="all">
 
@@ -67,6 +69,24 @@ The Generate VHL message is performed by an HTTP GET command shown below:
 GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&goal=[code]}{&exp=[integer]}{&flag=[string]}{&label=[string]}
 ```
 
+**Table 2:3.YY3.4.1.2-1: $generate-vhl Message HTTP query Parameters**
+
+| Query parameter Name | Cardinality | Type | Description |
+| -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| sourceIdentifier     | [1..1]    | token       | The Patient Identifier that will be used to find documents associated with the Patient |
+| targetSystem         | [0..*]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected |
+| goal             | [0..1]    | code       | Returned VHL rendering type: 'vhl' (VHL only), 'qrcode' (QR code only), or 'both' (both VHL and QR code). Defaults to 'both' if not specified. |
+| exp      |  [0..1]  | integer        | Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Application determine if this QR is stale. |
+| flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
+| label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink. |
+
+
+##### 2:3.YY3.4.1.3 Expected Actions
+{{ reqGenerateVHLResponseDescription.valueMarkdown }}
+
+{% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
+
+The {{linkvhls}} generates the VHL and QR code (if requested) as per the following:
 **VHL Payload Construction**
 
 The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#construct-a-smart-health-link-payload). The VHL Sharer SHALL:
@@ -108,25 +128,9 @@ When generating a QR code (goal='qrcode' or 'both'), the VHL Sharer SHALL encode
    - Mode: Alphanumeric (Mode 2)
    - Recommended diagonal size: 35-60mm
 
-**Table 2:3.YY3.4.1.2-1: $generate-vhl Message HTTP query Parameters**
-
-| Query parameter Name | Cardinality | Type | Description |
-| -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| sourceIdentifier     | [1..1]    | token       | The Patient Identifier that will be used to find documents associated with the Patient |
-| targetSystem         | [0..*]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected |
-| goal             | [0..1]    | code       | Returned VHL rendering type: 'vhl' (VHL only), 'qrcode' (QR code only), or 'both' (both VHL and QR code). Defaults to 'both' if not specified. |
-| exp      |  [0..1]  | integer        | Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Application determine if this QR is stale. |
-| flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
-| label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink. |
-
-
-##### 2:3.YY3.4.1.3 Expected Actions
-{{ reqGenerateVHLResponseDescription.valueMarkdown }}
-
-{% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
 
 #### 2:3.YY3.4.2  Generate VHL Response Message 
-The {{ linkvhls }} returns failure, or generates and returns zero to many VHL. Depending on the use case, the VHL maybe rendered using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC.
+The {{ linkvhls }} returns failure, or generates and returns zero to many VHL. Depending on the use case, the VHL maybe rendered using link or QR code.
 
 ##### 2:3.YY3.4.2.1 Trigger Events
 This message shall be sent when a request initiated by the {{linkvhlh}} has been processed successfully. 
