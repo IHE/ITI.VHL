@@ -3,7 +3,7 @@ InstanceOf: OperationDefinition
 Usage: #definition
 * url = "http://example.org/fhir/OperationDefinition/generate-vhl"
 * title = "Generate VHL"
-* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display. Input must include a patient identifier (e.g., an official national identifier). Optional parameters include targetSystem, exp (expiration time), flag (L/P/U flags), and label (description)."
+* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display.\n\nInput Parameters:\n- sourceIdentifier: Patient identifier (required)\n- targetSystem: Target Patient Identifier Assigning Authority (optional)\n- exp: Expiration time in Epoch seconds (optional)\n- flag: Single-character flags in alphabetical order - L (long-term use), P (Passcode required), U (direct file access) (optional)\n- label: Short description up to 80 characters (optional)\n- goal: Specifies output - 'vhl', 'qrcode', or 'both' (optional, defaults to 'both')\n\nOutput Generation:\n- When goal='vhl' or 'both': Returns the VHL URL as a uri parameter. The VHL contains the SHL payload (base64url-encoded JSON with url, flag, key, label, exp) that can be used to access the manifest.\n- When goal='qrcode' or 'both': Returns a Binary resource containing the QR code image (PNG or SVG format) that encodes the complete SMART Health Link (shlink:/...) for scanning.\n- The QR code embeds the full SHL payload including the manifest URL and decryption key for secure access to health documents."
 * name = "GenerateVHL"
 * status = #active
 * kind = #operation
@@ -46,6 +46,16 @@ Usage: #definition
   * max = "1"
   * type = #string
   * documentation = "Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink."
+* parameter[+]
+  * name = #goal
+  * use = #in
+  * min = 0
+  * max = "1"
+  * type = #code
+  * documentation = "Specifies what to generate: 'vhl' (VHL only), 'qrcode' (QR code only), or 'both' (both VHL and QR code). If not specified, defaults to 'both'."
+  * binding
+    * strength = #required
+    * valueSet = "http://example.org/fhir/ValueSet/vhl-generation-goal"
 * parameter[+]
   * name = #vhl
   * use = #out
