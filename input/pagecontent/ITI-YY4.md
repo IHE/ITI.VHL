@@ -103,48 +103,69 @@ Upon receiving a VHL, the VHL Receiver SHALL decode and validate it according to
 
 **For QR Code Scanning Option:**
 
-When the VHL Receiver claims the QR Code Scanning Option, the following steps SHALL be performed:
+When the VHL Receiver claims the QR Code Scanning Option, the following steps SHALL be performed to decode an HCERT-wrapped VHL:
 
 1. **Scan QR Code**:
    - Use QR code scanner (camera, dedicated scanner, or software library)
    - Capture QR code image displayed on screen or printed on paper
+   - Decode the QR code per ISO/IEC 18004:2015 in Alphanumeric mode
    - Provide visual feedback to user during scanning process
 
-2. **Decode QR Code to Extract shlink:/ URL**:
-   - Decode the QR code per ISO/IEC 18004:2015
+2. **Verify Context Identifier**:
    - Extract the complete string from the QR code
-   - Verify the string begins with `shlink:/` prefix
+   - Verify the string begins with `HC1:` prefix (HCERT context identifier)
    - If prefix is missing or incorrect, reject and inform user
+   - Remove the `HC1:` prefix from the string
 
-3. **Extract Base64url-encoded Payload**:
-   - Remove the `shlink:/` prefix from the string
-   - The remaining string is the base64url-encoded compressed payload
-   - Example: `shlink:/eyJ1cmwiOiJodHRwczovL...` → `eyJ1cmwiOiJodHRwczovL...`
+3. **Base45 Decode**:
+   - Decode the remaining string using Base45 decoding algorithm
+   - Result is a compressed byte array
+   - Handle any Base45 decoding errors appropriately
 
-4. **Base64url Decode**:
-   - Decode the base64url-encoded string per RFC 4648
-   - Result is a compressed (DEFLATE) byte array
-   - Handle any base64url decoding errors appropriately
-
-5. **Decompress Payload**:
-   - Decompress the byte array using DEFLATE algorithm
-   - Result is the JSON payload as a UTF-8 string
+4. **Decompress ZLIB/DEFLATE**:
+   - Decompress the byte array using ZLIB (RFC 1950) with DEFLATE (RFC 1951)
+   - Result is a CBOR-encoded CWT structure
    - Handle decompression errors (corrupted data, invalid format)
 
-6. **Parse JSON Payload**:
-   - Parse the decompressed string as JSON
-   - Extract VHL payload object containing:
+5. **Parse CBOR Web Token (CWT)**:
+   - Parse the decompressed bytes as CBOR per RFC 8392
+   - Extract the CWT structure containing protected header and claims
+   - Protected header contains:
+     - `alg` (algorithm): ES256 or PS256
+     - `kid` (key identifier): 8-byte truncated SHA-256 of DSC
+   - Handle CBOR parsing errors
+
+6. **Verify Digital Signature**:
+   - Extract `kid` from CWT protected header
+   - Retrieve corresponding Document Signing Certificate (DSC) from trust list
+   - Verify the COSE signature (RFC 8152) using DSC public key
+   - Confirm signature is valid and CWT has not been tampered with
+   - Reject if signature invalid or DSC not trusted
+
+7. **Extract and Validate CWT Claims**:
+   - Extract CWT claims:
+     - `iss` (issuer, claim key 1): ISO 3166-1 alpha-2 country code (optional)
+     - `iat` (issued at, claim key 6): timestamp in NumericDate format
+     - `exp` (expiration, claim key 4): timestamp in NumericDate format
+     - `hcert` (health certificate, claim key -260): HCERT payload object
+   - Validate `exp` - reject if current time > expiration
+   - Validate `iat` is not in the future
+
+8. **Extract SHL Payload from HCERT**:
+   - Within the `hcert` claim (claim key -260), locate claim key 5
+   - Claim key 5 contains the SHL payload object with:
      - `url`: manifest URL (required)
-     - `flag`: flags such as "P" for passcode (optional)
+     - `key`: base64url-encoded decryption key, 43 characters (required)
+     - `flag`: flags such as "P" for passcode, "L" for long-term (optional)
      - `label`: human-readable description (optional)
      - `exp`: expiration timestamp in seconds since epoch (optional)
-     - `v`: version number (optional)
-   - Validate JSON structure conforms to SMART Health Links specification
+   - Validate SHL payload structure conforms to SMART Health Links specification
 
-7. **Validate VHL Payload**:
+9. **Validate SHL Payload**:
    - Verify `url` field is present and is a valid HTTPS URL
-   - Check `exp` (if present) - reject if current time > expiration
-   - Note `flag` value (e.g., "P" indicates passcode required)
+   - Verify `key` field is present and is 43 characters (base64url-encoded 32 bytes)
+   - Check SHL `exp` (if present) - reject if current time > expiration
+   - Note `flag` value (e.g., "P" indicates passcode required, "L" for long-term)
    - Validate `url` points to expected manifest endpoint format
 
 **For Deep Link Processing Option:**
@@ -155,63 +176,105 @@ When the VHL Receiver claims the Deep Link Processing Option:
    - Accept URL via secure messaging, email, web link, or direct input
    - Verify URL begins with `shlink:/` prefix
 
-2. **Extract and Decode Payload**:
-   - Follow steps 3-7 from QR Code Scanning Option above
-   - (Base64url decode → Decompress → Parse JSON → Validate)
+2. **Extract Base64url-encoded Payload**:
+   - Remove the `shlink:/` prefix from the string
+   - The remaining string is the base64url-encoded minified JSON payload
+   - Example: `shlink:/eyJ1cmwiOiJodHRwczovL...` → `eyJ1cmwiOiJodHRwczovL...`
+
+3. **Base64url Decode**:
+   - Decode the base64url-encoded string per RFC 4648
+   - Result is a minified JSON string (UTF-8 encoded)
+   - Handle any base64url decoding errors appropriately
+
+4. **Parse JSON Payload**:
+   - Parse the JSON string to extract SHL payload object containing:
+     - `url`: manifest URL (required)
+     - `key`: base64url-encoded decryption key, 43 characters (required)
+     - `flag`: flags such as "P" for passcode (optional)
+     - `label`: human-readable description (optional)
+     - `exp`: expiration timestamp in seconds since epoch (optional)
+     - `v`: version number (optional, defaults to 1)
+   - Validate JSON structure conforms to SMART Health Links specification
+
+5. **Validate SHL Payload**:
+   - Verify `url` field is present and is a valid HTTPS URL
+   - Verify `key` field is present and is 43 characters
+   - Check `exp` (if present) - reject if current time > expiration
+   - Note `flag` value (e.g., "P" indicates passcode required)
+   - Validate `url` points to expected manifest endpoint format
 
 **Common Post-Decoding Actions (Both Options):**
 
 After successfully decoding the VHL payload, the VHL Receiver SHALL:
 
-1. **Identify VHL Sharer**:
-   - Extract issuer identifier from VHL payload or JWS header
-   - Determine which VHL Sharer issued this VHL
+1. **Store Decryption Key Securely**:
+   - The `key` parameter from the SHL payload is required to decrypt documents
+   - Store the key securely in memory for the session
+   - The key will be used during document retrieval (ITI-YY5) to decrypt file contents
 
-2. **Validate Digital Signature Against Trusted Key**:
-   - Obtain VHL Sharer's public key from Trust Anchor (cached trust list from ITI-YY2)
-   - Verify JWS signature using VHL Sharer's public key
-   - Confirm VHL Sharer is valid participant in trust network
-   - Ensure VHL payload has not been tampered with
-   - Reject if signature invalid
-
-3. **Prepare to Retrieve Associated Health Documents**:
-   - Extract manifest URL from validated VHL payload
-   - Validate expiration timestamp if present
+2. **Prepare to Retrieve Associated Health Documents**:
+   - Extract manifest URL from validated SHL payload
    - Validate usage constraints if present
-   - Prepare to initiate document retrieval [(ITI-YY5)](ITI-YY5.html)
+   - Prepare to initiate document retrieval [(ITI-YY5)](ITI-YY5.html) using the manifest URL and decryption key
 
 The VHL Receiver MAY:
-- Prompt user for passcode if required (validated during document retrieval)
-- Display VHL label/description
+- Prompt user for passcode if required by flag (validated during document retrieval)
+- Display VHL label/description to user
 - Record audit event per **[Audit Event – Received Health Data](Requirements-AuditEventReceived.html)**
-- Cache VHL for subsequent access attempts
+- Cache VHL payload for subsequent access attempts
 
-**Decoding Example:**
+**Decoding Example (QR Code with HCERT):**
 
 ```
 Input QR Code Content:
-shlink:/eyJ6aXAiOiJERUYiLCJhbGciOiJub25lIn0.eNqrVkpUslIyMjTQtVIwtDCyMDAwMNRRUEpNVLIy1FGqBQAtWQW4
+HC1:NCF3R0KLBBA...V8N8W.CE8WY
 
-Step 1: Remove prefix → eyJ6aXAiOiJERUYiLCJhbGciOiJub25lIn0.eNqrVkpUslIyMjTQtVIwtDCyMDAwMNRRUEpNVLIy1FGqBQAtWQW4
+Step 1: Verify and remove HC1: prefix → NCF3R0KLBBA...V8N8W.CE8WY
+Step 2: Base45 decode → [compressed bytes]
+Step 3: ZLIB/DEFLATE decompress → [CBOR bytes]
+Step 4: Parse CBOR as CWT → Extract protected header and claims
+Step 5: Verify signature using kid from header
+Step 6: Extract CWT claims (iss, iat, exp, hcert)
+Step 7: Within hcert (claim -260), extract claim 5 (SHL payload):
+  {
+    "url": "https://vhl-sharer.example.org/List?_id=abc123&_include=List:item",
+    "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
+    "flag": "LP",
+    "exp": 1735689600,
+    "label": "Patient Health Summary"
+  }
+Step 8: Validate SHL payload fields and prepare for document retrieval
+```
 
-Step 2: Base64url decode → [compressed bytes]
+**Decoding Example (Deep Link):**
 
-Step 3: DEFLATE decompress → {"url":"https://vhl-sharer.example.org/List/$retrieve-manifest?url=...","flag":"LP","exp":1735689600}
+```
+Input Deep Link:
+shlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzJl9pbmNsdWRlPUxpc3Q6aXRlbSIsImtleSI6ImRHaHBjeUJwY3lCaElITmxZM0psZENCclpYa2dkWE5sWkNCbWIzSWdaVzVqIiwiZmxhZyI6IkxQIiwiZXhwIjoxNzM1Njg5NjAwLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkifQ
 
-Step 4: Parse JSON and extract:
-  - url: https://vhl-sharer.example.org/List/$retrieve-manifest?url=...
-  - flag: LP (Long-term + Passcode required)
-  - exp: 1735689600 (December 31, 2024)
+Step 1: Remove shlink:/ prefix
+Step 2: Base64url decode → JSON string
+Step 3: Parse JSON:
+  {
+    "url": "https://vhl-sharer.example.org/List?_id=abc123&_include=List:item",
+    "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
+    "flag": "LP",
+    "exp": 1735689600,
+    "label": "Patient Health Summary"
+  }
+Step 4: Validate SHL payload fields and prepare for document retrieval
 ```
 
 **Error Handling:**
 
-If decoding fails (QR code unreadable, invalid base64url, decompression error, invalid JSON):
+If decoding fails:
+- **QR Code Option**: QR unreadable, invalid HC1: prefix, Base45 decode error, ZLIB decompression error, CBOR parse error, invalid CWT structure
+- **Deep Link Option**: Invalid shlink:/ prefix, base64url decode error, JSON parse error, invalid SHL structure
 - VHL Receiver SHALL reject the VHL
 - VHL Receiver SHOULD inform user with specific error message
 - VHL Receiver MAY request user to rescan or re-enter VHL
 
-If signature verification fails:
+If signature verification fails (QR Code Option):
 - VHL Receiver SHALL reject the VHL
 - VHL Receiver SHALL NOT attempt to retrieve documents
 - VHL Receiver SHOULD inform user/operator
