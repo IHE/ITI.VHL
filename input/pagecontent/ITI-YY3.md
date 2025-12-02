@@ -64,7 +64,7 @@ Where **[base]** is the URL of VHL Sharer Service provider.
 The Generate VHL message is performed by an HTTP GET command shown below:
 
 ```
-GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&_goal=[token]}{&expirationTime=[token]}{&flag=[token]}
+GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&goal=[code]}{&exp=[integer]}{&flag=[string]}{&label=[string]}
 ```
 
 **VHL Payload Construction**
@@ -72,11 +72,41 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&
 The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#construct-a-smart-health-link-payload). The VHL Sharer SHALL:
 
 1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier
-2. Construct the manifest URL as a query on the base List resource with `_include` parameter:
+2. Generate a 32-byte (256-bit) random encryption key, base64url-encode it (resulting in 43 characters) - this is the 'key' parameter
+3. Construct the manifest URL as a query on the base List resource with `_include` parameter:
    ```
-   [base]/List/$retrieve-manifest?url=[base]/List?_id=[folder-id]&_include=List:item
+   [base]/List?_id=[folder-id]&_include=List:item
    ```
-3. Include this manifest URL in the VHL payload along with optional parameters (label, exp, flag, v)
+4. Create the SHL payload as a JSON object with:
+   - url: the manifest URL from step 3
+   - key: the base64url-encoded encryption key from step 2
+   - exp: (optional) expiration time in Epoch seconds
+   - flag: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term)
+   - label: (optional) description string
+5. Minify the JSON (remove whitespace)
+6. Base64url-encode the minified JSON
+7. Construct the final SHL URL: shlink:/[base64url-encoded-payload]
+
+**QR Code Generation (HCERT/CWT Encoding)**
+
+When generating a QR code (goal='qrcode' or 'both'), the VHL Sharer SHALL encode the VHL as an HCERT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html):
+
+1. Create a CBOR Web Token (CWT) structure per RFC 8392 with protected header containing:
+   - alg (algorithm): ES256 (primary) or PS256 (secondary)
+   - kid (key identifier): truncated SHA-256 fingerprint of DSC (first 8 bytes)
+2. Add CWT claims:
+   - iss (issuer, claim key 1): optional ISO 3166-1 alpha-2 country code
+   - iat (issued at, claim key 6): timestamp in NumericDate format
+   - exp (expiration, claim key 4): timestamp in NumericDate format
+   - hcert (health certificate, claim key -260): object containing claim key 5 with the SHL payload object
+3. Sign the CWT using asymmetric signature (COSE, RFC 8152)
+4. Compress the signed CWT using ZLIB (RFC 1950) with Deflate (RFC 1951)
+5. Encode compressed CWT as Base45
+6. Prefix with context identifier 'HC1:'
+7. Generate QR code using ISO/IEC 18004:2015:
+   - Error correction level: Q (25% recommended)
+   - Mode: Alphanumeric (Mode 2)
+   - Recommended diagonal size: 35-60mm
 
 **Table 2:3.YY3.4.1.2-1: $generate-vhl Message HTTP query Parameters**
 
@@ -84,9 +114,10 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 | -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | sourceIdentifier     | [1..1]    | token       | The Patient Identifier that will be used to find documents associated with the Patient |
 | targetSystem         | [0..*]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected |
-| _goal             | [0..1]    | token       | Returned VHL rendering type (vhl, qrcode, or both) |
-| expirationTime      |  [0..1]  | integer        | Expiration time in Epoch seconds |
-| flag |  [0..1]  | token        | Flag to indicate if Passcode is required (P for passcode required) |
+| goal             | [0..1]    | code       | Returned VHL rendering type: 'vhl' (VHL only), 'qrcode' (QR code only), or 'both' (both VHL and QR code). Defaults to 'both' if not specified. |
+| exp      |  [0..1]  | integer        | Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Application determine if this QR is stale. |
+| flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
+| label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink. |
 
 
 ##### 2:3.YY3.4.1.3 Expected Actions
