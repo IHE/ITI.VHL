@@ -75,7 +75,7 @@ This transaction is a FHIR search on the List resource, similar to MHD ITI-66 Fi
 
 The {{ linkvhlr }} performs an HTTP POST operation on the List resource `_search` endpoint with search parameters in the request body:
 
-```http
+```
 POST [base]/List/_search
 Host: vhl-sharer.example.org
 Content-Type: application/x-www-form-urlencoded
@@ -94,10 +94,11 @@ The manifest URL obtained from the VHL contains the core search parameters. The 
 |-----------|------|-------------|-------------|---------|
 | _id | token | [1..1] | The folder ID (with 256-bit entropy) from the VHL | `_id=abc123def456` |
 | identifier | token | [0..1] | Business identifier for the List | `identifier=folder-2024-001` |
-| patient | reference | [0..1] | The patient whose documents are referenced | `patient=9876` |
-| code | token | [0..1] | The type of List (typically "folder") | `code=folder` |
-| status | token | [0..1] | The status of the List | `status=current` |
-| _include | special | [1..1] | Include referenced DocumentReference resources | `_include=List:item` |
+| patient | reference | [0..1] | The patient whose documents are referenced, either patient or patient.identifier shall be included | `patient=9876` |
+| patient.identifier| token| [0..1]| specifies an identifier associated with the patient to which the List Resource is assigned,, either patient or patient.identifier shall be included|`patient.identifier=pat-2024-9876`|
+| code | token | [1..1] | The type of List (typically "folder") | `code=folder` |
+| status | token | 1..1] | The status of the List | `status=current` |
+| _include | special | [0..1] | Include referenced DocumentReference resources | `_include=List:item` |
 {: .grid}
 
 **VHL Authorization Parameters:**
