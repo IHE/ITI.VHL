@@ -14,7 +14,9 @@ The Retrieve Manifest transaction enables a {{ linkvhlr }} to retrieve a manifes
 
 This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL Holder (via ITI-YY4 Provide VHL) and validated the VHL signature.
 
-This transaction follows the same pattern as MHD ITI-66 Find Document Lists, using a FHIR search on the List resource with an option to use the `_include` parameter to retrieve both the List and the referenced DocumentReference resources.
+This transaction follows the same pattern as MHD ITI-66 Find Document Lists, using a FHIR search on the List resource. 
+
+**Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** MAY process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, the {{ linkvhlr }} SHALL retrieve the List first, then retrieve each DocumentReference individually using ITI-67 (Retrieve Document) transactions.
 
 Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's participation in the trust network. The {{ linkvhls }} validates that the requesting {{ linkvhlr }} is authorized to access the documents before responding. This transaction MAY be optionally conducted over a secure channel as defined by the IHE Audit Trail and Node Authentication (ATNA) Profile. 
 
@@ -107,7 +109,7 @@ Contains FHIR search parameters:
 - `code`: The type of List, typically "folder" (required)
 - `status`: The status of the List, typically "current" (required)
 - `patient` or `patient.identifier`: Patient reference or identifier (required)
-- `_include`: if used, SHALL be "List:item" to include DocumentReference resources (optional)
+- `_include`: if used, SHALL be "List:item" to include DocumentReference resources (optional - only if VHL Sharer supports Include DocumentReference Option)
 
 **Part 2: SHL Manifest Parameters**
 
@@ -144,7 +146,7 @@ The manifest URL obtained from the VHL contains the core search parameters. The 
 | patient | reference | [0..1] | The patient whose documents are referenced; either patient or patient.identifier SHALL be included | `patient=Patient/9876` |
 | patient.identifier | token | [0..1] | Specifies an identifier associated with the patient; either patient or patient.identifier SHALL be included | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
 | identifier | token | [0..1] | Business identifier for the List | `identifier=folder-2024-001` |
-| _include | special | [0..1] | Include referenced DocumentReference resources; SHALL be "List:item" | `_include=List:item` |
+| _include | special | [0..1] | Include referenced DocumentReference resources; SHALL be "List:item" if used. Only applicable if VHL Sharer supports Include DocumentReference Option | `_include=List:item` |
 {: .grid}
 
 **SHL Manifest Parameters (Part 2):**
@@ -249,13 +251,21 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 3. **Execute Search**:
    - Query for List resource matching FHIR search parameters from Part 1
    - Validate List exists and is accessible
-   - Retrieve DocumentReference resources referenced by List.entry.item
+   - If `_include=List:item` parameter is present:
+     - If {{ linkvhls }} supports the Include DocumentReference Option:
+       - Retrieve DocumentReference resources referenced by List.entry.item
+       - Include them in the response Bundle with search.mode = "include"
+     - If {{ linkvhls }} does NOT support the Include DocumentReference Option:
+       - Ignore the `_include` parameter
+       - Return only the List resource in the response Bundle
+       - {{ linkvhlr }} will subsequently use ITI-67 transactions to retrieve individual DocumentReferences
    - Apply VHL scope and consent filters
 
 4. **Prepare Response**:
    - Construct FHIR Bundle of type `searchset`
    - Include List resource with search.mode = "match"
-   - Include DocumentReference resources with search.mode = "include"
+   - If Include DocumentReference Option is supported AND `_include` parameter was provided:
+     - Include DocumentReference resources with search.mode = "include"
    - Include only documents authorized by the VHL
 
 5. **Return Response**:
@@ -266,6 +276,43 @@ The {{ linkvhls }} MAY:
 - Record audit event per **[Audit Event – Accessed Health Data](Requirements-AuditEventAccess.html)**
 - Implement rate limiting
 - Log failed attempts
+
+**Supported Search Parameters:**
+
+The {{ linkvhls }} SHALL support at minimum:
+- `_id` (token)
+- `code` (token)
+- `status` (token)
+- Either `patient` (reference) OR `patient.identifier` (token)
+
+The {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL additionally support:
+- `_include=List:item` (special)
+
+The {{ linkvhls }} SHOULD support:
+- `identifier` (token)
+
+**_include Parameter Behavior:**
+
+If a {{ linkvhls }} supports the Include DocumentReference Option:
+- It SHALL process `_include=List:item` and return DocumentReference resources with search.mode = "include"
+- This reduces network round trips for the {{ linkvhlr }}
+
+If a {{ linkvhls }} does NOT support the Include DocumentReference Option:
+- It SHALL ignore the `_include` parameter if provided
+- It SHALL return only the List resource in the searchset Bundle
+- The {{ linkvhlr }} SHALL then use ITI-67 (Retrieve Document) transactions to retrieve individual DocumentReferences
+
+**Error Conditions:**
+
+| HTTP Status | Condition |
+|-------------|-----------|
+| 401 Unauthorized | Secure channel authentication failed or signature invalid |
+| 403 Forbidden | VHL expired, revoked, or doesn't authorize documents |
+| 404 Not Found | List resource with specified _id not found or VHL invalid |
+| 422 Unprocessable Entity | Invalid passcode or malformed parameters |
+| 429 Too Many Requests | Rate limit exceeded |
+| 500 Internal Server Error | Server-side error |
+{: .grid}
 
 ### 2:3.YY5.5 Security Considerations
 
@@ -298,3 +345,44 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - {{ linkvhls }} SHALL enforce VHL expiration
 - Short validity windows minimize replay risk
 - Digital signatures with timestamps prevent replay attacks
+
+### 2:3.YY5.6 Conformance
+
+**VHL Receiver SHALL:**
+- Support HTTP POST on List `_search` endpoint with multipart/form-data encoding
+- Create 3-part multipart request: fhir-parameters, shl-parameters, and optional signature
+- Include FHIR search parameters in Part 1 (fhir-parameters) as URL-encoded
+- Include SHL authorization parameters in Part 2 (shl-parameters) as JSON
+- Optionally include detached JWS signature in Part 3 that signs concatenation of Part 1 and Part 2
+- Include mandatory parameters: _id, code, status, patient or patient.identifier, recipient
+- MAY include `_include=List:item` parameter to request DocumentReferences in single response
+- Parse searchset Bundle response
+- Distinguish between List (search.mode = "match") and DocumentReference (search.mode = "include") entries
+- If `_include` parameter was provided but no DocumentReferences are returned in Bundle:
+  - Use ITI-67 (Retrieve Document) transactions to retrieve individual DocumentReferences from List.entry.item references
+
+**VHL Sharer SHALL:**
+- Support HTTP POST on List `_search` endpoint with multipart/form-data encoding
+- Parse 3-part multipart request to extract fhir-parameters, shl-parameters, and signature
+- Accept FHIR parameters via URL-encoded format in Part 1
+- Accept SHL parameters via JSON format in Part 2
+- Optionally verify detached JWS signature in Part 3 over concatenation of Part 1 and Part 2
+- Support mandatory search parameters: _id, code, status, patient or patient.identifier
+- Support SHL authorization parameters: recipient, passcode (optional), embeddedLengthMax (optional)
+- Return Bundle of type searchset
+- Include List resource with search.mode = "match"
+- Validate VHL authorization before returning documents
+- Verify passcode securely (if provided)
+- Verify signature using receiver's public key from trust list (if signature provided)
+
+**VHL Sharer with Include DocumentReference Option SHALL additionally:**
+- Support `_include=List:item` parameter
+- When `_include=List:item` is provided:
+  - Retrieve DocumentReference resources referenced by List.entry.item
+  - Include them in searchset Bundle with search.mode = "include"
+  - Apply VHL scope and consent filters to DocumentReferences
+
+**VHL Sharer without Include DocumentReference Option SHALL:**
+- Ignore `_include` parameter if provided
+- Return only List resource in searchset Bundle
+- {{ linkvhlr }} will use ITI-67 transactions to retrieve individual DocumentReferences
