@@ -93,11 +93,33 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 
 1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier
 2. Generate a 32-byte (256-bit) random encryption key, base64url-encode it (resulting in 43 characters) - this is the 'key' parameter
-3. Construct the manifest URL as a query on the base List resource with `_include` parameter:
+3. Construct the manifest URL as a query on the base List resource:
+   
+   **Mandatory Query Parameters:**
+   - `_id=[folder-id]` - The unique folder identifier generated in step 1
+   - `code=folder` - The type of List (MHD folder type)
+   - `status=current` - The status of the List
+   - `patient.identifier=[system]|[value]` - Patient identifier in system|value format
+   
+   **Optional Query Parameters:**
+   - `_include=List:item` - Only if VHL Sharer supports the Include DocumentReference Option
+   
+   **Basic Manifest URL (without _include):**
    ```
-   [base]/List?_id=[folder-id]&_include=List:item
+   [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123
    ```
-4. Create the SHL payload as a JSON object with:
+   
+   **Enhanced Manifest URL (with _include - if supported):**
+   ```
+   [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
+   ```
+   
+   **Note on Include DocumentReference Option**: 
+   - If the VHL Sharer supports the **Include DocumentReference Option**, the manifest URL SHOULD include the `_include=List:item` parameter
+   - This enables VHL Receivers to retrieve both the List and all DocumentReference resources in a single ITI-YY5 request
+   - If the VHL Sharer does not support this option, the `_include` parameter SHALL be omitted
+   - VHL Receivers will then retrieve DocumentReferences via separate ITI-67 (Retrieve Document) transactions
+4. Create the VHL payload as a JSON object with:
    - url: the manifest URL from step 3
    - key: the base64url-encoded encryption key from step 2
    - exp: (optional) expiration time in Epoch seconds
@@ -105,7 +127,63 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
    - label: (optional) description string
 5. Minify the JSON (remove whitespace)
 6. Base64url-encode the minified JSON
-7. Construct the final SHL URL: shlink:/[base64url-encoded-payload]
+7. Construct the final VHL URL: vhlink:/[base64url-encoded-payload]
+
+**Complete Example:**
+
+**Scenario 1: VHL Sharer without Include DocumentReference Option**
+
+Given:
+- Folder ID: `abc123def456`
+- Patient: `urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123`
+- Base URL: `https://vhl-sharer.example.org`
+- Encryption key (base64url): `dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j`
+- Expiration: `1735689600` (December 31, 2024)
+- Label: `Patient Health Summary`
+
+Manifest URL:
+```
+https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123
+```
+
+VHL Payload (before encoding):
+```json
+{
+  "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123",
+  "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
+  "exp": 1735689600,
+  "label": "Patient Health Summary"
+}
+```
+
+Final VHL:
+```
+vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMiLCJrZXkiOiJkR2hwY3lCcGN5QmhJSE5sWTNKbGRDQnJaWGtnZFhObFpDQm1iM0lnWlc1aiIsImV4cCI6MTczNTY4OTYwMCwibGFiZWwiOiJQYXRpZW50IEhlYWx0aCBTdW1tYXJ5In0
+```
+
+**Scenario 2: VHL Sharer with Include DocumentReference Option**
+
+Same parameters, but manifest URL includes `_include=List:item`:
+
+Manifest URL:
+```
+https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
+```
+
+VHL Payload (before encoding):
+```json
+{
+  "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+  "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
+  "exp": 1735689600,
+  "label": "Patient Health Summary"
+}
+```
+
+Final VHL:
+```
+vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiZEdocGN5QnBjeUJoSUhObFkzSmxkQ0JyWlhrZ2RYTmxaQ0JtYjNJZ1pXNWoiLCJleHAiOjE3MzU2ODk2MDAsImxhYmVsIjoiUGF0aWVudCBIZWFsdGggU3VtbWFyeSJ9
+```
 
 **QR Code Generation (HCERT/CWT Encoding)**
 
@@ -118,7 +196,7 @@ When generating a QR code (goal='qrcode' or 'both'), the VHL Sharer SHALL encode
    - iss (issuer, claim key 1): optional ISO 3166-1 alpha-2 country code
    - iat (issued at, claim key 6): timestamp in NumericDate format
    - exp (expiration, claim key 4): timestamp in NumericDate format
-   - hcert (health certificate, claim key -260): object containing claim key 5 with the SHL payload object
+   - hcert (health certificate, claim key -260): object containing claim key 5 with the VHL payload object
 3. Sign the CWT using asymmetric signature (COSE, RFC 8152)
 4. Compress the signed CWT using ZLIB (RFC 1950) with Deflate (RFC 1951)
 5. Encode compressed CWT as Base45
