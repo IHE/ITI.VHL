@@ -93,7 +93,7 @@ Where **[manifest-url]** is the complete URL from the VHL payload, including all
 
 **Example Manifest URL from VHL:**
 ```
-https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
+https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
 ```
 
 **Multipart Request Structure:**
@@ -235,7 +235,7 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Use receiver's public key from trust list for verification
      - Reject if signature invalid or receiver not trusted
 
-2. **Authorize Request**:
+2. **Authorize Request**: **Verify Manifest Request Signature Option**
    - Validate the folder ID (_id parameter) corresponds to a valid VHL
    - Verify VHL signature matches the original issuance
    - Confirm VHL not expired (check against issuance time + validity period)
