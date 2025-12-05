@@ -10,8 +10,6 @@ note right
   Transmission via:
   - QR code scan
   - Deep link (URL)
-  - Verifiable Credential
-  - NFC/Bluetooth
 end note
 
 Receiver --> Holder: (Optional Acknowledgment)

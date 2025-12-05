@@ -32,8 +32,13 @@ Depending on the use case, the VHL MAY be rendered or transmitted using formats 
 - **RFC 7515**: JSON Web Signature (JWS)
 - **RFC 7519**: JSON Web Token (JWT)  
 - **RFC 4648**: Base64url Encoding
+- **RFC 8392**: CBOR Web Token (CWT)
+- **RFC 8152**: CBOR Object Signing and Encryption (COSE)
+- **RFC 1950**: ZLIB Compressed Data Format
+- **RFC 1951**: DEFLATE Compressed Data Format
 - **ISO/IEC 18004:2015**: QR Code specification
 - **SMART Health Links Specification**: [VHL Payload Structure](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html)
+- **WHO SMART Trust HCERT Specification**: [HCERT Structure](https://smart.who.int/trust/hcert_spec.html)
 
 ### 2:3.YY4.4 Messages
 
@@ -56,32 +61,21 @@ A VHL Holder initiates the Provide VHL transaction when:
 
 ##### 2:3.YY4.4.1.2 Message Semantics
 
-The VHL payload structure is defined in [Volume 3](volume-3.html) and aligns with the SMART Health Links specification. The VHL contains at minimum:
-- Manifest URL (HTTPS URL pointing to document manifest)
-- Digital Signature (JWS signature by VHL Sharer)
-- Issuer Identifier (VHL Sharer identifier)
-- Optional: Expiration timestamp, passcode flag, usage constraints, label
-
-**VHL Encoding:**
-
-The VHL payload is:
-1. Serialized as compact JSON
-2. Compressed using DEFLATE
-3. Base64url-encoded per RFC 4648
-4. Prefixed with `shlink:/`
+The VHL payload structure is defined in [ITI-YY3](ITI-YY3.html) and aligns with the SMART Health Links specification. 
 
 **Transmission Options**
 
 Implementations SHALL support at least one of the following transmission mechanisms (see Volume 1 Section XX.2 for option details):
 
 **QR Code Rendering Option:**
-- VHL encoded as QR code (ISO/IEC 18004:2015)
+- VHL encoded as HCERT QR code with `HC1:` prefix
 - Suitable for in-person encounters, walk-in clinics, emergency departments
-- QR code contains the complete `shlink:/` URL string
+- QR code contains HCERT/CWT structure with embedded SHL payload
 
 **Deep Link Sharing Option:**
-- VHL transmitted as `shlink:/` URL via secure messaging, email, or web links
+- VHL transmitted as `vhlink:/` URL via secure messaging, email, or web links
 - Suitable for telehealth, asynchronous coordination
+- Direct JSON payload without HCERT wrapping
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
 
@@ -89,13 +83,13 @@ The VHL Holder SHALL:
 1. Verify VHL validity (not expired)
 2. Select appropriate transmission mechanism based on claimed options
 3. Render/transmit VHL according to option requirements
-4. Provide passcode out-of-band if VHL is passcode-protected
+4. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
 
 The VHL Holder MAY:
 - Maintain record of VHL transmissions
 - Revoke VHL access if supported by VHL Sharer
 
-##### 2:3.YY4.4.1.3 Expected Actions - VHL Receiver
+##### 2:3.YY4.4.1.4 Expected Actions - VHL Receiver
 
 {{ provideVHLRespDescription.valueMarkdown }}
 
@@ -154,32 +148,37 @@ When the VHL Receiver claims the QR Code Scanning Option, the following steps SH
 8. **Extract SHL Payload from HCERT**:
    - Within the `hcert` claim (claim key -260), locate claim key 5
    - Claim key 5 contains the SHL payload object with:
-     - `url`: manifest URL (required)
+     - `url`: manifest URL (required) - includes all mandatory FHIR search parameters
      - `key`: base64url-encoded decryption key, 43 characters (required)
-     - `flag`: flags such as "P" for passcode, "L" for long-term (optional)
+     - `flag`: flags such as "L" for long-term, "P" for passcode (optional)
      - `label`: human-readable description (optional)
      - `exp`: expiration timestamp in seconds since epoch (optional)
+     - `v`: version number (optional)
    - Validate SHL payload structure conforms to SMART Health Links specification
 
 9. **Validate SHL Payload**:
    - Verify `url` field is present and is a valid HTTPS URL
    - Verify `key` field is present and is 43 characters (base64url-encoded 32 bytes)
    - Check SHL `exp` (if present) - reject if current time > expiration
-   - Note `flag` value (e.g., "P" indicates passcode required, "L" for long-term)
-   - Validate `url` points to expected manifest endpoint format
+   - Note `flag` value:
+     - "L" indicates long-term use
+     - "P" indicates passcode required (obtain from VHL Holder)
+     - "LP" indicates both long-term and passcode-protected
+   - Validate `url` contains expected manifest endpoint format with mandatory parameters
 
 **For Deep Link Processing Option:**
 
 When the VHL Receiver claims the Deep Link Processing Option:
 
-1. **Receive shlink:/ URL**:
+1. **Receive vhlink:/ URL**:
    - Accept URL via secure messaging, email, web link, or direct input
-   - Verify URL begins with `shlink:/` prefix
+   - Verify URL begins with `vhlink:/` prefix
+   - Example: `vhlink:/eyJ1cmwiOiJodHRwczovL...`
 
 2. **Extract Base64url-encoded Payload**:
-   - Remove the `shlink:/` prefix from the string
+   - Remove the `vhlink:/` prefix from the string
    - The remaining string is the base64url-encoded minified JSON payload
-   - Example: `shlink:/eyJ1cmwiOiJodHRwczovL...` → `eyJ1cmwiOiJodHRwczovL...`
+   - Example: `vhlink:/eyJ1cmwiOiJodHRwczovL...` → `eyJ1cmwiOiJodHRwczovL...`
 
 3. **Base64url Decode**:
    - Decode the base64url-encoded string per RFC 4648
@@ -188,9 +187,9 @@ When the VHL Receiver claims the Deep Link Processing Option:
 
 4. **Parse JSON Payload**:
    - Parse the JSON string to extract SHL payload object containing:
-     - `url`: manifest URL (required)
+     - `url`: manifest URL (required) - includes all mandatory FHIR search parameters
      - `key`: base64url-encoded decryption key, 43 characters (required)
-     - `flag`: flags such as "P" for passcode (optional)
+     - `flag`: flags such as "L" for long-term, "P" for passcode (optional)
      - `label`: human-readable description (optional)
      - `exp`: expiration timestamp in seconds since epoch (optional)
      - `v`: version number (optional, defaults to 1)
@@ -200,8 +199,8 @@ When the VHL Receiver claims the Deep Link Processing Option:
    - Verify `url` field is present and is a valid HTTPS URL
    - Verify `key` field is present and is 43 characters
    - Check `exp` (if present) - reject if current time > expiration
-   - Note `flag` value (e.g., "P" indicates passcode required)
-   - Validate `url` points to expected manifest endpoint format
+   - Note `flag` value (e.g., "P" indicates passcode required, "L" for long-term)
+   - Validate `url` contains expected manifest endpoint format with mandatory parameters
 
 **Common Post-Decoding Actions (Both Options):**
 
@@ -210,15 +209,27 @@ After successfully decoding the VHL payload, the VHL Receiver SHALL:
 1. **Store Decryption Key Securely**:
    - The `key` parameter from the SHL payload is required to decrypt documents
    - Store the key securely in memory for the session
-   - The key will be used during document retrieval (ITI-YY5) to decrypt file contents
+   - The key will be used during document retrieval (ITI-YY6) to decrypt document contents
 
-2. **Prepare to Retrieve Associated Health Documents**:
-   - Extract manifest URL from validated SHL payload
-   - Validate usage constraints if present
-   - Prepare to initiate document retrieval [(ITI-YY5)](ITI-YY5.html) using the manifest URL and decryption key
+2. **Parse Manifest URL**:
+   - Extract the manifest URL from the SHL payload
+   - The URL format from ITI-YY3 includes mandatory FHIR search parameters:
+     - `_id`: The folder ID
+     - `code`: Typically "folder"
+     - `status`: Typically "current"
+     - `patient.identifier`: Patient identifier in system|value format
+     - `_include=List:item`: (if VHL Sharer supports Include DocumentReference Option)
+   - Example: `https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item`
+
+3. **Prepare to Retrieve Manifest**:
+   - The VHL Receiver will use ITI-YY5 Retrieve Manifest with 3-part multipart request:
+     - **Part 1 (fhir-parameters):** FHIR search parameters from the manifest URL
+     - **Part 2 (shl-parameters):** JSON object with `recipient`, `passcode` (if P flag), `embeddedLengthMax`
+     - **Part 3 (signature):** Optional digital signature over Parts 1 and 2
+   - Store manifest URL and prepare SHL parameters for ITI-YY5 request
 
 The VHL Receiver MAY:
-- Prompt user for passcode if required by flag (validated during document retrieval)
+- Prompt user for passcode if "P" flag is present (required for ITI-YY5)
 - Display VHL label/description to user
 - Record audit event per **[Audit Event – Received Health Data](Requirements-AuditEventReceived.html)**
 - Cache VHL payload for subsequent access attempts
@@ -232,55 +243,93 @@ HC1:NCF3R0KLBBA...V8N8W.CE8WY
 Step 1: Verify and remove HC1: prefix → NCF3R0KLBBA...V8N8W.CE8WY
 Step 2: Base45 decode → [compressed bytes]
 Step 3: ZLIB/DEFLATE decompress → [CBOR bytes]
-Step 4: Parse CBOR as CWT → Extract protected header and claims
-Step 5: Verify signature using kid from header
-Step 6: Extract CWT claims (iss, iat, exp, hcert)
-Step 7: Within hcert (claim -260), extract claim 5 (SHL payload):
+Step 4: Parse CBOR as CWT → Extract protected header (alg: ES256, kid: 8-byte SHA-256)
+Step 5: Verify COSE signature using DSC from trust list based on kid
+Step 6: Extract CWT claims:
+  - iss (claim 1): "US"
+  - iat (claim 6): 1704067200
+  - exp (claim 4): 1735689600
+  - hcert (claim -260): {...}
+Step 7: Within hcert (claim -260), extract claim key 5 (SHL payload):
   {
-    "url": "https://vhl-sharer.example.org/List?_id=abc123&_include=List:item",
+    "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
     "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
     "flag": "LP",
     "exp": 1735689600,
-    "label": "Patient Health Summary"
+    "label": "Patient Health Summary",
+    "v": 1
   }
-Step 8: Validate SHL payload fields and prepare for document retrieval
+Step 8: Validate SHL payload fields
+Step 9: Parse manifest URL to extract FHIR search parameters
+Step 10: Prepare for ITI-YY5 Retrieve Manifest with 3-part multipart request
 ```
 
 **Decoding Example (Deep Link):**
 
 ```
 Input Deep Link:
-shlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzJl9pbmNsdWRlPUxpc3Q6aXRlbSIsImtleSI6ImRHaHBjeUJwY3lCaElITmxZM0psZENCclpYa2dkWE5sWkNCbWIzSWdaVzVqIiwiZmxhZyI6IkxQIiwiZXhwIjoxNzM1Njg5NjAwLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkifQ
+vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiZEdocGN5QnBjeUJoSUhObFkzSmxkQ0JyWlhrZ2RYTmxaQ0JtYjNJZ1pXNWoiLCJmbGFnIjoiTFAiLCJleHAiOjE3MzU2ODk2MDAsImxhYmVsIjoiUGF0aWVudCBIZWFsdGggU3VtbWFyeSIsInYiOjF9
 
-Step 1: Remove shlink:/ prefix
+Step 1: Remove vhlink:/ prefix → eyJ1cmwiOiJodHRwczovL...
 Step 2: Base64url decode → JSON string
 Step 3: Parse JSON:
   {
-    "url": "https://vhl-sharer.example.org/List?_id=abc123&_include=List:item",
+    "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
     "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
     "flag": "LP",
     "exp": 1735689600,
-    "label": "Patient Health Summary"
+    "label": "Patient Health Summary",
+    "v": 1
   }
-Step 4: Validate SHL payload fields and prepare for document retrieval
+Step 4: Validate SHL payload fields
+Step 5: Parse manifest URL to extract FHIR search parameters
+Step 6: Prepare for ITI-YY5 Retrieve Manifest with 3-part multipart request
+```
+
+**Manifest URL Parsing:**
+
+The manifest URL from the SHL payload contains all parameters needed for ITI-YY5 Part 1 (fhir-parameters):
+
+```
+URL: https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
+
+Parsed FHIR Search Parameters (for ITI-YY5 Part 1):
+- _id=abc123def456
+- code=folder
+- status=current
+- patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123
+- _include=List:item (if present, indicates VHL Sharer supports Include DocumentReference Option)
 ```
 
 **Error Handling:**
 
 If decoding fails:
-- **QR Code Option**: QR unreadable, invalid HC1: prefix, Base45 decode error, ZLIB decompression error, CBOR parse error, invalid CWT structure
-- **Deep Link Option**: Invalid shlink:/ prefix, base64url decode error, JSON parse error, invalid SHL structure
-- VHL Receiver SHALL reject the VHL
-- VHL Receiver SHOULD inform user with specific error message
-- VHL Receiver MAY request user to rescan or re-enter VHL
+- **QR Code Option Errors:**
+  - QR unreadable or damaged
+  - Invalid HC1: prefix
+  - Base45 decode error
+  - ZLIB decompression error
+  - CBOR parse error
+  - Invalid CWT structure
+  - Missing hcert claim or claim key 5
+- **Deep Link Option Errors:**
+  - Invalid vhlink:/ prefix 
+  - Base64url decode error
+  - JSON parse error
+  - Invalid SHL structure
 
-If signature verification fails (QR Code Option):
+VHL Receiver SHALL:
+- Reject the VHL
+- Inform user with specific error message
+- MAY request user to rescan or re-enter VHL
+
+If signature verification fails (QR Code Option only):
 - VHL Receiver SHALL reject the VHL
 - VHL Receiver SHALL NOT attempt to retrieve documents
 - VHL Receiver SHOULD inform user/operator
 - VHL Receiver MAY log failed verification
 
-If VHL expired:
+If VHL expired (either exp in CWT or SHL payload):
 - VHL Receiver SHALL reject the VHL
 - VHL Receiver SHOULD inform user/operator
 - User may request new VHL from VHL Holder
@@ -315,51 +364,55 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 ### 2:3.YY4.5 Security Considerations
 
 #### 2:3.YY4.5.1 VHL Integrity and Authenticity
-- Digital signature ensures VHL issued by trusted VHL Sharer
-- VHL Receivers MUST verify signatures before trusting content
+- Digital signature (QR Code Option) ensures VHL issued by trusted VHL Sharer
+- VHL Receivers claiming QR Code Option MUST verify COSE signatures before trusting content
+- Deep Link Option does not include signature - relies on secure transmission channel
 
 #### 2:3.YY4.5.2 VHL Confidentiality
 - VHL does NOT contain PHI
 - VHL only contains reference (URL) to retrieve documents
 - Actual documents retrieved over secure channel (ITI-YY5)
+- Encryption key in VHL enables document decryption (ITI-YY6)
 
 #### 2:3.YY4.5.3 Replay Attacks
-- VHL Sharers SHOULD include expiration timestamps
+- VHL Sharers SHOULD include expiration timestamps in both CWT and SHL payload
 - VHL Receivers SHOULD enforce expiration validation
 - VHL Sharers MAY implement single-use VHLs
+- Short expiration times reduce replay attack window
 
 #### 2:3.YY4.5.4 Passcode Protection
 - Passcode communicated out-of-band (not in VHL)
-- Passcode validated during document retrieval (ITI-YY5)
-- VHL Sharers SHOULD implement rate limiting
+- "P" flag indicates passcode required
+- Passcode validated during manifest retrieval (ITI-YY5 Part 2)
+- VHL Sharers SHOULD implement rate limiting on passcode attempts
 
 #### 2:3.YY4.5.5 Trust Network Validation
-VHL Receivers MUST:
+VHL Receivers claiming QR Code Scanning Option MUST:
 - Validate VHL Sharer is current participant in trust network
+- Retrieve DSC from trust list using kid from CWT protected header
 - Check certificate revocation status where applicable
 - Reject VHLs from untrusted participants
 
 #### 2:3.YY4.5.6 Transmission Security
 
-**QR Codes:**
+**QR Codes (HC1: prefix):**
 - Can be photographed/copied
 - Use for time-limited scenarios
 - Suitable for supervised encounters
+- Digital signature provides authenticity verification
+- Recommended for higher security scenarios
 
-**Deep Links:**
+**Deep Links (vhlink:/ prefix):**
 - Use HTTPS for transmission
 - May be forwarded unintentionally
 - Include expiration/single-use constraints to mitigate risks
+- No built-in signature verification
+- Suitable for trusted communication channels
 
-### 2:3.YY4.6 Conformance
+#### 2:3.YY4.5.7 Prefix Distinction
+- VHL URLs use `vhlink:/` prefix (not `shlink:/`)
+- QR codes use `HC1:` prefix (HCERT format)
+- This distinguishes VHL from SMART Health Links
+- Applications can route appropriately based on prefix
 
-**VHL Holder SHALL:**
-- Support at least one VHL rendering option (QR Code Rendering or Deep Link Sharing)
-- Provide passcodes out-of-band when required
 
-**VHL Receiver SHALL:**
-- Support at least one VHL processing option (QR Code Scanning or Deep Link Processing)
-- Verify VHL digital signatures before trusting content
-- Validate VHL expiration when present
-- Retrieve public keys from trusted Trust Anchors
-- Reject VHLs with invalid signatures or expired validity

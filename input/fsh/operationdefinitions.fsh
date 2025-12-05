@@ -3,7 +3,7 @@ InstanceOf: OperationDefinition
 Usage: #definition
 * url = "http://example.org/fhir/OperationDefinition/generate-vhl"
 * title = "Generate VHL"
-* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display.\n\nInput Parameters:\n- sourceIdentifier: Patient identifier (required)\n- targetSystem: Target Patient Identifier Assigning Authority (optional)\n- exp: Expiration time in Epoch seconds (optional)\n- flag: Single-character flags in alphabetical order - L (long-term use), P (Passcode required), U (direct file access) (optional)\n- label: Short description up to 80 characters (optional)\n- goal: Specifies output - 'vhl', 'qrcode', or 'both' (optional, defaults to 'both')\n\nOutput Generation:\n- When goal='vhl' or 'both': Returns the VHL URL as a uri parameter. The VHL contains the SHL payload (base64url-encoded JSON with url, flag, key, label, exp) that can be used to access the manifest.\n- When goal='qrcode' or 'both': Returns a Binary resource containing the QR code image (PNG or SVG format) that encodes the complete SMART Health Link (shlink:/...) for scanning.\n- The QR code embeds the full SHL payload including the manifest URL and decryption key for secure access to health documents."
+* description = "This operation generates a signed Verifiable Health Link (VHL) and optionally a QR code for transmission or display.\n\nInput Parameters:\n- sourceIdentifier: Patient identifier (required)\n- targetSystem: Target Patient Identifier Assigning Authority (optional)\n- exp: Expiration time in Epoch seconds (optional)\n- flag: Single-character flags in alphabetical order - L (long-term use), P (Passcode required), U (direct file access) (optional)\n- label: Short description up to 80 characters (optional)\n- passcode: User-supplied passcode for passcode-protected VHLs (optional)\n- goal: Specifies output - 'vhl', 'qrcode', or 'both' (optional, defaults to 'both')\n\nOutput Generation:\n- When goal='vhl' or 'both': Returns the VHL URL as a uri parameter. The VHL contains the SHL payload (base64url-encoded JSON with url, flag, key, label, exp) that can be used to access the manifest.\n- When goal='qrcode' or 'both': Returns a Binary resource containing the QR code image (PNG or SVG format) that encodes the complete SMART Health Link (vhlink:/...) for scanning.\n- The QR code embeds the full SHL payload including the manifest URL and decryption key for secure access to health documents."
 * name = "GenerateVHL"
 * status = #active
 * kind = #operation
@@ -47,6 +47,13 @@ Usage: #definition
   * type = #string
   * documentation = "Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink."
 * parameter[+]
+  * name = #passcode
+  * use = #in
+  * min = 0
+  * max = "1"
+  * type = #string
+  * documentation = "Optional. User-supplied passcode for passcode-protected VHLs. If provided, the VHL Sharer SHALL securely hash and store this passcode for validation during manifest retrieval (ITI-YY5). The 'P' flag SHALL be included in the flag parameter when a passcode is set."
+* parameter[+]
   * name = #goal
   * use = #in
   * min = 0
@@ -62,7 +69,7 @@ Usage: #definition
   * min = 0
   * max = "*"
   * type = #uri
-  * documentation = "The signed VHL URL containing the SMART Health Link payload.\n\nVHL Generation Process:\n1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier\n2. Generate a 32-byte (256-bit) random encryption key, base64url-encode it (resulting in 43 characters) - this is the 'key' parameter\n3. Construct the manifest URL as a query on the base List resource with _include parameter:\n   [base]/List?_id=[folder-id]&_include=List:item\n4. Create the SHL payload as a JSON object with:\n   - url: the manifest URL from step 3\n   - key: the base64url-encoded encryption key from step 2\n   - exp: (optional) expiration time in Epoch seconds\n   - flag: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term)\n   - label: (optional) description string\n5. Minify the JSON (remove whitespace)\n6. Base64url-encode the minified JSON\n7. Construct the final SHL URL: shlink:/[base64url-encoded-payload]\n\nFor complete specification details, see: https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#construct-a-smart-health-link-payload"
+  * documentation = "The signed VHL URL containing the SMART Health Link payload.\n\nVHL Generation Process:\n1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier\n2. Generate a 32-byte (256-bit) random encryption key, base64url-encode it (resulting in 43 characters) - this is the 'key' parameter\n3. Construct the manifest URL as a query on the base List resource:\n   - If VHL Sharer supports Include DocumentReference Option:\n     [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[patient-id]&_include=List:item\n   - If VHL Sharer does NOT support Include DocumentReference Option:\n     [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[patient-id]\n4. Create the SHL payload as a JSON object with:\n   - url: the manifest URL from step 3\n   - key: the base64url-encoded encryption key from step 2 (43 characters)\n   - exp: (optional) expiration time in Epoch seconds\n   - flag: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term, 'U' for direct file access)\n   - label: (optional) description string (max 80 characters)\n   - v: version number (defaults to 1)\n5. Minify the JSON (remove whitespace)\n6. Base64url-encode the minified JSON\n7. Construct the final VHL URL: vhlink:/[base64url-encoded-payload]\n\nFor complete specification details, see: https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#construct-a-smart-health-link-payload"
 * parameter[+]
   * name = #qrcode
   * use = #out
