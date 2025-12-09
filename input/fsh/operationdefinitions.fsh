@@ -38,7 +38,7 @@ Usage: #definition
   * min = 0
   * max = "1"
   * type = #string
-  * documentation = "Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access)."
+  * documentation = "Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required)"
 * parameter[+]
   * name = #label
   * use = #in
