@@ -218,116 +218,14 @@ Options that may be selected for each actor in this implementation guide are lis
 |----------------|--------------------------------------|
 | {{ linkvhlr }} | Sign Manifest Request                |
 | ^              | Verify Document Signature            |
+| ^              | OAuth with FAST                      |
 | {{ linkvhls }} | Include DocumentReference            |
-| ^              | Verify Manifest Request Signature    |
-| ^              | Record Consent                       |
-| ^              | Audit Event                          |
+| ^              | Sign Manifest Request                |
+| ^              | OAuth with FAST                      |
 {: .grid}
 
-**Note:** Sign Manifest Request Option (VHL Receiver) and Verify Manifest Request Signature Option (VHL Sharer) are complementary - if one actor supports signing, the other should support verification for mutual authentication.
 
-### XX.2.1 Trust Establishment for VHL Sharer and VHL Receiver
-
-VHL Sharer and VHL Receiver actors have two approaches to establish trust with the {{ linkta }}:
-
-**Approach 1: DID-based Trust Establishment (Recommended)**
-- Implement ITI-YY1 Submit PKI Material with DID
-- Implement ITI-YY2 Retrieve Trust List with DID
-- Enables interoperability testing at IHE Connectathons
-- Provides standardized, jurisdiction-independent trust establishment
-- Follows W3C DID Core specification
-
-**Approach 2: Alternative Trust Establishment**
-- Do not implement ITI-YY1 or ITI-YY2
-- Use jurisdiction-specific PKI exchange mechanisms (out of scope for this profile)
-- Cannot participate in IHE Connectathon testing for trust establishment
-- Must document mechanisms in IHE Integration Statement
-- Implementation-specific interoperability requirements
-
-**Interoperability Testing:**
-
-The VHL Profile defines trust establishment through the DID-based transactions ITI-YY1 and ITI-YY2. While these transactions are optional for VHL Sharer and VHL Receiver actors, they represent the ONLY standardized mechanism for demonstrating interoperability at IHE Connectathons.
-
-Implementations using alternative trust establishment mechanisms:
-- Are conformant to this profile
-- May be appropriate for specific jurisdictional deployments
-- Cannot demonstrate cross-jurisdiction interoperability at Connectathons
-- SHALL document their trust establishment approach in their IHE Integration Statement
-
-**IHE RECOMMENDS** that implementations support ITI-YY1 and ITI-YY2 to maximize interoperability potential.
-
-### XX.2.2 QR Code Rendering Option
-
-The QR Code Rendering Option enables the {{ linkvhlh }} or {{ linkvhls }} to render a VHL as a QR code that can be displayed on a screen or printed on paper.
-
-Actors claiming the QR Code Rendering Option SHALL:
-- Generate QR codes conforming to ISO/IEC 18004:2015
-- Encode VHL using HCERT/CWT structure with `HC1:` prefix
-- Use Error Correction Level Q (25%) as recommended
-- Generate QR codes in PNG or SVG format
-- Ensure QR codes are of sufficient size and quality for reliable scanning (minimum recommended diagonal size: 35-60mm)
-- Include adequate quiet zone (white border) around the QR code
-
-This option is suitable for:
-- In-person encounters where the VHL Holder can display their device to the VHL Receiver
-- Printed materials such as health cards or discharge summaries
-- Walk-in clinics, emergency departments, and point-of-care scenarios
-
-See ITI-YY3 Section 2:3.YY3.4.1.3 for detailed QR code generation requirements including HCERT/CWT encoding.
-
-### XX.2.3 Deep Link Sharing Option
-
-The Deep Link Sharing Option enables the {{ linkvhlh }} or {{ linkvhls }} to share a VHL as a URL that can be transmitted via secure messaging, email, or other electronic communication channels.
-
-Actors claiming the Deep Link Sharing Option SHALL:
-- Generate VHLs as URLs with the `vhlink:/` prefix
-- Ensure URLs are transmitted over secure channels
-- Support URL formats compatible with standard web browsers and mobile applications
-
-This option is suitable for:
-- Telehealth and remote consultation scenarios
-- Asynchronous care coordination
-- Sharing via secure messaging platforms or patient portals
-- Email transmission (when appropriately secured)
-
-VHL Holders and VHL Sharers using this option SHOULD:
-- Include expiration timestamps in VHLs to limit the window of potential forwarding
-- Consider single-use VHLs for high-security scenarios
-- Inform users about the risks of unintended forwarding
-
-### XX.2.4 QR Code Scanning Option
-
-The QR Code Scanning Option enables the {{ linkvhlr }} to scan and decode QR codes containing VHLs.
-
-Actors claiming the QR Code Scanning Option SHALL:
-- Support scanning of QR codes conforming to ISO/IEC 18004:2015
-- Decode QR codes with `HC1:` prefix (HCERT format)
-- Perform Base45 decoding
-- Decompress using ZLIB/DEFLATE
-- Parse CBOR Web Token (CWT) structure
-- Verify COSE digital signatures using DSC from trust list
-- Extract SHL payload from hcert claim (claim key -260, key 5)
-- Validate the VHL payload according to ITI-YY4 Section 2:3.YY4.4.1.4
-- Handle QR codes displayed on screens or printed on paper
-- Provide appropriate user feedback during the scanning process
-
-The complete QR Code Scanning process is detailed in ITI-YY4 Expected Actions for VHL Receiver.
-
-### XX.2.5 Deep Link Processing Option
-
-The Deep Link Processing Option enables the {{ linkvhlr }} to receive and process VHLs transmitted as URLs.
-
-Actors claiming the Deep Link Processing Option SHALL:
-- Accept VHL URLs with `vhlink:/` prefix via secure channels
-- Parse and validate the URL structure
-- Perform base64url decoding
-- Parse JSON payload
-- Extract and validate the SHL payload according to ITI-YY4 Section 2:3.YY4.4.1.4
-- Handle URLs received via secure messaging, email, or other electronic means
-
-This option is suitable for receiving VHLs in telehealth and asynchronous care scenarios.
-
-### XX.2.6 Sign Manifest Request Option (VHL Receiver)
+### XX.2.1 Sign Manifest Request Option (VHL Receiver)
 
 The Sign Manifest Request Option enables the {{ linkvhlr }} to digitally sign manifest requests sent to the {{ linkvhls }}.
 
@@ -348,9 +246,9 @@ This option provides:
 
 See ITI-YY5 Section 2:3.YY5.4.1.2 for detailed signature format and ITI-YY5 Section 2:3.YY5.6 for conformance requirements.
 
-### XX.2.7 Verify Manifest Request Signature Option (VHL Sharer)
+### XX.2.1 Sign Manifest Request Option (VHL Sharer)
 
-The Verify Manifest Request Signature Option enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
+The Sign Manifest Request Signature Option enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
 
 Actors claiming the Verify Manifest Request Signature Option SHALL:
 - Parse Part 2 (signature) from multipart requests in ITI-YY5
@@ -371,7 +269,7 @@ This option provides:
 
 See ITI-YY5 Section 2:3.YY5.4.1.3 for verification process and ITI-YY5 Section 2:3.YY5.6 for conformance requirements.
 
-### XX.2.8 Include DocumentReference Option (VHL Sharer)
+### XX.2.2 Include DocumentReference Option (VHL Sharer)
 
 The Include DocumentReference Option enables the {{ linkvhls }} to process the `_include=List:item` parameter in manifest requests and return DocumentReference resources along with the List resource in a single response.
 
@@ -397,7 +295,7 @@ Actors NOT claiming the Include DocumentReference Option SHALL:
 
 See ITI-YY5 Section 2:3.YY5.4.1.3 for detailed behavior and ITI-YY5 Section 2:3.YY5.6 for conformance requirements.
 
-### XX.2.9 Verify Document Signature Option (VHL Receiver)
+### XX.2.3 Verify Document Signature Option (VHL Receiver)
 
 In this option the {{ linkvhlr }}, after receipt of a digitally signed document from a {{ linkvhls }}, shall verify the digital signature using previously retrieved PKI material. This key material may or may not be distributed under the same trust network under which the VHL was distributed. This key material may or may not be the same key material that was used to verify the VHL.
 
@@ -405,163 +303,6 @@ See cross-profile considerations for a discussion of the relationship of this op
 
 This option is captured in the following business requirement:
 * [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
-
-### XX.2.10 Record Consent Option (VHL Sharer)
-
-In this option the {{ linkvhls }} acts as a Consent Recorder from the Privacy Consent on FHIR (PCF) profile. In this option, the {{ linkvhls }} SHALL initiate an [Access Consent: ITI-108](https://profiles.ihe.net/ITI/PCF/ITI-108.html) transaction as part of the Expected Actions after receipt of a Generate VHL request. The Access Consent transaction is used to record the consent declarations by the VHL Holder for the sharing of the (set of) health document(s) by the {{ linkvhls }} to any authorized {{ linkvhlr }} within the trust network for a specified use case.
-
-This option is captured in the following business requirement:
-* [Record Consent](Requirements-RecordConsent.html)
-
-### XX.2.11 Audit Event Option (VHL Sharer)
-
-In this option the {{ linkvhls }} records an audit event for critical events in the access of health documents including:
-* Request for the generation of a VHL by a VHL Holder; and
-* Request for access to a (set of) health document(s) by a {{ linkvhlr }}.
-
-This option is captured in the following business requirement:
-* [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
-
-
-Options that may be selected for each actor in this implementation guide are listed in Table XX.2-1 below. Dependencies between options when applicable are specified in notes.
-
-<p id ="tXX.2-1" class="tableTitle">Table XX.2-1: Actor Options</p>
-
-| Actor          | Option Name               |
-|----------------|---------------------------|
-| {{ linkvhlh }} | QR Code Rendering         |
-| ^              | Deep Link Sharing         |
-| {{ linkvhlr }} | QR Code Scanning          |
-| ^              | Deep Link Processing      |
-| ^              | Verify Document Signature |
-| {{ linkvhls }} | QR Code Rendering         |
-| ^              | Deep Link Sharing         |
-| ^              | Record Consent            |
-| ^              | Audit Event               |
-{: .grid}
-
-Note 1: VHL Holder and VHL Sharer SHALL support at least one VHL rendering option (QR Code Rendering or Deep Link Sharing).
-
-Note 2: VHL Receiver SHALL support at least one VHL processing option (QR Code Scanning or Deep Link Processing) that corresponds to the rendering option(s) used by VHL Holders.
-
-### XX.2.1 Trust Establishment for VHL Sharer and VHL Receiver
-
-VHL Sharer and VHL Receiver actors have two approaches to establish trust with the {{ linkta }}:
-
-**Approach 1: DID-based Trust Establishment (Recommended)**
-- Implement ITI-YY1 Submit PKI Material with DID
-- Implement ITI-YY2 Retrieve Trust List with DID
-- Enables interoperability testing at IHE Connectathons
-- Provides standardized, jurisdiction-independent trust establishment
-- Follows W3C DID Core specification
-
-**Approach 2: Alternative Trust Establishment**
-- Do not implement ITI-YY1 or ITI-YY2
-- Use jurisdiction-specific PKI exchange mechanisms (out of scope for this profile)
-- Cannot participate in IHE Connectathon testing for trust establishment
-- Must document mechanisms in IHE Integration Statement
-- Implementation-specific interoperability requirements
-
-**Interoperability Testing:**
-
-The VHL Profile defines trust establishment through the DID-based transactions ITI-YY1 and ITI-YY2. While these transactions are optional for VHL Sharer and VHL Receiver actors, they represent the ONLY standardized mechanism for demonstrating interoperability at IHE Connectathons.
-
-Implementations using alternative trust establishment mechanisms:
-- Are conformant to this profile
-- May be appropriate for specific jurisdictional deployments
-- Cannot demonstrate cross-jurisdiction interoperability at Connectathons
-- SHALL document their trust establishment approach in their IHE Integration Statement
-
-**IHE RECOMMENDS** that implementations support ITI-YY1 and ITI-YY2 to maximize interoperability potential.
-
-### XX.2.2 QR Code Rendering Option
-
-The QR Code Rendering Option enables the {{ linkvhlh }} or {{ linkvhls }} to render a VHL as a QR code that can be displayed on a screen or printed on paper.
-
-Actors claiming the QR Code Rendering Option SHALL:
-- Generate QR codes conforming to ISO/IEC 18004:2015
-- Encode the complete `shlink:/` URL string in the QR code
-- Use Error Correction Level L (Low) - approximately 7% error correction
-- Generate QR codes in PNG or SVG format
-- Ensure QR codes are of sufficient size and quality for reliable scanning (minimum 2cm x 2cm when printed)
-- Include adequate quiet zone (white border) around the QR code
-
-This option is suitable for:
-- In-person encounters where the VHL Holder can display their device to the VHL Receiver
-- Printed materials such as health cards or discharge summaries
-- Walk-in clinics, emergency departments, and point-of-care scenarios
-
-See ITI-YY3 Section 2:3.YY3.4.2.3 for detailed QR code generation requirements.
-
-### XX.2.3 Deep Link Sharing Option
-
-The Deep Link Sharing Option enables the {{ linkvhlh }} or {{ linkvhls }} to share a VHL as an HTTPS URL that can be transmitted via secure messaging, email, or other electronic communication channels.
-
-Actors claiming the Deep Link Sharing Option SHALL:
-- Generate VHLs as complete HTTPS URLs with the `shlink:/` prefix
-- Ensure URLs are transmitted over secure channels
-- Support URL formats compatible with standard web browsers and mobile applications
-
-This option is suitable for:
-- Telehealth and remote consultation scenarios
-- Asynchronous care coordination
-- Sharing via secure messaging platforms or patient portals
-- Email transmission (when appropriately secured)
-
-VHL Holders and VHL Sharers using this option SHOULD:
-- Include expiration timestamps in VHLs to limit the window of potential forwarding
-- Consider single-use VHLs for high-security scenarios
-- Inform users about the risks of unintended forwarding
-
-### XX.2.4 QR Code Scanning Option
-
-The QR Code Scanning Option enables the {{ linkvhlr }} to scan and decode QR codes containing VHLs.
-
-Actors claiming the QR Code Scanning Option SHALL:
-- Support scanning of QR codes conforming to ISO/IEC 18004:2015
-- Decode QR codes containing `shlink:/` URLs
-- Extract and validate the VHL payload according to the decoding process specified in ITI-YY4 Section 2:3.YY4.4.1.3
-- Handle QR codes displayed on screens or printed on paper
-- Provide appropriate user feedback during the scanning process
-
-The QR Code Scanning process is detailed in ITI-YY4 Expected Actions for VHL Receiver.
-
-### XX.2.5 Deep Link Processing Option
-
-The Deep Link Processing Option enables the {{ linkvhlr }} to receive and process VHLs transmitted as HTTPS URLs.
-
-Actors claiming the Deep Link Processing Option SHALL:
-- Accept VHL URLs with `shlink:/` prefix via secure channels
-- Parse and validate the URL structure
-- Extract and decode the VHL payload according to the process specified in ITI-YY4
-- Handle URLs received via secure messaging, email, or other electronic means
-
-This option is suitable for receiving VHLs in telehealth and asynchronous care scenarios.
-
-### XX.2.6 Verify Document Signature Option
-
-In this option the {{ linkvhlr }}, after receipt of a digitally signed document from a {{ linkvhls }}, shall verify the digital signature using previously retrieved PKI material. This key material may or may not be distributed under the same trust network under which the VHL was distributed. This key material may or may not be the same key material that was used to verify the VHL.
-
-See cross-profile considerations for a discussion of the relationship of this option to the IHE Document Signature profile.
-
-This option is captured in the following business requirement:
-* [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
-
-### XX.2.7 Record Consent Option
-
-In this option the {{ linkvhls }} acts as a Consent Recorder from the Privacy Consent on FHIR (PCF) profile. In this option, the {{ linkvhls }} SHALL initiate an [Access Consent: ITI-108](https://profiles.ihe.net/ITI/PCF/ITI-108.html) transaction as part of the Expected Actions after receipt of a Generate VHL request. The Access Consent transaction is used to record the consent declarations by the VHL Holder for the sharing of the (set of) health document(s) by the {{ linkvhls }} to any authorized {{ linkvhlr }} within the trust network for a specified use case.
-
-This option is captured in the following business requirement:
-* [Record Consent](Requirements-RecordConsent.html)
-
-### XX.2.8 Audit Event Option
-
-In this option the {{ linkvhls }} records an audit event for critical events in the access of health documents including:
-* Request for the generation of a VHL by a VHL Holder; and
-* Request for access to a (set of) health document(s) by a {{ linkvhlr }}.
-
-This option is captured in the following business requirement:
-* [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
 
 
 <a name="required-groupings"> </a>
