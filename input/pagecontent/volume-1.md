@@ -216,25 +216,15 @@ Options that may be selected for each actor in this implementation guide are lis
 
 | Actor          | Option Name                          |
 |----------------|--------------------------------------|
-| {{ linkvhlh }} | QR Code Rendering                    |
-| ^              | Deep Link Sharing                    |
-| {{ linkvhlr }} | QR Code Scanning                     |
-| ^              | Deep Link Processing                 |
-| ^              | Sign Manifest Request                |
+| {{ linkvhlr }} | Sign Manifest Request                |
 | ^              | Verify Document Signature            |
 | {{ linkvhls }} | Include DocumentReference            |
 | ^              | Verify Manifest Request Signature    |
-| ^              | QR Code Rendering                    |
-| ^              | Deep Link Sharing                    |
 | ^              | Record Consent                       |
 | ^              | Audit Event                          |
 {: .grid}
 
-**Note 1:** VHL Holder and VHL Sharer SHALL support at least one VHL rendering option (QR Code Rendering or Deep Link Sharing).
-
-**Note 2:** VHL Receiver SHALL support at least one VHL processing option (QR Code Scanning or Deep Link Processing) that corresponds to the rendering option(s) used by VHL Holders.
-
-**Note 3:** Sign Manifest Request Option (VHL Receiver) and Verify Manifest Request Signature Option (VHL Sharer) are complementary - if one actor supports signing, the other should support verification for mutual authentication.
+**Note:** Sign Manifest Request Option (VHL Receiver) and Verify Manifest Request Signature Option (VHL Sharer) are complementary - if one actor supports signing, the other should support verification for mutual authentication.
 
 ### XX.2.1 Trust Establishment for VHL Sharer and VHL Receiver
 

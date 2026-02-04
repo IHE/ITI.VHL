@@ -66,8 +66,10 @@ Where **[base]** is the URL of VHL Sharer Service provider.
 The Generate VHL message is performed by an HTTP GET command shown below:
 
 ```
-GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&goal=[code]}{&exp=[integer]}{&flag=[string]}{&label=[string]}{&passcode=[string]}
+GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&exp=[integer]}{&flag=[string]}{&label=[string]}{&passcode=[string]}
 ```
+
+**Note:** The `goal` parameter has been removed. The operation always generates a QR code containing the VHL encoded as an HCERT/CWT structure.
 
 **Table 2:3.YY3.4.1.2-1: $generate-vhl Message HTTP query Parameters**
 
@@ -75,7 +77,6 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&
 | -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | sourceIdentifier     | [1..1]    | token       | The Patient Identifier that will be used to find documents associated with the Patient |
 | targetSystem         | [0..*]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected |
-| goal             | [0..1]    | code       | Returned VHL rendering type: 'vhl' (VHL only), 'qrcode' (QR code only), or 'both' (both VHL and QR code). Defaults to 'both' if not specified. |
 | exp      |  [0..1]  | integer        | Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Application determine if this QR is stale. |
 | flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
 | label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink. |
@@ -87,7 +88,9 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&
 
 {% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
 
-The {{linkvhls}} generates the VHL and QR code (if requested) as per the following:
+The {{linkvhls}} generates a QR code containing the VHL. The QR code is encoded as an HCERT/CWT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html) and contains the SHL payload embedded at claim key 5 within the hcert claim (claim key -260).
+
+The generation process is as follows:
 
 **Passcode Handling (if provided)**
 
@@ -126,11 +129,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
    - `label`: (optional) description string (max 80 characters)
    - `v`: version number (defaults to 1)
 
-5. Minify the JSON (remove all unnecessary whitespace)
 
-6. Base64url-encode the minified JSON
-
-7. Construct the final VHL URL: `vhlink:/[base64url-encoded-payload]`
 
 **Example VHL Construction:**
 
@@ -145,42 +144,36 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
   "v": 1
 }
 
-// Step 5: Minified JSON
-{"url":"https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item","key":"dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j","exp":1735689600,"flag":"LP","label":"Patient Health Summary","v":1}
-
-// Step 6: Base64url-encoded
-
-// Step 7: Final VHL URL
-vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiZEdocGN5QnBjeUJoSUhObFkzSmxkQ0JyWlhrZ2RYTmxaQ0JtYjNJZ1pXNWoiLCJleHAiOjE3MzU2ODk2MDAsImZsYWciOiJMUCIsImxhYmVsIjoiUGF0aWVudCBIZWFsdGggU3VtbWFyeSIsInYiOjF9
+// The SHL payload from step 4 will be embedded in the HCERT structure (see QR Code Generation below)
 ```
 
 **QR Code Generation (HCERT/CWT Encoding)**
 
-When generating a QR code (goal='qrcode' or 'both'), the VHL Sharer SHALL encode the VHL as an HCERT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html):
+After constructing the SHL payload (steps 1-4 above), the VHL Sharer SHALL encode it within an HCERT structure:
 
-1. Create a CBOR Web Token (CWT) structure per RFC 8392 with protected header containing:
+5. Create a CBOR Web Token (CWT) structure per RFC 8392 with protected header containing:
    - `alg` (algorithm): ES256 (ECDSA with SHA-256, primary) or PS256 (RSASSA-PSS with SHA-256, secondary)
    - `kid` (key identifier): truncated SHA-256 fingerprint of DSC (first 8 bytes)
 
-2. Add CWT claims:
+6. Add CWT claims:
    - `iss` (issuer, claim key 1): optional ISO 3166-1 alpha-2 country code
    - `iat` (issued at, claim key 6): timestamp in NumericDate format
    - `exp` (expiration, claim key 4): timestamp in NumericDate format
    - `hcert` (health certificate, claim key -260): object containing:
-     - claim key 5: the SHL payload object from VHL construction step 4
+     - claim key 5: the SHL payload object from step 4
 
-3. Sign the CWT using asymmetric signature algorithm (COSE, RFC 8152) with VHL Sharer's private key
+7. Sign the CWT using asymmetric signature algorithm (COSE, RFC 8152) with VHL Sharer's private key
 
-4. Compress the signed CWT using ZLIB (RFC 1950) with Deflate (RFC 1951) compression
+8. Compress the signed CWT using ZLIB (RFC 1950) with Deflate (RFC 1951) compression
 
-5. Encode the compressed CWT as Base45
+9. Encode the compressed CWT as Base45
 
-6. Prefix with context identifier `HC1:`
+10. Prefix with context identifier `HC1:`
 
-7. Generate QR code using ISO/IEC 18004:2015:
-   - Error correction level: Q (25% recommended)
-   - Mode: Alphanumeric (Mode 2)
-   - Recommended diagonal size: 35-60mm for physical QR codes
+11. Generate QR code using ISO/IEC 18004:2015:
+    - Error correction level: Q (25% recommended)
+    - Mode: Alphanumeric (Mode 2)
+    - Recommended diagonal size: 35-60mm for physical QR codes
 
 **Example HCERT/CWT Structure:**
 
@@ -219,7 +212,7 @@ The VHL Receiver will use this exact manifest URL when performing the ITI-YY5 Re
 
 
 #### 2:3.YY3.4.2  Generate VHL Response Message 
-The {{ linkvhls }} returns failure, or generates and returns zero to many VHL. Depending on the use case, the VHL maybe rendered using link or QR code.
+The {{ linkvhls }} returns failure, or generates and returns a QR code containing the VHL encoded as an HCERT/CWT structure.
 
 ##### 2:3.YY3.4.2.1 Trigger Events
 This message shall be sent when a request initiated by the {{linkvhlh}} has been processed successfully. 
@@ -236,47 +229,48 @@ with details.
 
 **Success Response:**
 
-The response SHALL include output parameters based on the `goal` parameter:
+The response SHALL include a single output parameter:
 
-| goal value | Output Parameters |
-|------------|------------------|
-| 'vhl' | VHL URL string (vhlink:/...) |
-| 'qrcode' | QR code image (base64-encoded or URL) |
-| 'both' (default) | Both VHL URL and QR code |
+| Parameter | Type | Cardinality | Description |
+|-----------|------|-------------|-------------|
+| qrcode | Binary | [1..1] | QR code image containing HCERT-encoded VHL |
 {: .grid}
-
-**VHL URL Output:**
-- SHALL use prefix `vhlink:/` (not `shlink:/`)
-- SHALL contain base64url-encoded SHL payload
-- SHALL be suitable for deep link activation or manual entry
 
 **QR Code Output:**
 - SHALL be encoded as HCERT with `HC1:` prefix
-- SHALL contain the same SHL payload embedded in HCERT claim structure
+- SHALL contain the SHL payload embedded in HCERT claim structure (claim key -260, key 5)
 - SHALL be suitable for camera scanning
+- SHALL be in PNG or SVG format
 
 ##### 2:3.YY3.4.2.3 Expected Actions
-The VHL Holder processes the results according to application-defined rules:
 
-- If VHL URL is returned: Store or share the `vhlink:/` URL for direct access
-- If QR code is returned: Display or print the QR code for scanning
-- Cache the encryption key securely for future document decryption (ITI-YY6)
+The VHL Holder SHALL:
+- Display or print the QR code for scanning by VHL Receivers
+- Cache the encryption key securely (extracted from SHL payload) for future document decryption
 - If a passcode was provided during generation:
-  - Securely store the plaintext passcode separately from the VHL URL/QR code
+  - Securely store the plaintext passcode separately from the QR code
   - Provide the passcode to authorized VHL Receivers for manifest retrieval (ITI-YY5)
-  - Consider secure transmission methods for sharing both VHL and passcode (e.g., out-of-band communication)
+  - Use secure transmission methods when sharing the passcode out-of-band
+
+The VHL Holder MAY:
+- Maintain record of QR code presentations
+- Revoke VHL access if supported by VHL Sharer
 
 
 ### 2:3.YY3.5 Security Considerations 
 
 #### 2:3.YY3.5.1 Encryption Key Security
 - The 32-byte encryption key MUST be generated using a cryptographically secure random number generator
-- The key is embedded in the VHL URL/QR code and MUST be kept confidential
+- The key is embedded in the SHL payload within the QR code and MUST be kept confidential
 - Loss of the key means loss of access to encrypted documents
+- The encryption key is not directly visible in the QR code as it is embedded within the signed and compressed HCERT structure
 
-#### 2:3.YY3.5.2 VHL URL Prefix
-- VHL URLs SHALL use the `vhlink:/` prefix to distinguish from SMART Health Links (`shlink:/`)
-- This allows applications to properly route VHL-specific processing
+#### 2:3.YY3.5.2 QR Code Security
+- QR codes contain the complete VHL including the encryption key
+- QR codes can be photographed or copied - use time-limited expiration
+- QR codes SHALL be encoded as HCERT with digital signatures for authenticity
+- Display QR codes in controlled environments when possible
+- Consider short expiration times (minutes to hours) for high-security scenarios
 
 #### 2:3.YY3.5.3 Passcode Security
 - If a passcode is provided, it MUST be securely hashed before storage using industry-standard algorithms (bcrypt, Argon2, PBKDF2)

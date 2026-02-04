@@ -17,7 +17,7 @@
 
 The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
-Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code or deep link (HTTPS URL). Actors SHALL support at least one rendering/transmission option as described in Volume 1 Section XX.2.
+The VHL is transmitted as a QR code containing an HCERT-encoded payload with the HC1: prefix. VHL Receivers scan the QR code to extract the VHL payload for subsequent document retrieval.
 
 ### 2:3.YY4.2 Actor Roles
 
@@ -61,43 +61,34 @@ A VHL Holder initiates the Provide VHL transaction when:
 
 ##### 2:3.YY4.4.1.2 Message Semantics
 
-The VHL payload structure is defined in [ITI-YY3](ITI-YY3.html) and aligns with the SMART Health Links specification. 
+The VHL payload structure is defined in [ITI-YY3](ITI-YY3.html) and aligns with the SMART Health Links specification.
 
-**Transmission Options**
+**QR Code Transmission**
 
-Implementations SHALL support at least one of the following transmission mechanisms (see Volume 1 Section XX.2 for option details):
-
-**QR Code Rendering Option:**
+The VHL is transmitted via QR code with the following characteristics:
 - VHL encoded as HCERT QR code with `HC1:` prefix
 - Suitable for in-person encounters, walk-in clinics, emergency departments
 - QR code contains HCERT/CWT structure with embedded SHL payload
-
-**Deep Link Sharing Option:**
-- VHL transmitted as `vhlink:/` URL via secure messaging, email, or web links
-- Suitable for telehealth, asynchronous coordination
-- Direct JSON payload without HCERT wrapping
+- Can be displayed on screen or printed on paper
+- Minimum recommended diagonal size: 35-60mm
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
 
 The VHL Holder SHALL:
-1. Verify VHL validity (not expired)
-2. Select appropriate transmission mechanism based on claimed options
-3. Render/transmit VHL according to option requirements
-4. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
+1. Verify QR code validity (not expired, CWT signature valid)
+2. Display QR code on device screen or provide printed copy
+3. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
+4. Ensure QR code is displayed at appropriate size for reliable scanning
 
 The VHL Holder MAY:
-- Maintain record of VHL transmissions
+- Maintain record of QR code presentations
 - Revoke VHL access if supported by VHL Sharer
 
 ##### 2:3.YY4.4.1.4 Expected Actions - VHL Receiver
 
 {{ provideVHLRespDescription.valueMarkdown }}
 
-Upon receiving a VHL, the VHL Receiver SHALL decode and validate it according to the claimed option:
-
-**For QR Code Scanning Option:**
-
-When the VHL Receiver claims the QR Code Scanning Option, the following steps SHALL be performed to decode an HCERT-wrapped VHL:
+Upon receiving a VHL via QR code, the VHL Receiver SHALL perform the following 9-step decoding process:
 
 1. **Scan QR Code**:
    - Use QR code scanner (camera, dedicated scanner, or software library)
@@ -166,43 +157,7 @@ When the VHL Receiver claims the QR Code Scanning Option, the following steps SH
      - "LP" indicates both long-term and passcode-protected
    - Validate `url` contains expected manifest endpoint format with mandatory parameters
 
-**For Deep Link Processing Option:**
-
-When the VHL Receiver claims the Deep Link Processing Option:
-
-1. **Receive vhlink:/ URL**:
-   - Accept URL via secure messaging, email, web link, or direct input
-   - Verify URL begins with `vhlink:/` prefix
-   - Example: `vhlink:/eyJ1cmwiOiJodHRwczovL...`
-
-2. **Extract Base64url-encoded Payload**:
-   - Remove the `vhlink:/` prefix from the string
-   - The remaining string is the base64url-encoded minified JSON payload
-   - Example: `vhlink:/eyJ1cmwiOiJodHRwczovL...` → `eyJ1cmwiOiJodHRwczovL...`
-
-3. **Base64url Decode**:
-   - Decode the base64url-encoded string per RFC 4648
-   - Result is a minified JSON string (UTF-8 encoded)
-   - Handle any base64url decoding errors appropriately
-
-4. **Parse JSON Payload**:
-   - Parse the JSON string to extract SHL payload object containing:
-     - `url`: manifest URL (required) - includes all mandatory FHIR search parameters
-     - `key`: base64url-encoded decryption key, 43 characters (required)
-     - `flag`: flags such as "L" for long-term, "P" for passcode (optional)
-     - `label`: human-readable description (optional)
-     - `exp`: expiration timestamp in seconds since epoch (optional)
-     - `v`: version number (optional, defaults to 1)
-   - Validate JSON structure conforms to SMART Health Links specification
-
-5. **Validate SHL Payload**:
-   - Verify `url` field is present and is a valid HTTPS URL
-   - Verify `key` field is present and is 43 characters
-   - Check `exp` (if present) - reject if current time > expiration
-   - Note `flag` value (e.g., "P" indicates passcode required, "L" for long-term)
-   - Validate `url` contains expected manifest endpoint format with mandatory parameters
-
-**Common Post-Decoding Actions (Both Options):**
+**Post-Decoding Actions:**
 
 After successfully decoding the VHL payload, the VHL Receiver SHALL:
 
@@ -264,28 +219,6 @@ Step 9: Parse manifest URL to extract FHIR search parameters
 Step 10: Prepare for ITI-YY5 Retrieve Manifest with 3-part multipart request
 ```
 
-**Decoding Example (Deep Link):**
-
-```
-Input Deep Link:
-vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiZEdocGN5QnBjeUJoSUhObFkzSmxkQ0JyWlhrZ2RYTmxaQ0JtYjNJZ1pXNWoiLCJmbGFnIjoiTFAiLCJleHAiOjE3MzU2ODk2MDAsImxhYmVsIjoiUGF0aWVudCBIZWFsdGggU3VtbWFyeSIsInYiOjF9
-
-Step 1: Remove vhlink:/ prefix → eyJ1cmwiOiJodHRwczovL...
-Step 2: Base64url decode → JSON string
-Step 3: Parse JSON:
-  {
-    "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
-    "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
-    "flag": "LP",
-    "exp": 1735689600,
-    "label": "Patient Health Summary",
-    "v": 1
-  }
-Step 4: Validate SHL payload fields
-Step 5: Parse manifest URL to extract FHIR search parameters
-Step 6: Prepare for ITI-YY5 Retrieve Manifest with 3-part multipart request
-```
-
 **Manifest URL Parsing:**
 
 The manifest URL from the SHL payload contains all parameters needed for ITI-YY5 Part 1 (fhir-parameters):
@@ -303,27 +236,23 @@ Parsed FHIR Search Parameters (for ITI-YY5 Part 1):
 
 **Error Handling:**
 
-If decoding fails:
-- **QR Code Option Errors:**
-  - QR unreadable or damaged
-  - Invalid HC1: prefix
-  - Base45 decode error
-  - ZLIB decompression error
-  - CBOR parse error
-  - Invalid CWT structure
-  - Missing hcert claim or claim key 5
-- **Deep Link Option Errors:**
-  - Invalid vhlink:/ prefix 
-  - Base64url decode error
-  - JSON parse error
-  - Invalid SHL structure
+If QR code scanning or decoding fails:
+- QR unreadable or damaged
+- Invalid HC1: prefix
+- Base45 decode error
+- ZLIB decompression error
+- CBOR parse error
+- Invalid CWT structure
+- Missing hcert claim or claim key 5
+- Signature verification failure
 
 VHL Receiver SHALL:
 - Reject the VHL
 - Inform user with specific error message
-- MAY request user to rescan or re-enter VHL
+- Request user to rescan QR code
+- NOT attempt to retrieve documents
 
-If signature verification fails (QR Code Option only):
+If signature verification fails:
 - VHL Receiver SHALL reject the VHL
 - VHL Receiver SHALL NOT attempt to retrieve documents
 - VHL Receiver SHOULD inform user/operator
@@ -364,9 +293,9 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 ### 2:3.YY4.5 Security Considerations
 
 #### 2:3.YY4.5.1 VHL Integrity and Authenticity
-- Digital signature (QR Code Option) ensures VHL issued by trusted VHL Sharer
-- VHL Receivers claiming QR Code Option MUST verify COSE signatures before trusting content
-- Deep Link Option does not include signature - relies on secure transmission channel
+- Digital signature ensures VHL issued by trusted VHL Sharer
+- VHL Receivers MUST verify COSE signatures before trusting content
+- CWT signature provides end-to-end trust verification
 
 #### 2:3.YY4.5.2 VHL Confidentiality
 - VHL does NOT contain PHI
@@ -387,32 +316,25 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 - VHL Sharers SHOULD implement rate limiting on passcode attempts
 
 #### 2:3.YY4.5.5 Trust Network Validation
-VHL Receivers claiming QR Code Scanning Option MUST:
+VHL Receivers MUST:
 - Validate VHL Sharer is current participant in trust network
 - Retrieve DSC from trust list using kid from CWT protected header
 - Check certificate revocation status where applicable
 - Reject VHLs from untrusted participants
 
-#### 2:3.YY4.5.6 Transmission Security
+#### 2:3.YY4.5.6 QR Code Security
 
-**QR Codes (HC1: prefix):**
-- Can be photographed/copied
-- Use for time-limited scenarios
-- Suitable for supervised encounters
+**QR Code Characteristics:**
+- Can be photographed/copied - use time-limited expiration
+- Suitable for supervised encounters (in-person, on-screen display)
 - Digital signature provides authenticity verification
 - Recommended for higher security scenarios
 
-**Deep Links (vhlink:/ prefix):**
-- Use HTTPS for transmission
-- May be forwarded unintentionally
-- Include expiration/single-use constraints to mitigate risks
-- No built-in signature verification
-- Suitable for trusted communication channels
-
-#### 2:3.YY4.5.7 Prefix Distinction
-- VHL URLs use `vhlink:/` prefix (not `shlink:/`)
-- QR codes use `HC1:` prefix (HCERT format)
-- This distinguishes VHL from SMART Health Links
-- Applications can route appropriately based on prefix
+**Best Practices:**
+- Include short expiration times in CWT exp claim
+- Use passcode protection (P flag) for sensitive data
+- Display QR codes in controlled environments
+- Avoid printing QR codes for long-term use unless necessary
+- Implement single-use VHLs where appropriate
 
 
