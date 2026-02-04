@@ -18,6 +18,8 @@ This transaction follows the same pattern as MHD ITI-66 Find Document Lists, usi
 
 **Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** MAY process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, the {{ linkvhlr }} SHALL retrieve the List first, then retrieve each DocumentReference individually using ITI-67 (Retrieve Document) transactions.
 
+**Sign Manifest Request Option:** When both the {{ linkvhlr }} and {{ linkvhls }} support the **Sign Manifest Request Option**, the {{ linkvhlr }} SHALL digitally sign the manifest request using one of the signature-based authentication methods (Method 1, 2, or 4), and the {{ linkvhls }} SHALL verify the signature before processing the request. This option provides cryptographic proof of the receiver's identity, request integrity, and non-repudiation. Support for this option is indicated by the actor claiming the option in its capability statement.
+
 Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's participation in the trust network. The {{ linkvhls }} validates that the requesting {{ linkvhlr }} is authorized to access the documents before responding. This transaction MAY be optionally conducted over a secure channel as defined by the IHE Audit Trail and Node Authentication (ATNA) Profile. 
 
 ### 2:3.YY5.2 Actor Roles
@@ -117,6 +119,8 @@ All authentication methods SHALL include the following SHL-specific parameters i
 ##### 2:3.YY5.4.1.3 Authentication Methods
 
 The {{ linkvhlr }} and {{ linkvhls }} SHALL use one of the following authentication methods. The choice of method is determined by implementing jurisdiction and trading partner agreement.
+
+**Note on Sign Manifest Request Option:** Methods 1, 2, and 4 involve cryptographic signatures and are the signature-based authentication methods associated with the **Sign Manifest Request Option**. When both the {{ linkvhlr }} and {{ linkvhls }} claim support for the Sign Manifest Request Option, they SHALL use one of these signature-based methods (1, 2, or 4). Method 3 (OAuth Backend Services) uses token-based authentication and does not require the Sign Manifest Request Option.
 
 ###### 2:3.YY5.4.1.3.1 Method 1: Multipart POST with Detached Signature
 
@@ -498,6 +502,11 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - If `_include` parameter was in manifest URL but no DocumentReferences are returned:
   - Use ITI-67 (Retrieve Document) transactions to retrieve individual DocumentReferences
 
+**VHL Receiver with Sign Manifest Request Option SHALL additionally:**
+- Support at least one signature-based authentication method (Method 1, 2, or 4)
+- Generate cryptographic signatures using their private key
+- Include key identifier (kid) in signature to enable public key lookup
+
 **VHL Receiver SHOULD:**
 - Support OAuth Backend Services (Method 3) for interoperability
 
@@ -511,7 +520,7 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - Accept POST requests to List/_search endpoint
 - Extract FHIR search parameters from URL query string
 - Extract SHL parameters from request body (format varies by authentication method)
-- Verify authentication credentials using receiver's public key from trust list
+- Verify authentication credentials using receiver's public key from trust list (for signature methods) or token validation (for OAuth)
 - Support mandatory search parameters: _id, code, status, patient or patient.identifier
 - Support SHL authorization parameters: recipient (required), passcode (optional), embeddedLengthMax (optional)
 - Return Bundle of type searchset
@@ -519,6 +528,12 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - Validate VHL authorization before returning documents
 - Verify passcode securely (if provided)
 - Reject requests with invalid authentication (401 Unauthorized)
+
+**VHL Sharer with Sign Manifest Request Option SHALL additionally:**
+- Support at least one signature-based authentication method (Method 1, 2, or 4)
+- Verify cryptographic signatures using receiver's public key from trust list
+- Reject requests with invalid signatures (401 Unauthorized)
+- Use key identifier (kid/keyid) to locate receiver's public key
 
 **VHL Sharer SHOULD:**
 - Support OAuth Backend Services (Method 3) for interoperability
