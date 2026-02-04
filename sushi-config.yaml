@@ -66,10 +66,10 @@ pages:
     title: 1:XX Verifiable Health Links (VHL) - Volume 1
     generation: markdown
   ITI-YY1.md:
-    title: 2:3.YY1 Submit PKI Material
+    title: 2:3.YY1 Submit PKI Material with DID
     generation: markdown
   ITI-YY2.md:
-    title: 2:3.YY2 Retrieve Trust List
+    title: 2:3.YY2 Retrieve Trust List with DID
     generation: markdown
   ITI-YY3.md:
     title: 2:3.YY3 Generate VHL
@@ -112,8 +112,8 @@ menu:
     Security Considerations: volume-1.html#security-considerations
     Cross-Profile Considerations: volume-1.html#other-grouping
   Volume 2:
-    Submit PKI Material [ITI-YY1]: ITI-YY1.html
-    Retrieve Trust List [ITI-YY2]: ITI-YY2.html
+    Submit PKI Material with DID [ITI-YY1]: ITI-YY1.html
+    Retrieve Trust List with DID [ITI-YY2]: ITI-YY2.html
     Generate VHL [ITI-YY3]: ITI-YY3.html
     Provide VHL [ITI-YY4]: ITI-YY4.html
     Retrieve Manifest [ITI-YY5]: ITI-YY5.html

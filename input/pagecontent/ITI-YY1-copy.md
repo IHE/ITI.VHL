@@ -7,7 +7,7 @@
 > **ALTERNATIVE APPROACH - OPTION-BASED**: This file represents an alternative structure where "Submit PKI Material" is a REQUIRED transaction, with "DID-based PKI Exchange" as an optional format. See ITI-YY1.md for the current (DID-only optional transaction) approach.
 
 {% assign reqSubmitPKI = site.data.Requirements-InitiateSubmitPKIMaterialRequest %}
-{% assign reqDistributePKI = site.data.Requirements-RespondtoSubmitPKIMaterialRequest %}
+{% assign reqDistributePKI = site.data. Requirements-RespondtoSubmitPKIMaterialRequest %}
 
 
 {% assign reqSubmitPKItitle = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}

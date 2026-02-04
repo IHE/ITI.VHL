@@ -2,7 +2,6 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-## 2:3.YY1 Submit PKI Material with DID
 
 > **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for Trust Anchor actors and **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors. Implementations that do not support this transaction must use alternative mechanisms (out of scope for this profile) to establish trust relationships with the Trust Anchor. Only implementations that claim support for this transaction can participate in IHE Connectathon testing for trust establishment. See Volume 1 Section XX.2.1 for details on trust establishment approaches.
 
