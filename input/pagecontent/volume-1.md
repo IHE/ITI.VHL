@@ -25,7 +25,7 @@ The authority to participate in the trust network is governed by each actor's **
 
 Jurisdictions may also impose specific regulatory requirements on the privacy and security of health data exchange. These may include mandatory **consent verification**, **audit logging**, or other compliance controls that impact how VHL-based exchanges are implemented.
 
-As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} are expected to publish and retrieve PKI material—typically as signed **Trust Lists**—from the {{ linkta }}. The precise onboarding and credential issuance processes used to establish trust with the {{ linkta }} are implementation-specific and beyond the scope of this profile.
+As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} are expected to submit and retrieve PKI material—typically as signed **Trust Lists**—from the {{ linkta }}. The precise onboarding and credential issuance processes used to establish trust with the {{ linkta }} are implementation-specific and beyond the scope of this profile.
 
 > **Note on SMART Health Links (SHL):**
 
@@ -177,7 +177,14 @@ This transaction is captured as the following requirements:
 
 #### XX.1.2.3 Generate VHL [ITI-YY3]
 
-This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a VHL. A {{ linkvhls }} may optionally record the consent of the individual to share their information under the Record Consent option. A {{ linkvhls }} may optionally create an audit trail of the VHL creation under the Audit Event option. The individual shall trust that the {{ linkvhls }} has been authorized by its jurisdiction to authorize and provide access to health documents.   
+This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a QR code containing a VHL. The QR code is encoded as an HCERT/CWT structure.
+
+A {{ linkvhls }} MAY:
+- Record consent of the individual
+- Create audit trail of VHL creation
+- Set passcode protection (P flag) with secure hash storage
+- Set expiration time for time-limited access
+- Set long-term flag (L) for ongoing access
 
 For more details see the detailed [transaction description](ITI-YY3.html)
 
@@ -187,7 +194,15 @@ This transaction is captured as the following requirements:
 
 #### XX.1.2.4 Provide VHL [ITI-YY4]
 
-This transaction is initiated by a {{ linkvhlh }} to transmit a VHL to a {{ linkvhlr }}. Depending on the use case and context, the VHL may be rendered and transmitted through various mechanisms, such as QR code, Verifiable Credentials, Bluetooth, or near-field communication protocols. These mechanisms are described in [Volume 3](volume-3.html).
+This transaction is initiated by a {{ linkvhlh }} to transmit a VHL to a {{ linkvhlr }} by displaying or providing a QR code for scanning. 
+
+**QR Code Transmission:**
+
+The {{ linkvhlh }} presents the VHL by:
+- Displaying the QR code on their device screen for the {{ linkvhlr }} to scan, OR
+- Providing a printed QR code generated during ITI-YY3
+
+The {{ linkvhlr }} scans the QR code using a camera-equipped device and processes the HCERT-encoded VHL through a 9-step decoding process:
 
 For more details see the detailed [transaction description](ITI-YY4.html)
 
@@ -197,7 +212,23 @@ This transaction is captured as the following requirements:
 
 #### XX.1.2.5 Retrieve Manifest [ITI-YY5]
 
-This transaction is initiated by a {{ linkvhlr }} to retrieve a document manifest from a {{ linkvhls }} using a previously validated VHL as authorization. The transaction is conducted over a secure channel as defined by ATNA, with mutual authentication of both parties.
+This transaction is initiated by a {{ linkvhlr }} to retrieve a document manifest from a {{ linkvhls }} using a previously validated VHL as authorization. The transaction uses standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists.
+
+**Response:**
+
+The {{ linkvhls }} returns a FHIR Bundle of type "searchset" containing:
+- **List resource** with search.mode="match" - references available documents
+- **DocumentReference resources** with search.mode="include" (if Include DocumentReference Option supported and `_include` parameter used)
+
+If the {{ linkvhls }} supports the **Include DocumentReference Option**, it processes the `_include=List:item` parameter and returns both List and DocumentReference resources in a single response, reducing network round trips.
+
+If the {{ linkvhls }} does NOT support this option, it ignores the `_include` parameter and returns only the List resource. The {{ linkvhlr }} then retrieves individual DocumentReference resources using separate read requests.
+
+**Capability Statements:**
+
+Client and server requirements are defined in:
+- [VHL Receiver Client Capability Statement](CapabilityStatement-VHLReceiverCapabilityStatement.html)
+- [VHL Sharer Server Capability Statement](CapabilityStatement-VHLSharerCapabilityStatement.html)
 
 For more details see the detailed [transaction description](ITI-YY5.html)
 
@@ -217,6 +248,7 @@ Options that may be selected for each actor in this implementation guide are lis
 | Actor          | Option Name                          |
 |----------------|--------------------------------------|
 | {{ linkvhlr }} | Sign Manifest Request                |
+| ^              | Include DocumentReference            |
 | ^              | Verify Document Signature            |
 | ^              | OAuth with FAST                      |
 | {{ linkvhls }} | Include DocumentReference            |
@@ -242,15 +274,15 @@ This option provides:
 - Protection against request forgery
 - Enhanced audit trail
 
-**Complementary Option:** This option is designed to work with the Verify Manifest Request Signature Option (VHL Sharer). If a {{ linkvhlr }} signs requests, the {{ linkvhls }} should support signature verification.
+**Complementary Option:** This option is designed to work with the Sign Manifest Request Option (VHL Sharer). If a {{ linkvhlr }} signs requests, the {{ linkvhls }} should support signature verification.
 
 See ITI-YY5 Section 2:3.YY5.4.1.2 for detailed signature format and ITI-YY5 Section 2:3.YY5.6 for conformance requirements.
 
 ### XX.2.1 Sign Manifest Request Option (VHL Sharer)
 
-The Sign Manifest Request Signature Option enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
+The Sign Manifest Request Option enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
 
-Actors claiming the Verify Manifest Request Signature Option SHALL:
+Actors claiming the Sign Manifest Request Option SHALL:
 - Parse Part 2 (signature) from multipart requests in ITI-YY5
 - Extract `kid` from JWS protected header
 - Retrieve receiver's public key from trust list using `kid`

@@ -8,8 +8,7 @@ participant "VHL Receiver" as Receiver
 Holder -> Receiver: Provide VHL [ITI-YY4]
 note right
   Transmission via:
-  - QR code scan
-  - Deep link (URL)
+  - QR code 
 end note
 
 Receiver --> Holder: (Optional Acknowledgment)
