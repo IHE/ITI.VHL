@@ -11,7 +11,7 @@ releaseLabel: ci-build
 #releaseLabel: ballot
 #releaseLabel: trial-use
 #releaseLabel: release
-date: 2025-03-07
+date: 2026-02-09
 status: draft
 publisher:
   ## Find your domain contact on the https://www.ihe.net/ihe_domains page
@@ -86,9 +86,6 @@ pages:
   testplan.md:
     title: "Test Plan"
     generation: markdown
-  PKI_Submission.md:
-    title: "PKI Submission"
-    generation: markdown
   other.md:
     title: Changes to Other IHE Specifications
     generation: markdown
@@ -124,5 +121,4 @@ menu:
     Changes to Other IHE Specifications: other.html
     Download and Analysis: download.html
     Test Plan: testplan.html
-    PKI Submission: PKI_Submission.html
     Appendix A (VHL vs SHL): vhl_vs_shl.html
