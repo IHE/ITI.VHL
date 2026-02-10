@@ -367,325 +367,37 @@ A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to sh
 
 #### XX.4.2 Use Cases
 
-##### XX.4.2.1 Use Case #1: Holder Requests Generation of a Verifiable Health Link
+#### XX.4.2.1 Use Case \#1: WHO Global Digital Health Certification Network
 
-A patient uses a digital health application to request a shareable summary of their health information, intended for use by a new healthcare provider or other interested.
-
-###### XX.4.2.1.1 Scenario Narrative
-
-**Ms. SJ**, age 37, recently relocated within her province after a complex pregnancy. She is currently managing hypertension and Type 2 diabetes and is seeking continuity of care at a new primary care clinic. Through a provincial patient portal, she accesses her personal health information and elects to generate a Verifiable Health Link (VHL) for her new provider.
-
-The application guides Ms. SJ through privacy and security options: she is presented with a consent form, the ability to set a PIN, and an expiration time for the VHL. Once she completes the required steps, the system assembles a health summary (e.g., medications, encounters, diagnoses) and generates a VHL encoded in a QR code, which is displayed on her device. She is also given the option to print the QR code. Ms. SJ is now ready for her upcoming appointment.
-
-###### XX.4.2.1.2 Process Flow – Generate VHL**
-
-**Preconditions:**
-- The patient has access to a jurisdictionally supported patient portal or mobile application that allows the generation of a VHL referencing a patient summary.
-    
-**Main Flow:**
-
-1. The patient or authorized caregiver logs into the patient-facing application.
-2. The user navigates to a section offering the ability to generate a shareable health summary.
-3. The system presents privacy and security options, which may include:
-    - Acceptance of a consent statement
-    - Setting a PIN or passcode
-    - Selecting a validity period
-    - Scoping the data to be included
-4. The user reviews and confirms the selected sharing options.
-5. If the user consents:
-    - The application submits a request to the VHL issuer (e.g., the jurisdictional system or EHR backend) with the defined parameters.
-    - The VHL issuer generates a signed VHL referencing the selected documents.
-6. The system returns the VHL, rendering it as a QR code or downloadable artifact.
-7. If the user declines, the process is terminated and no VHL is created.
-    
-**Postconditions:**
-- A signed Verifiable Health Link (VHL) is created and rendered as a QR code or URL.  
-- The patient is able to display, print, or transmit the VHL for use by authorized third parties (e.g., the receiving healthcare provider). 
+{% assign ucGDHCN = site.data.ExampleScenario-UseCaseGroupGDHCN %}
+{% include usecase.liquid site=site scenario=ucGDHCN %}
 
 
+##### XX.4.2.1.1 Hajj Pilgrimage Use Case Description
 
-
-#### XX.4.2.2 Use Case \#2: Holder Generates and Uses a VHL 
-
-The patient provides access to their encrypted patient summary via the QR code on their mobile device or by sharing a secure VHL, (e.g., via email) at the point of care (e.g., walk-in clinic, emergency department).  The healthcare provider scans the QR code or accesses the VHL shared by the patient, addressing any security prompts, such as entering a passcode if required, and then may proceed to view/utilize and consume the patient summary.
-
-##### XX.4.2.2.1 Generate and Use VHL Case Description
-
-##### XX.4.2.2.2 Generate and Use VHL Process Flow
-
-**Pre-conditions**:
-- Patient has a QR code or VHL with access to a patient summary.
-- HCP has the necessary tools to scan the QR code or access the VHL (e.g., a QR code scanner, Health Information System).
-- VHL Sharer and VHL Receiver have shared their public keys to a trust network
-- VHL Receiver is in the same trust network as as the VHL Sharer.
-
-**Main Flow**:
-- Patient has a medical encounter with a health care provider (HCP) virtually or in-person to obtain health care services. 
-- Patient displays their patient summary QR code on their mobile device or shares a verifiable health link (e.g., via email) with the HCP and provides them with the passcode/PIN that they created (in Part A of this use case) to access the patient summary.
-- HCP scans the QR code or accesses the VHL in a browser to retrieve the patient summary. 
-- HCP is presented with applicable privacy and/or security form and they enter required security prompts (e.g., passcode, expiration time frame etc.,) according to jurisdictional policies.
-- VHL Receiver verifies the provenance of the shared link and confirms that the link originated from a trusted source before making a request to retrieve health document
-- VHL Sharer verifies the manifest request was made by a trusted organization/entity
-- VHL Sharer verifies the information submitted by the HCP in response to the security prompts (e.g., passcode/PIN). 
-  - If the security prompts are correct, proceed to retrieve patient summary.
-  - If the security prompts are incorrect, VHL Sharer denies access and prompts the user to re-submit the security prompts. If multiple failed attempts occur or the HCP abandons the process, the request for the patient summary is terminated. Process complete.
-- VHL Receiver retrieves the patient summary. Note: This process typically involves two steps: initially, a manifest file is provided containing the link to the patient summary. The patient summary is then retrieved in a subsequent step.
-- HCP views and optionally saves/imports the patient summary in their clinical system.
-
-**Post-conditions:**
-
-HCP has access to Patient Summary.
-
-
-<figure >
-  <div style="width:38em; max-width:100%;">
-    {%include usecase-generate-use-vhl-single-doc-processflow.svg%}
-  </div>
-  <p id="fX.X.X.X-3" class="figureTitle">Figure X.X.X.X-3: Use Case Issue and Utilize VHL for a Single Health Document Process Flow</p>
-</figure>
-
-<figure >
-  <div style="width:35em; max-width:100%;">
-     {%include usecase-generate-use-vhl-processflow.svg%}
-  </div>
-  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Use Case Issue and Utilize VHL for a (set of) Health Document(s) Process Flow</p>
-</figure>
-
-This use case has the following business requirement:
-* [Establish Trust](Requirements-EstablishTrust.html)
-* [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
-
-
-#### XX.4.2.3 Use Case \#3: Exchange Key Material 
-
-##### XX.4.2.3.1 Exchange Key Material  Use Case Description
-
-##### XX.4.2.3.2 Exchange Key Material  Process Flow
-
-**Pre-conditions**:
-
-**Main Flow**:
-
-**Post-conditions:**
-
-<figure >
-  <div style="width:35em; max-width:100%;">
-  {%include usecase-exchange-key-material-processflow.svg%}
-  </div>
-  <p id="fX.X.X.X-1" class="figureTitle">Figure X.X.X.X-1: Use Case Issue and Utilize VHL Process Flow</p>
-</figure>
-
-#### XX.4.2.4 Use Case \#4: Holder requests to destroy a VHLink
-
-##### XX.4.2.4.1 simple name Use Case Description
-
-##### XX.4.2.4.2 simple name Process Flow
-
-**Pre-conditions**:
-
-**Main Flow**:
-
-**Post-conditions:**
-
-
-
-
-#### XX.4.2.5 Use Case \#5: WHO Global Digital Health Certification Network
-
-The World Health Organization (WHO) operates a trust network, the Global Digital Health Certification Network (GDHCN), for use by public sector health jurisdictions.  The WHO GDHCN uses the notion of a Trust Domain which is defined by a set of:
-* use cases and business processes related to the utilization of Verifiable Digital Health Certificates;
-* open, interoperable technical specifications that define the applicable Trusted Services and verifiable digital health certificates for the use case; and
-* policy and regulatory standards describing expected behavior of participants for to the use case.
-
-The PKI operated by the WHO supports a variety of trust domains, two of which are described below. 
-
-
-##### XX.4.2.5.1 Hajj Pilgrimage Use Case Description
-
-During the Hajj pilgrimage the Kingdom of Saudi Arabia (KSA) hosts approximately two million pilgrims from across the globe as part of a mass gathering event.  Temporary hospitals and clinics, comprising over a thousand beds, are established to provide care to the pilgrims over the ?four? week period of Hajj.
-
-Starting with Hajj XXXX, in 2024, pilgrims from Oman, Malaysia and Indonesia were able to share their health records utilizing the International Patient Summary (IPS) with verification of health documents provided through the GDHCN infrastructure.
-
-Pilgrims begin their journey in their home country where they receive a health check and are educated on the use of QR codes (a version of Verifiable Health Links) and provide the consent to share their health records.  This consent may be provided verbally or recorded digitally.  When recorded, there are two notions of consent recorded: 
-- for their home country in which they agree that health records from their home country can be shared with appropriate authorities during Hajj
-- for KSA is to permit utilization of these health records within the Saudi System. These consent records are recorded into the IPS Advanced Directives section and are included with the IPS when it is shared.  
-
-The verifiable health link is provided by their home jurisdiction during their health check as a QR code.   
-Depending on the digital infrastructure pilgrim's origin country, jurisdictional policies and digital capabilities (e.g. access to smart phones) of the pilgrim's origin country, the verifiable health link may be:
-* generated and printed on the pilgrim's health card and distributed to the pilgrim at the time of the health check; or
-* provisioned to the pilgrim through an existing digital health platform or wallet.
-For similar reasons, the verifiable health link may refer to:
-* an instance of the IPS rendered as a PDF;
-* an instance of the IPS rendered as JSON; or
-* a folder containing at least the PDF of JSON rendering of the IPS as well associated digital signatures.
-
-
-During a care encounter in KSA, the pilgrim provides their verifiable health link as a QR code to their care provider.  Once a VHL is shared by a pilgrim during a care encounter in KSA:
-* the VHL is verified through the GDHCN infrastructure
-* an mTLS connection is established between the KSA EMRs and the origin country national infrastructure using key material exchanged via GDHCN
-* a manifest of IPS related files including a PDF and JSON renderings and associated digital signatures
-* The EMR retrieves the requisite files,
-
-Some of the challenges faced during the pilot implementation, though not necessarily to be taken up in this profile, include:
-- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods)
-- in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit.  
-- how to scale and automate some of the health checks  (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS). 
-
-<figure >
-  <div>
-  <img src="hajj-diagram.png" caption="Figure X.X.X.X-2: Hajj Pilgrimage" style="width:42em; max-width:100%;"/>
-  </div>
-    <p id="fX.X.X.X-1" class="figureTitle">Figure X.X.X.X-1: Pilgrim's Journey Hajj Health Card </p>
-</figure>
+{% assign ucHajj = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
+{% include usecase.liquid site=site scenario=ucHajj %}
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)
 * [Create Trusted Channel](Requirements-CreateTrustedChannel.html)
 
-##### XX.4.2.5.2 Pan-American Highway for Health Use Case Description
+##### XX.4.2.1.2 Pan-American Highway for Health Use Case Description
 
-In the region of the Americas,  "countries identified several priorities for cross-border digital
-health, including optimizing available human resources through international
-telehealth, validating digital certificates, ensuring continuity of care, and regional
-resilience to face health emergencies by sharing data for public health. During the
-IDB-PAHO co-led event, RELACSIS 4.0,1 a plan was launched to strengthen regional
-digital health services and resilience, through regional data exchange and policy
-harmonization. Sixteen countries successfully exchanged digital vaccine certificates
-(COVID-19, Polio, Measles, and Yellow Fever) and critical clinical information
-(diagnosis, allergy, and prescription information) using international standards during
-the 2nd Regional LACPASS Connectathon.2 Regional bodies and network such as the
-Council of Ministers of Health of Central America and the Dominican Republic
-(COMISCA), The Caribbean Public Health Agency (CARPHA), and the LAC Digital
-Health Network (RACSEL) have all identified cross-border data sharing as a priority."  
-[footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
-
-The Pan American Health Organization (PAHO) and the InterAmerican Development Bank (IADB) are supporting the development of policues and digital infrastructrue to support this need. One particular priority is to improve the continuity of care for internal migrants within the region, by ensuring individuals have access to and can share their vaccination records and the International Patient Summary.
-
-The Pan-American Highway for Health (PH4H)  "aims to provide patients with better healthcare services, regardless of their location. It will also enhance healthcare for those who move temporarily for work
-or study, as well as for migrants, by enabling them to share their health history, thus
-improving their employability and access to education. "  
-[footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
-
-While there currently there is no single legal framework that broadly enables data sharing across the region, there are sub-regional networks (e.g. COMISCA, CARPHA) that have policies that can be leveraged in the short term while neccesary data sharing agreements are developed.   Thus, individuals in this region will need to be able to move through overlapping trust networks.
-
-
-
-<figure >
-  <img src="PH4H.png" caption="Figure X.X.X.X-2: Pan-American Highway for Digital Health Goals" style="width:38em; max-width: 100%;"/>
-  <p id="fX.X.X.X-1" class="figureTitle">Figure X.X.X.X-1: Pan-American Highway for Digital Health Goals </p>
-</figure>
-
+{% assign ucPH4H = site.data.ExampleScenario-UseCasePH4H %}
+{% include usecase.liquid site=site scenario=ucPH4H %}
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)
 
-#### XX.4.2.6 Use Case #6: EU Vaccination Card
+#### XX.4.2.2 Use Case #2: EU Vaccination Card
 
-The [European Vaccination Card (EVC)](https://euvabeco.eu/news/european-vaccination-card-evc-a-citizen-held-card-to-foster-informed-decision-making-on-vaccination-and-improve-continuity-of-care-across-the-eu/) is a citizen-held card to foster informed decision-making on vaccination, and improve continuity of care across the EU.
+{% assign ucEVAC = site.data.ExampleScenario-UseCaseEVAC %}
+{% include usecase.liquid site=site scenario=ucEVAC %}
 
-The EVC will allow "Member States to bilaterally verify the authenticity of digital records through an interoperable trust architecture. While similar to the EU Digital COVID Certificate in being a portable vaccination record, the EVC serves a different purpose. Unlike the certificate, which often fulfilled legal or health mandates, the EVC is specifically designed to empower individuals by granting them control over their vaccination information. This empowerment is crucial for ensuring continuity of care for those crossing borders or transitioning between healthcare systems."
-
-The EVC will operate in the context of the European Health Data Spaces that requires detailed information on access the health data to be recorded.
-
-<figure >
-  <img src="ehds_legal.png" caption="Figure X.X.X.X-8: European Health Data Spaces" style="width:45em; max-width:100%"/>
-  <p id="fX.X.X.X-8" class="figureTitle">Figure X.X.X.X-8: European Health Data Spaces </p>
-</figure>
-
-For more information see Regulation (EU) 2025/327 of the European Parliament and of the Council of 11 February 2025 on the European Health Data Space and amending Directive 2011/24/EU and Regulation (EU) 2024/2847. Specifically:
-* [ANNEX II - Essential requirements for the harmonised software components of EHR systems and for products for which interoperability with EHR systems has been claimed](https://eur-lex.europa.eu/eli/reg/2025/327/oj#anx_II)
-* [Article 9 - Right to obtain information on accessing data](https://eur-lex.europa.eu/eli/reg/2025/327/oj#art_9)
-
-This use case has the following business requirement:
-* [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
-
-#### XX.4.2.7 Use Case #7: Smart Health Links
-Note: Not sure if we want to include "Verifiable" health link as an option and Smart Health Link as another option. If so, we should recap SHL use case here. (No pre-coordination of trust)
-
-#### XX.4.2.8 Use Case #8: EU Digital Identity Wallet - Unlinkability
-
-The European Union's digital identity regulation establishes requirements for the European Digital Identity Wallet (EUDIW) that ensure user privacy through unlinkability. These requirements are particularly relevant when health attestations are shared through digital wallets.
-
-##### XX.4.2.8.1 Unlinkability Use Case Description
-
-Article 5a(16) of [Regulation (EU) No 910/2014 as amended](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A02014R0910-20241018) establishes critical privacy requirements for the European Digital Identity Wallet:
-
-> **Article 5a(16):** The technical framework of the European Digital Identity Wallet shall:
-> 
-> (a) not allow providers of electronic attestations of attributes or any other party, after the issuance of the attestation of attributes, to obtain data that allows transactions or user behaviour to be tracked, linked or correlated, or knowledge of transactions or user behaviour to be otherwise obtained, unless explicitly authorised by the user;
-> 
-> (b) enable privacy preserving techniques which ensure unlinkability, where the attestation of attributes does not require the identification of the user.
-
-When health information is shared through a digital wallet infrastructure, these requirements mandate that:
-
-1. **No post-issuance tracking**: After a health attestation (such as vaccination records or health certificates) is issued to a wallet, the issuing {{ linkvhls }} SHALL NOT be able to track when, where, or with whom the holder shares that attestation, unless explicitly authorized by the user.
-
-2. **Unlinkability of presentations**: When a {{ linkvhlh }} presents health attestations to different {{ linkvhlr }}s (e.g., different healthcare providers or venues), those presentations SHALL NOT be linkable to each other by the {{ linkvhls }} or any third party, preventing behavioral profiling.
-
-3. **Privacy-preserving verification**: The {{ linkvhlr }} can verify the authenticity and validity of the health attestation through the trust network without revealing to the {{ linkvhls }} that a verification occurred or identifying which specific presentation is being verified.
-
-##### XX.4.2.8.2 Unlinkability Process Flow
-
-**Pre-conditions:**
-- The {{ linkvhlh }} has obtained health attestations (e.g., vaccination records) in their digital wallet
-- The {{ linkvhls }} has issued verifiable credentials that support privacy-preserving presentation
-- The {{ linkvhlr }} participates in the trust network and can verify credentials
-- Privacy-preserving cryptographic techniques are implemented (e.g., selective disclosure, zero-knowledge proofs, or unlinkable signatures)
-
-**Main Flow:**
-
-1. **Issuance Phase:**
-   - {{ linkvhlh }} requests health attestation from {{ linkvhls }}
-   - {{ linkvhls }} issues credential using privacy-preserving techniques that enable unlinkable presentations
-   - Credential is stored in {{ linkvhlh }}'s digital wallet
-   - {{ linkvhls }} does NOT maintain presentation-tracking capabilities
-
-2. **First Presentation:**
-   - {{ linkvhlh }} presents health attestation to {{ linkvhlr }} A (e.g., Hospital A)
-   - {{ linkvhlr }} A verifies attestation against trust network
-   - Verification occurs without notifying {{ linkvhls }} of the specific presentation
-   - {{ linkvhlr }} A cannot link this presentation to other presentations by the same holder
-
-3. **Second Presentation:**
-   - {{ linkvhlh }} presents health attestation to {{ linkvhlr }} B (e.g., Pharmacy B)
-   - {{ linkvhlr }} B verifies attestation against trust network
-   - This presentation is cryptographically unlinkable from the presentation to {{ linkvhlr }} A
-   - {{ linkvhls }} cannot determine that both presentations came from the same credential
-
-4. **Trust Network Operation:**
-   - {{ linkta }} maintains trust list for verification
-   - Verification queries do NOT reveal which specific credentials are being presented
+ueries do NOT reveal which specific credentials are being presented
    - No party can correlate presentations across different {{ linkvhlr }}s
 
-**Post-conditions:**
-- {{ linkvhlh }} has successfully shared health information with multiple parties
-- {{ linkvhls }} cannot track usage patterns or build behavioral profiles
-- {{ linkvhlr }}s can verify authenticity but cannot collude to track the {{ linkvhlh }}
-- User privacy is preserved through technical unlinkability measures
-
-##### XX.4.2.8.3 Implementation Considerations
-
-To achieve unlinkability while maintaining verifiability, implementations MAY use:
-
-- **Selective Disclosure**: Allow holders to present only necessary attributes without revealing the entire credential
-- **Zero-Knowledge Proofs**: Enable verification of claims without revealing underlying data
-- **Unlinkable Signatures**: Use cryptographic techniques (e.g., BBS+ signatures, anonymous credentials) that prevent correlation of signatures across presentations
-- **Batch Issuance**: Issue credentials in batches to prevent timing correlation
-- **Minimized Identifiers**: Avoid including persistent identifiers that could enable tracking
-
-The VHL profile supports these requirements by:
-- Enabling the {{ linkvhls }} to issue credentials that can be presented without callback to the issuer
-- Supporting verification through the trust network without requiring issuer notification
-- Allowing jurisdictions to implement privacy-preserving cryptographic schemes appropriate to their regulatory requirements
-
-<figure>
-  <img src="unlinkability-diagram.png" caption="Figure X.X.X.X-9: Unlinkable Health Credential Presentations" style="width:45em; max-width:100%"/>
-  <p id="fX.X.X.X-9" class="figureTitle">Figure X.X.X.X-9: Unlinkable Health Credential Presentations</p>
-</figure>
-
-This use case has the following business requirements:
-* [Establish Trust](Requirements-EstablishTrust.html)
-* Privacy-preserving credential presentation (implementation-specific)
 
 
 <a name = "security-considerations"></a>
