@@ -375,8 +375,11 @@ A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to sh
 
 ##### XX.4.2.1.1 Hajj Pilgrimage Use Case Description
 
+
 {% assign ucHajj = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
-{% include usecase.liquid site=site scenario=ucHajj %}
+{{% include ucHajj.purpose}}
+
+
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)

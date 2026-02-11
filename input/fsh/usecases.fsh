@@ -1,26 +1,3 @@
-Instance: UseCaseGroupGDHCN
-InstanceOf: ExampleScenario
-Usage: #definition
-* name = "GroupGDHCN"
-* status = $pubStatus#active
-* publisher = "IHE"
-* purpose = """
-The World Health Organization (WHO) operates a trust network, the Global Digital Health Certification Network (GDHCN), for use by public sector health jurisdictions. The WHO GDHCN uses the notion of a Trust Domain which is defined by a set of use cases and business processes related to the utilization of Verifiable Digital Health Certificates, open interoperable technical specifications that define the applicable Trusted Services and verifiable digital health certificates for the use case, and policy and regulatory standards describing expected behavior of participants for the use case. The PKI operated by the WHO supports a variety of trust domains, two of which are described below.
-"""
-* process.title = "WHO GDHCN Trust Domain Participation"
-* process.description = "Public sector health jurisdictions participate in the WHO GDHCN trust network to enable cross-border verification of digital health certificates."
-* process.preConditions = "Public sector health jurisdiction has identified a use case for cross-border digital health certification. WHO GDHCN trust network is operational."
-* process.postConditions = "Jurisdiction has established trust domain participation enabling cross-border verification of Verifiable Digital Health Certificates."
-* process.step[0].operation.number = "1"
-* process.step[0].operation.name = "Trust Domain Definition"
-* process.step[0].operation.description = "Jurisdiction defines use cases, business processes, technical specifications, and policy standards for the Trust Domain."
-* process.step[1].operation.number = "2"
-* process.step[1].operation.name = "PKI Material Submission"
-* process.step[1].operation.description = "Jurisdiction submits PKI material to WHO GDHCN Trust Anchor via Submit PKI Material [ITI-YY1]."
-* process.step[2].operation.number = "3"
-* process.step[2].operation.name = "Trust List Distribution"
-* process.step[2].operation.description = "Trust Anchor distributes updated trust list to network participants via Retrieve Trust List [ITI-YY2]."
-
 Instance: UseCaseHajjPilgrimage
 InstanceOf: ExampleScenario
 Usage: #definition
