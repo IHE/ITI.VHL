@@ -2,10 +2,9 @@ Instance: UseCaseGroupGDHCN
 InstanceOf: ExampleScenario
 Usage: #definition
 * name = "GroupGDHCN"
-* title = "Use Case #1: WHO Global Digital Health Certification Network"
 * status = $pubStatus#active
 * publisher = "IHE"
-* description = """
+* purpose = """
 The World Health Organization (WHO) operates a trust network, the Global Digital Health Certification Network (GDHCN), for use by public sector health jurisdictions. The WHO GDHCN uses the notion of a Trust Domain which is defined by a set of use cases and business processes related to the utilization of Verifiable Digital Health Certificates, open interoperable technical specifications that define the applicable Trusted Services and verifiable digital health certificates for the use case, and policy and regulatory standards describing expected behavior of participants for the use case. The PKI operated by the WHO supports a variety of trust domains, two of which are described below.
 """
 * process.title = "WHO GDHCN Trust Domain Participation"
@@ -26,10 +25,9 @@ Instance: UseCaseHajjPilgrimage
 InstanceOf: ExampleScenario
 Usage: #definition
 * name = "HajjPilgrimage"
-* title = "WHO GDHCN Hajj Pilgrimage"
 * status = $pubStatus#active
 * publisher = "IHE"
-* description = """
+* purpose = """
 During the Hajj pilgrimage, the Kingdom of Saudi Arabia (KSA) hosts approximately two million pilgrims from across the globe as part of a mass gathering event. Temporary hospitals and clinics, comprising over a thousand beds, are established to provide care to the pilgrims over the four-week period of Hajj.
 
 Starting with Hajj 1445 AH (2024 CE), pilgrims from Oman, Malaysia, and Indonesia were able to share their health records utilizing the International Patient Summary (IPS) with verification of health documents provided through the WHO Global Digital Health Certification Network (GDHCN) infrastructure.
@@ -74,8 +72,8 @@ Depending on the digital infrastructure pilgrim's origin country, jurisdictional
 - an instance of the IPS rendered as JSON; or
 - a folder containing at least the PDF of JSON rendering of the IPS as well associated digital signatures."
 * process.step[2].operation.number = "3"
-* process.step[3].operation.name = "VHL Provision During Care"
-* process.step[3].operation.description = "During a care encounter in KSA, the pilgrim provides their verifiable health link as a QR code to their care provider. Once a VHL is shared by a pilgrim during a care encounter in KSA:
+* process.step[2].operation.name = "VHL Provision During Care"
+* process.step[2].operation.description = "During a care encounter in KSA, the pilgrim provides their verifiable health link as a QR code to their care provider. Once a VHL is shared by a pilgrim during a care encounter in KSA:
 
 - the VHL is verified through the GDHCN infrastructure
 - an mTLS connection is established between the KSA EMRs and the origin country national infrastructure using key material exchanged via GDHCN
@@ -87,10 +85,9 @@ Instance: UseCasePH4H
 InstanceOf: ExampleScenario
 Usage: #definition
 * name = "PH4H"
-* title = "Pan-American Highway for Health"
 * status = $pubStatus#active
 * publisher = "IHE"
-* description = """
+* purpose = """
 In the region of the Americas,  "countries identified several priorities for cross-border digital
 health, including optimizing available human resources through international
 telehealth, validating digital certificates, ensuring continuity of care, and regional
@@ -126,10 +123,9 @@ Instance: UseCaseEVAC
 InstanceOf: ExampleScenario
 Usage: #definition
 * name = "EUVAC"
-* title = "EU Vaccination Card"
 * status = $pubStatus#active
 * publisher = "IHE"
-* description = """
+* purpose = """
 The [European Vaccination Card (EVC)](https://euvabeco.eu/news/european-vaccination-card-evc-a-citizen-held-card-to-foster-informed-decision-making-on-vaccination-and-improve-continuity-of-care-across-the-eu/) is a citizen-held card to foster informed decision-making on vaccination, and improve continuity of care across the EU.
 
 The EVC will allow "Member States to bilaterally verify the authenticity of digital records through an interoperable trust architecture. While similar to the EU Digital COVID Certificate in being a portable vaccination record, the EVC serves a different purpose. Unlike the certificate, which often fulfilled legal or health mandates, the EVC is specifically designed to empower individuals by granting them control over their vaccination information. This empowerment is crucial for ensuring continuity of care for those crossing borders or transitioning between healthcare systems."
