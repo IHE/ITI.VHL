@@ -8,8 +8,9 @@
     usecase-section-number (valueString, e.g. "XX.4.2.1.1")
     usecase-heading-level  (valueInteger, 4 or 5)
 
-  Native R4 fields:
-    name    (string)  - used as the heading title
+  R4 fields (may appear as native fields or R5 cross-version extensions
+  depending on IG Publisher version):
+    name    (string)   - used as the heading title
     purpose (markdown) - rendered as the use case description
 
   Usage: {% include usecase-list.liquid site=site %}
@@ -18,6 +19,8 @@
 {% assign _ext_sort    = "https://profiles.ihe.net/ITI/VHL/StructureDefinition/usecase-sort-order" %}
 {% assign _ext_section = "https://profiles.ihe.net/ITI/VHL/StructureDefinition/usecase-section-number" %}
 {% assign _ext_level   = "https://profiles.ihe.net/ITI/VHL/StructureDefinition/usecase-heading-level" %}
+{% assign _ext_name    = "http://hl7.org/fhir/5.0/StructureDefinition/extension-ExampleScenario.name" %}
+{% assign _ext_purpose = "http://hl7.org/fhir/5.0/StructureDefinition/extension-ExampleScenario.purpose" %}
 
 {% comment %} Build sortable "sortKey|stub" token string from all ExampleScenario canonicals {% endcomment %}
 {% assign _uc_canonicals = site.data.canonicals | where: 'type', 'ExampleScenario' %}
@@ -51,8 +54,17 @@
 
   {% assign _section_str = _section_ext.valueString  | default: "XX.4.2.X" %}
   {% assign _level_int   = _level_ext.valueInteger   | default: 4 %}
-  {% assign _title_str   = _scenario.name             | default: _stub %}
-  {% assign _purpose_md  = _scenario.purpose %}
+
+  {% assign _title_str = _scenario.name %}
+  {% unless _title_str %}
+    {% assign _title_str = _scenario.extension | where: "url", _ext_name | first | map: "valueString" %}
+  {% endunless %}
+  {% assign _title_str = _title_str | default: _stub %}
+
+  {% assign _purpose_md = _scenario.purpose %}
+  {% unless _purpose_md %}
+    {% assign _purpose_md = _scenario.extension | where: "url", _ext_purpose | first | map: "valueMarkdown" %}
+  {% endunless %}
 
   {% if _level_int == 5 %}
 <h5 id="{{ _stub }}">{{ _section_str }} {{ _title_str }}</h5>
