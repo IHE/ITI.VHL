@@ -39,7 +39,7 @@ The Submit PKI Material with DID transaction enables entities within a trust net
 - **RFC 7517**: JSON Web Key (JWK)
 - **RFC 8446**: TLS Protocol Version 1.3
 - **RFC 5280**: X.509 PKI Certificate and CRL Profile
-
+ 
 
 ### 2:3.YY1.4 Messages
 
