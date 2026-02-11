@@ -377,7 +377,7 @@ A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to sh
 
 
 {% assign ucHajj = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
-{{% include ucHajj.purpose}}
+{{% include ucHajj._purpose}}
 
 
 
