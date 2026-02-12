@@ -52,7 +52,7 @@ The Submit PKI Material with DID transaction enables entities within a trust net
 
 #### 2:3.YY1.4.1 Submit PKI Material Request Message
 ##### 2:3.YY1.4.1.1 Trigger Events
-{{ reqSubmitPKIdescription.valueMarkdown}}
+{{ reqSubmitPKIdescription.valueMarkdown }}
 
 {% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
 

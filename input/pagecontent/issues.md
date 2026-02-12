@@ -22,6 +22,8 @@
 
 - ToDo_005: Should we specify an API mechanism for the Publish PKI Material transaction?  It may be enough to treat them as Content Creator/Consumer pairs where the content is the location of a trustlist (as a DID).
 
+- ToDo_006: ITI-YY5 Receiver Authentication for Sharer using Embedded JWS as an option
+
 ### Closed Issues
 
 - 
