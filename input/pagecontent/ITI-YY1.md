@@ -211,10 +211,8 @@ The response message format is determined by the implementing jurisdiction of th
 
 **Success Response:**
 
-On successful submission and validation, the {{ linkta }} MAY return:
+On successful submission and validation, the {{ linkta }} SHALL return:
 - HTTP 201 Created (for HTTP POST submissions)
-- The canonical URL where the DID Document can be retrieved
-- A confirmation receipt or transaction identifier
 
 **Error Response:**
 
