@@ -119,7 +119,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
      [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[patient-id]
      ```
    
-   Note: The manifest URL includes all mandatory FHIR search parameters (_id, code, status, patient.identifier) and optionally includes `_include=List:item` if the VHL Sharer supports the Include DocumentReference Option.
+   Note: The manifest URL includes all mandatory FHIR search parameters (_id, code, status) and the patient identifier via FHIR chained search on the patient parameter (patient.identifier=system|value). It optionally includes `_include=List:item` if the VHL Sharer supports the Include DocumentReference Option.
 
 4. Create the SHL payload as a JSON object with:
    - `url`: the manifest URL from step 3
@@ -205,7 +205,7 @@ The manifest URL constructed in step 3 MUST include all mandatory FHIR search pa
 - `_id`: The unique folder ID (required)
 - `code`: The List type, typically "folder" (required)
 - `status`: The List status, typically "current" (required)
-- `patient.identifier`: The patient identifier in system|value format (required)
+- `patient.identifier`: The patient identifier using FHIR chained search on the patient reference parameter, in system|value format (required)
 - `_include=List:item`: Include DocumentReferences (optional - only if VHL Sharer supports Include DocumentReference Option)
 
 The VHL Receiver will use this exact manifest URL when performing the ITI-YY5 Retrieve Manifest transaction, adding the SHL manifest parameters (recipient, passcode, embeddedLengthMax) separately in Part 2 of the multipart request.

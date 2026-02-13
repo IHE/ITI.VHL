@@ -259,14 +259,7 @@ Options that may be selected for each actor in this implementation guide are lis
 
 ### XX.2.1 Sign Manifest Request Option (VHL Receiver)
 
-The Sign Manifest Request Option enables the {{ linkvhlr }} to digitally sign manifest requests sent to the {{ linkvhls }}.
-
-Actors claiming the Sign Manifest Request Option SHALL:
-- Compute detached JWS signature over SHL parameters (Part 1 of multipart request)
-- Include signature in Part 2 of the multipart request to ITI-YY5
-- Use receiver's private key for signing
-- Include `kid` (key identifier) in JWS protected header
-- Format signature as `application/jose`
+The Sign Manifest Request Option enables the {{ linkvhlr }} to digitally sign manifest requests sent to the {{ linkvhls }} and enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
 
 This option provides:
 - Mutual authentication between VHL Receiver and VHL Sharer
@@ -276,47 +269,11 @@ This option provides:
 
 **Complementary Option:** This option is designed to work with the Sign Manifest Request Option (VHL Sharer). If a {{ linkvhlr }} signs requests, the {{ linkvhls }} should support signature verification.
 
-See ITI-YY5 Section 2:3.YY5.4.1.2 for detailed signature format and ITI-YY5 Section 2:3.YY5.6 for conformance requirements.
-
-### XX.2.1 Sign Manifest Request Option (VHL Sharer)
-
-The Sign Manifest Request Option enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
-
-Actors claiming the Sign Manifest Request Option SHALL:
-- Parse Part 2 (signature) from multipart requests in ITI-YY5
-- Extract `kid` from JWS protected header
-- Retrieve receiver's public key from trust list using `kid`
-- Verify detached JWS signature over Part 1 (shl-parameters) content
-- Reject requests with invalid signatures
-- Reject requests from untrusted receivers (not in trust list)
-- Return HTTP 401 Unauthorized for signature verification failures
-
-This option provides:
-- Verification that requests originate from trusted VHL Receivers
-- Protection against unauthorized manifest access
-- Enhanced security for high-value health data
-- Detailed audit trail of authenticated requests
-
-**Complementary Option:** This option is designed to work with the Sign Manifest Request Option (VHL Receiver). If a {{ linkvhls }} verifies signatures, the {{ linkvhlr }} should support signing requests.
-
-See ITI-YY5 Section 2:3.YY5.4.1.3 for verification process and ITI-YY5 Section 2:3.YY5.6 for conformance requirements.
+See ITI-YY5 Section 2:3.YY5.4.1.2 for detailed signature format.
 
 ### XX.2.2 Include DocumentReference Option (VHL Sharer)
 
 The Include DocumentReference Option enables the {{ linkvhls }} to process the `_include=List:item` parameter in manifest requests and return DocumentReference resources along with the List resource in a single response.
-
-Actors claiming the Include DocumentReference Option SHALL:
-- Support `_include=List:item` parameter in manifest URL
-- When `_include=List:item` is present:
-  - Retrieve DocumentReference resources referenced by List.entry.item
-  - Include them in searchset Bundle with search.mode = "include"
-  - Apply VHL scope and consent filters to DocumentReferences
-- Return Bundle with both List (search.mode = "match") and DocumentReference resources
-
-Actors NOT claiming the Include DocumentReference Option SHALL:
-- Ignore the `_include` parameter if provided
-- Return only the List resource in searchset Bundle
-- VHL Receiver will use ITI-67 (Retrieve Document) transactions to retrieve individual DocumentReferences
 
 **Benefits:**
 - Reduces network round trips for VHL Receiver
@@ -325,7 +282,7 @@ Actors NOT claiming the Include DocumentReference Option SHALL:
 
 **Implementation Note:** When generating VHLs in ITI-YY3, VHL Sharers supporting this option SHOULD include `_include=List:item` in the manifest URL. VHL Sharers not supporting this option SHOULD NOT include the `_include` parameter in the manifest URL.
 
-See ITI-YY5 Section 2:3.YY5.4.1.3 for detailed behavior and ITI-YY5 Section 2:3.YY5.6 for conformance requirements.
+See ITI-YY5 Section 2:3.YY5.4.1.3 for detailed behavior.
 
 ### XX.2.3 Verify Document Signature Option (VHL Receiver)
 
@@ -336,6 +293,14 @@ See cross-profile considerations for a discussion of the relationship of this op
 This option is captured in the following business requirement:
 * [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
 
+### XX.2.4 OAuth with FAST Option
+
+The OAuth with FAST Option enables the {{ linkvhlr }} and {{ linkvhls }} to use OAuth 2.0 access tokens for authentication during the ITI-YY5 Retrieve Manifest transaction, as an alternative to HTTP Message Signatures. This option provides interoperability with existing SMART on FHIR and [FAST Security](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/) implementations.
+
+
+**Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} must support this option for OAuth-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or other authentication mechanisms defined in ITI-YY5 SHALL be used instead.
+
+See ITI-YY5 Section 2:3.YY5.4.1.4 for detailed OAuth flow and examples.
 
 <a name="required-groupings"> </a>
 

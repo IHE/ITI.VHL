@@ -110,7 +110,7 @@ The following FHIR search parameters are extracted from the manifest URL:
 | code | token | [1..1] | The type of List (typically "folder") | `code=folder` |
 | status | token | [1..1] | The status of the List (typically "current") | `status=current` |
 | patient | reference | [0..1] | The patient whose documents are referenced; either patient or patient.identifier SHALL be included | `patient=Patient/9876` |
-| patient.identifier | token | [0..1] | Patient identifier in system\|value format; either patient or patient.identifier SHALL be included | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
+| patient.identifier | token (chained) | [0..1] | FHIR chained search on the patient reference parameter; resolves the patient by identifier (system\|value) without requiring a direct Patient resource reference; either patient or patient.identifier SHALL be included | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
 | identifier | token | [0..1] | Business identifier for the List | `identifier=folder-2024-001` |
 | _include | special | [0..1] | Include referenced DocumentReference resources; SHALL be "List:item" if used. Only processed if VHL Sharer supports Include DocumentReference Option | `_include=List:item` |
 {: .grid}
@@ -310,7 +310,7 @@ The {{ linkvhlr }} SHALL:
 
 1. **Extract Manifest URL from VHL**:
    - Obtain manifest URL from VHL payload (ITI-YY4)
-   - URL contains all FHIR search parameters (_id, code, status, patient.identifier, optional _include)
+   - URL contains all FHIR search parameters (_id, code, status, and the patient identifier via chained search as patient.identifier, plus optional _include)
    - Parse URL to extract search parameters
 
 2. **Prepare Request Parameters**:
@@ -395,7 +395,7 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - _id (folder ID - required)
      - code (typically "folder" - required)
      - status (typically "current" - required)
-     - patient.identifier (patient ID - required)
+     - patient.identifier (chained search on the patient reference parameter - required)
    - Validate List exists and is accessible
    - Apply VHL scope filters (only include documents authorized by VHL)
    - Apply consent filters if applicable
@@ -433,7 +433,7 @@ Per the [VHL Sharer Server Capability Statement](CapabilityStatement-VHLSharerCa
 - `_id` (token) - Required
 - `code` (token) - Required
 - `status` (token) - Required
-- `patient` (reference) OR `patient.identifier` (token) - At least one required
+- `patient` (reference) OR `patient.identifier` (chained search on the patient reference parameter, token) - At least one required
 
 The {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL additionally support:
 - `_include=List:item` (special)

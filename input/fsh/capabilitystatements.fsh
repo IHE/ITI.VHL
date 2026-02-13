@@ -63,7 +63,7 @@ Usage: #definition
       * name = "patient"
       * definition = "http://hl7.org/fhir/SearchParameter/List-patient"
       * type = #reference
-      * documentation = "The patient whose documents are referenced in the List. SHOULD be supported."
+      * documentation = "The patient whose documents are referenced in the List. SHOULD be supported. The VHL Sharer SHALL accept chained searches on patient.identifier (e.g., patient.identifier=system|value) for List searches."
     
     * searchParam[+]
       * name = "code"
@@ -77,12 +77,9 @@ Usage: #definition
       * type = #token
       * documentation = "The status of the List (current, retired, etc.). SHOULD be supported."
     
-    * searchParam[+]
-      * name = "_include"
-      * definition = "http://hl7.org/fhir/SearchParameter/Resource-include"
-      * type = #special
-      * documentation = "Include referenced DocumentReference resources. If the VHL Sharer supports the Include DocumentReference Option, it SHALL support '_include=List:item' to include all DocumentReference resources referenced by List.entry.item in the searchset Bundle with search.mode='include'. This allows VHL Receivers to retrieve the manifest and all document references in a single request."
-  
+    // Search Includes
+    * searchInclude = "List:item"
+
   // DocumentReference Resource
   * resource[+]
     * type = #DocumentReference
@@ -121,11 +118,11 @@ Usage: #definition
   * resource[0]
     * type = #List
     * profile = "http://hl7.org/fhir/StructureDefinition/List"
-    * documentation = "The VHL Receiver searches for List resources using the manifest URL extracted from the VHL payload. The search SHALL include mandatory FHIR parameters: _id (folder ID), code, status, and patient.identifier. The VHL Receiver MAY request inclusion of DocumentReference resources via _include parameter."
+    * documentation = "The VHL Receiver searches for List resources using the manifest URL extracted from the VHL payload. The search SHALL include mandatory parameters: _id (folder ID), code, and status, and SHALL include the patient identifier using FHIR chained search on the patient parameter (i.e., patient.identifier=system|value). The VHL Receiver MAY request inclusion of DocumentReference resources via the _include parameter."
     
     * interaction[0]
       * code = #search-type
-      * documentation = "Search for List resources using manifest URL from VHL payload. The VHL Receiver SHALL support searching with _id, code, status, and patient.identifier parameters. The VHL Receiver SHALL support the _include=List:item parameter to retrieve DocumentReference resources in a single request."
+      * documentation = "Search for List resources using manifest URL from VHL payload. The VHL Receiver SHALL support searching with _id, code, and status parameters, and SHALL support chained search on the patient parameter (patient.identifier=system|value) to identify the patient. The VHL Receiver SHALL support the _include=List:item parameter to retrieve DocumentReference resources in a single request."
     
     // Search Parameters
     * searchParam[0]
@@ -150,14 +147,11 @@ Usage: #definition
       * name = "patient"
       * definition = "http://hl7.org/fhir/SearchParameter/List-patient"
       * type = #reference
-      * documentation = "Patient identifier in system|value format. SHALL be supported and SHALL be included in manifest URL from VHL payload as patient.identifier."
+      * documentation = "Patient reference search parameter. SHALL be supported with FHIR chained search (patient.identifier=system|value) to identify the patient by identifier without requiring a direct Patient resource reference. SHALL be included in the manifest URL from the VHL payload."
     
-    * searchParam[+]
-      * name = "_include"
-      * definition = "http://hl7.org/fhir/SearchParameter/Resource-include"
-      * type = #special
-      * documentation = "Request inclusion of DocumentReference resources. The VHL Receiver SHALL support '_include=List:item' to retrieve all DocumentReference resources referenced by List.entry.item in a single response. This reduces the number of round trips and improves performance. If the VHL Sharer supports the Include DocumentReference Option, this parameter will be present in the manifest URL from the VHL payload."
-  
+    // Search Includes
+    * searchInclude = "List:item"
+
   // DocumentReference Resource
   * resource[+]
     * type = #DocumentReference
