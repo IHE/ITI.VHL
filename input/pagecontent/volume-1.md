@@ -342,6 +342,10 @@ The PKI operated by the WHO supports a variety of trust domains, two of which ar
 
 
 ##### XX.4.2.1.1 Hajj Pilgrimage Use Case Description
+{% assign useCaseHajjPilgrimage = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
+
+{{ useCaseHajjPilgrimage.purpose }}
+
 
 During the Hajj pilgrimage, the Kingdom of Saudi Arabia (KSA) hosts approximately two million pilgrims from across the globe as part of a mass gathering event. Temporary hospitals and clinics, comprising over a thousand beds, are established to provide care to the pilgrims over the four-week period of Hajj.
 

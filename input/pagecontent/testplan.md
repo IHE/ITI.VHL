@@ -65,8 +65,8 @@ Unit Tests in this context is where a SUT is tested against a simulator or valid
 
 
 **VHL Receiver**
-- [ITI-YY4] : Provide QR code
-- [ITI-YY5] :
+- [ITI-YY4] : Provided QR code is decoded
+- [ITI-YY5] : 
 
 ### Integration Test Procedure
 
