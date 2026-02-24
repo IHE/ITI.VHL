@@ -19,9 +19,9 @@ Key Features:
 
 Some of the challenges faced during the pilot implementation, though not necessarily to be taken up in this profile, include:
 
-while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods)
-in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit.
-how to scale and automate some of the health checks (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS).
+- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods)
+- in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit
+- how to scale and automate some of the health checks (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS).
 
 
 <figure>
@@ -66,25 +66,13 @@ Usage: #definition
 * publisher = "IHE"
 * purpose = """
 In the region of the Americas,  "countries identified several priorities for cross-border digital
-health, including optimizing available human resources through international
-telehealth, validating digital certificates, ensuring continuity of care, and regional
-resilience to face health emergencies by sharing data for public health. During the
-IDB-PAHO co-led event, RELACSIS 4.0,1 a plan was launched to strengthen regional
-digital health services and resilience, through regional data exchange and policy
-harmonization. Sixteen countries successfully exchanged digital vaccine certificates
-(COVID-19, Polio, Measles, and Yellow Fever) and critical clinical information
-(diagnosis, allergy, and prescription information) using international standards during
-the 2nd Regional LACPASS Connectathon.2 Regional bodies and network such as the
-Council of Ministers of Health of Central America and the Dominican Republic
-(COMISCA), The Caribbean Public Health Agency (CARPHA), and the LAC Digital
-Health Network (RACSEL) have all identified cross-border data sharing as a priority."  
+health, including optimizing available human resources through international telehealth, validating digital certificates, ensuring continuity of care, and regional resilience to face health emergencies by sharing data for public health. During the IDB-PAHO co-led event, RELACSIS 4.0,1 a plan was launched to strengthen regional digital health services and resilience, through regional data exchange and policy harmonization. Sixteen countries successfully exchanged digital vaccine certificates (COVID-19, Polio, Measles, and Yellow Fever) and critical clinical information
+(diagnosis, allergy, and prescription information) using international standards during the 2nd Regional LACPASS Connectathon.2 Regional bodies and network such as the Council of Ministers of Health of Central America and the Dominican Republic (COMISCA), The Caribbean Public Health Agency (CARPHA), and the LAC Digital Health Network (RACSEL) have all identified cross-border data sharing as a priority."  
 [footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
 
 The Pan American Health Organization (PAHO) and the InterAmerican Development Bank (IADB) are supporting the development of policues and digital infrastructrue to support this need. One particular priority is to improve the continuity of care for internal migrants within the region, by ensuring individuals have access to and can share their vaccination records and the International Patient Summary.
 
-The Pan-American Highway for Health (PH4H)  "aims to provide patients with better healthcare services, regardless of their location. It will also enhance healthcare for those who move temporarily for work
-or study, as well as for migrants, by enabling them to share their health history, thus
-improving their employability and access to education. "  
+The Pan-American Highway for Health (PH4H)  "aims to provide patients with better healthcare services, regardless of their location. It will also enhance healthcare for those who move temporarily for work or study, as well as for migrants, by enabling them to share their health history, thus improving their employability and access to education. "  
 [footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
 
 While there currently there is no single legal framework that broadly enables data sharing across the region, there are sub-regional networks (e.g. COMISCA, CARPHA) that have policies that can be leveraged in the short term while neccesary data sharing agreements are developed.   Thus, individuals in this region will need to be able to move through overlapping trust networks.
@@ -117,9 +105,6 @@ The EVC will operate in the context of the European Health Data Spaces that requ
 For more information see Regulation (EU) 2025/327 of the European Parliament and of the Council of 11 February 2025 on the European Health Data Space and amending Directive 2011/24/EU and Regulation (EU) 2024/2847. Specifically:
 * [ANNEX II - Essential requirements for the harmonised software components of EHR systems and for products for which interoperability with EHR systems has been claimed](https://eur-lex.europa.eu/eli/reg/2025/327/oj#anx_II)
 * [Article 9 - Right to obtain information on accessing data](https://eur-lex.europa.eu/eli/reg/2025/327/oj#art_9)
-
-This use case has the following business requirement:
-* [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
 
 A critical privacy requirement for the EVC is unlinkability: Article 5a(16) of [Regulation (EU) No 910/2014 as amended](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A02014R0910-20241018) **Article 5a(16):** The technical framework of the European Digital Identity Wallet shall:
 
