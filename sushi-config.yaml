@@ -53,10 +53,16 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 #resources:
 # list every example here with a name, description and that exampleBoolean is true; These are used to populate the artifacts page, and are needed to eliminate build warnings
 # You may delay filling out this section until you approach publication as it is merely a nice to have and eliminates build warnings -- If you do this then you will need above the autoload-resources true
+path-pages:
+  - input/tests/features
+path-binary:
+  - input/tests/features
+path-test:
+  - input/tests/features
 
 dependencies:
-hl7.fhir.uv.extensions : 5.2.0 
 hl7.fhir.uv.testing : 0.1.0-SNAPSHOT
+hl7.fhir.uv.extensions : 5.2.0 
 
 pages:
 # itemize here each narrative page. Include assigned section numbers when appropriate. The order they appear here is the order they will appear in the TOC and on the next/prev navigation.
