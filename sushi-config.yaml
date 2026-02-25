@@ -56,6 +56,7 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
 
 dependencies:
 hl7.fhir.uv.extensions : 5.2.0 
+hl7.fhir.uv.testing : 0.1.0-SNAPSHOT
 
 pages:
 # itemize here each narrative page. Include assigned section numbers when appropriate. The order they appear here is the order they will appear in the TOC and on the next/prev navigation.
