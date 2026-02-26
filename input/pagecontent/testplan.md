@@ -51,22 +51,20 @@ Testing of actor options includes:
 
 Unit Tests in this context is where a SUT is tested against a simulator or validator.  A simulator is a implementation of an actor that is designed specifically to test the opposite pair actor. The simulator might be a reference implementation or may be a specially designed test-bench. Where a reference implementation is used the negative tests are harder to simulate. A validator is a implementation that can check conformance. A validator may be a simulator, but may also be a standalone tool used to validate only a message encoding. Some reference implementations may be able to validate to a StructureDefinition profile, but often these do not include sufficient constraints given the overall actor conformance criteria. 
 
-**Trust Anchor**
-- [ITI-YY2] : On receipt of a Retrieve Trust List Request Msg, the TA responds with the DID
-- [ITI-YY1]: On receipt of DID , validate, organize and sign the trust list, ack
-- retrieve TRust List (test1),
-- submit a trust list and retrieve it (Test2)
+**Trust Anchor** – see [TestPlan-TrustAnchor](TestPlan-TrustAnchor.html)
+- [ITI-YY1] : On receipt of a DID Document, validate, organize, and sign the trust list, acknowledge
+- [ITI-YY2] : On receipt of a Retrieve Trust List Request, the Trust Anchor responds with the DID Documents
 
-**VHL Sharer**
-- [ITI-YY1] : Submit PKI Material with DID
-    - validate DID semantic
-- [ITI-YY3] : Generate VHL
-   - test the operation defn, given inputs validate the output
+**VHL Sharer** – see [TestPlan-VHLSharer](TestPlan-VHLSharer.html)
+- [ITI-YY1] : Submit PKI Material with DID – validate DID semantics
+- [ITI-YY3] : Generate VHL – given the operation inputs, validate the output
+- [ITI-YY5] : Retrieve Manifest – authenticate the receiver and return a conformant searchset Bundle
 
-
-**VHL Receiver**
-- [ITI-YY4] : Provided QR code is decoded
-- [ITI-YY5] : 
+**VHL Receiver** – see [TestPlan-VHLReceiver](TestPlan-VHLReceiver.html)
+- [ITI-YY1] : Submit PKI Material with DID (Optional) – same initiator expectations as VHL Sharer
+- [ITI-YY2] : Retrieve Trust List – construct the request and process the response correctly
+- [ITI-YY4] : Provided QR code is decoded through the full nine-step HCERT/CWT pipeline
+- [ITI-YY5] : Retrieve Manifest – construct and sign the request; process the searchset Bundle
 
 ### Integration Test Procedure
 

@@ -260,7 +260,7 @@ The retrieved material MAY include:
 * Certificate revocation data (e.g., CRLs, OCSP responses)
 * Metadata used to:
   - Validate digital signatures on VHLs and related resources
-  - Establish mutually authenticated connections
+  - Establish secure connections
   - Decrypt content protected via asymmetric encryption
 
 Participants SHOULD cache the received trust list to reduce network and server load.

@@ -22,14 +22,9 @@
 
 ### 2:3.YY2.1 Scope
 
-The Retrieve Trust List with DID transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted cryptographic material from the {{ linkta }} using Decentralized Identifiers (DIDs). This material includes:
-
-- DID Documents containing public key material
-- Verification methods with cryptographic keys (JWK or multibase format)
-- Service endpoints for trust network participants
-- Associated metadata required to validate the authenticity of a Verified Health Link (VHL)
+The Retrieve Trust List with DID transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted public key material from the {{ linkta }} using Decentralized Identifiers (DIDs). 
     
-Retrieved material SHALL be used to determine the trustworthiness of VHL artifacts and service endpoints in accordance with the governing trust framework.
+Retrieved material SHALL be used to determine the trustworthiness of VHL artifacts in accordance with the governing trust framework.
 
 <figure>
 {%include ITI-YY2.svg%}
@@ -63,13 +58,10 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 
 **Preconditions:**
 
-When the DID option is used for PKI material retrieval, the {{ linkta }} SHALL have made available at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network. The requesting participant ({{ linkvhlr }} or {{ linkvhls }}) knows in advance the endpoint from which to retrieve DID Documents and PKI material.
+The {{ linkta }} SHALL have made available at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network. The requesting participant ({{ linkvhlr }} or {{ linkvhls }}) knows in advance the endpoint from which to retrieve DID Documents and PKI material.
 
-The {{ linkta }} MAY provide:
-- A single common endpoint for all participants to retrieve PKI material, OR
-- Individual endpoints per participant, in addition to the common endpoint
+The {{ linkta }} MAY additionally provide individual endpoints per participant, in addition to the common endpoint.
 
-At minimum, one endpoint accessible to all participants SHALL be available.
 
 ##### 2:3.YY2.4.1.2 Message Semantics
 
@@ -77,43 +69,8 @@ The Retrieve Trust List Request retrieves DID Documents from the {{ linkta }}.
 
 **Request Methods:**
 
-Implementations SHALL support one of the following request patterns:
+The mechanism used to retrieve a DID Document is determined by the DID method of the DID being resolved. Implementations SHALL resolve DID Documents according to the resolution rules defined by the applicable DID method specification.
 
-**Option 1: HTTP GET for specific DID**
-
-```http
-GET [trust-anchor-base]/did/{did-identifier}
-Accept: application/did+json
-```
-
-Where `{did-identifier}` is the URL-encoded DID (e.g., `did:example:vhl-sharer-123456`)
-
-**Option 2: Query for all DIDs**
-
-```http
-GET [trust-anchor-base]/did
-Accept: application/did+json
-```
-
-Returns a collection of DID Documents for all registered trust network participants.
-
-**Option 3: mCSD-based Query**
-
-Using IHE mCSD patterns to query for Organization resources containing DID Documents:
-
-```http
-GET [trust-anchor-base]/Organization?_has:OrganizationAffiliation:organization:role=VHLSharer
-Accept: application/fhir+json
-```
-
-**Request Parameters:**
-
-| Parameter | Cardinality | Description |
-|-----------|-------------|-------------|
-| did-identifier | [0..1] | Specific DID to retrieve (for Option 1) |
-| type | [0..1] | Filter by entity type (e.g., VHLSharer, VHLReceiver) |
-| status | [0..1] | Filter by status (active, revoked, expired) |
-{: .grid}
 
 ##### 2:3.YY2.4.1.3 Expected Actions
 
@@ -122,15 +79,17 @@ Accept: application/fhir+json
 The requesting actor SHALL:
 
 1. **Determine Retrieval Endpoint**: Identify the {{ linkta }} endpoint for DID Document retrieval
-2. **Construct Request**: Build an HTTP GET request for:
-   - A specific DID Document (if the DID is known), OR
-   - All active DID Documents in the trust network
+2. **Construct Request**: Build an HTTP GET request for retrieval of DID Document
 3. **Submit Request**: Send the request over a secure connection
 4. **Handle Response**: Process the returned DID Document(s) and extract public key material
 5. **Cache**: Cache the retrieved material according to caching policies
 6. **Validate**: Verify the integrity and authenticity of retrieved DID Documents
 
-**Trust Anchor (Responder):**
+
+
+#### 2:3.YY2.4.2 Retrieve Trust List Response Message 
+
+##### 2:3.YY2.4.2.1 Trigger Events
 
 {{ reqRetrievePKIRespdescription.valueMarkdown}}
 
@@ -141,12 +100,6 @@ Upon receiving a Retrieve Trust List Request, the {{ linkta }} SHALL:
 3. **Filter Results**: Return only active, non-revoked DID Documents
 4. **Construct Response**: Format the response according to the requested representation
 5. **Sign Response** (optional): Digitally sign the response to ensure integrity
-
-#### 2:3.YY2.4.2 Retrieve Trust List Response Message 
-
-##### 2:3.YY2.4.2.1 Trigger Events
-
-A {{ linkta }} initiates a Retrieve Trust List Response Message once it has processed the request and assembled the appropriate DID Documents.
 
 ##### 2:3.YY2.4.2.2  Message Semantics
 

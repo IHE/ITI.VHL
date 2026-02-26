@@ -76,9 +76,6 @@ The DID Document SHALL be formatted as a JSON document containing:
 | @context | [1..*] | JSON-LD context, MUST include "https://www.w3.org/ns/did/v1" |
 | id | [1..1] | The DID for the submitting entity (e.g., "did:example:123456789abcdefghi") |
 | verificationMethod | [1..*] | Array of verification methods containing public key material |
-| authentication | [0..*] | References to verification methods used for authentication |
-| assertionMethod | [0..*] | References to verification methods used for assertions/signatures |
-| service | [0..*] | Service endpoints for the entity |
 {: .grid}
 
 **Verification Method Structure:**
@@ -91,7 +88,6 @@ Each verification method SHALL include:
 | type | [1..1] | Cryptographic suite type (e.g., "JsonWebKey2020", "EcdsaSecp256k1VerificationKey2019") |
 | controller | [1..1] | DID that controls this verification method |
 | publicKeyJwk | [0..1] | Public key in JWK format (RFC 7517) |
-| publicKeyMultibase | [0..1] | Public key in multibase format (alternative to publicKeyJwk) |
 {: .grid}
 
 **Example DID Document:**
@@ -113,17 +109,6 @@ Each verification method SHALL include:
       "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
       "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4"
     }
-  }],
-  "authentication": [
-    "did:example:vhl-sharer-123456#signing-key-1"
-  ],
-  "assertionMethod": [
-    "did:example:vhl-sharer-123456#signing-key-1"
-  ],
-  "service": [{
-    "id": "did:example:vhl-sharer-123456#vhl-endpoint",
-    "type": "VHLSharerService",
-    "serviceEndpoint": "https://vhl-sharer.example.org"
   }]
 }
 ```
@@ -132,7 +117,7 @@ Each verification method SHALL include:
 
 The DID Document SHALL be submitted to the {{ linkta }} via one of the following pathways (as determined by the implementing jurisdiction):
 
-- **Direct HTTP POST**: Submit the DID Document directly to the {{ linkta }}'s designated endpoint over a secure, mutually authenticated TLS connection
+- **Direct HTTP POST**: Submit the DID Document directly to the {{ linkta }}'s designated endpoint over a secure connection
   ```
   POST [trust-anchor-base]/did
   Content-Type: application/did+json
@@ -160,9 +145,7 @@ The submitting actor SHALL:
 1. **Generate Key Pair**: Generate one or more cryptographic key pairs suitable for the intended use (signing, encryption, authentication)
 2. **Construct DID Document**: Create a DID Document containing:
    - A unique DID identifier for the entity
-   - Verification methods with public key material in JWK or multibase format
-   - Appropriate authentication and assertion method references
-   - Service endpoints where the entity can be contacted
+   - Verification methods with public key material in JWK format
 3. **Submit to Trust Anchor**: Send the DID Document to the {{ linkta }} via the designated submission pathway
 4. **Maintain Private Keys**: Securely store the corresponding private keys and protect them from unauthorized access
 
@@ -176,25 +159,15 @@ Upon receiving a DID Document submission, the {{ linkta }} SHALL:
 
 1. **Validate DID Document Structure**: Verify the DID Document conforms to W3C DID Core specification
 2. **Verify Cryptographic Material**: Validate that:
-   - Public keys are properly formatted (JWK or multibase)
+   - Public keys are properly formatted (JWK)
    - Key types and curves are acceptable per trust framework policy
    - Key sizes meet minimum security requirements
 3. **Verify Identity**: Authenticate the submitting entity's identity through:
-   - Mutual TLS authentication
+   - secure connection
    - Verification of proof/signature on the DID Document
    - Validation against pre-registered organizational identifiers
 4. **Catalog DID Document**: Store the validated DID Document in the Trust Anchor's registry
 5. **Make Available for Retrieval**: Ensure the DID Document is accessible via the retrieval endpoint(s)
-
-**DID Option Endpoint Requirements**
-
-When the DID option is used for PKI material submission and retrieval, the {{ linkta }} SHALL maintain at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network for retrieving submitted DID Documents and PKI material.
-
-The {{ linkta }} MAY provide:
-- A single common endpoint for all participants to retrieve PKI material, OR
-- Individual endpoints per participant, in addition to the common endpoint
-
-At minimum, one endpoint accessible to all participants SHALL be available to ensure that any {{ linkvhlr }} or {{ linkvhls }} can retrieve the necessary trust material from the {{ linkta }}.
 
 **Rejection Criteria**
 
@@ -243,7 +216,7 @@ The secure and verifiable exchange of PKI material via DID Documents is foundati
 
 - The {{ linkta }} MUST authenticate the identity of submitting entities
 - Authentication mechanisms MAY include:
-  - Mutual TLS with pre-registered certificates
+  - Secure connection with pre-registered certificates
   - Signed proof-of-control over the DID
   - Out-of-band identity verification for initial registration
 
