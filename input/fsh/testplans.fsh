@@ -54,7 +54,7 @@ scenarios are at least acknowledged.
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY1-submit-pki-material-response.feature"
+    "ITI-YY1-submit-pki-material-response.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material Response – Gherkin Feature"
 
 
@@ -78,7 +78,7 @@ Considerations) of the transaction specification.
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY2-retrieve-trust-list-response.feature"
+    "ITI-YY2-retrieve-trust-list-response.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List Response – Gherkin Feature"
 
 
@@ -130,7 +130,7 @@ Scenarios are derived from section 2:3.YY1.4.1.2 (Message Semantics) and 2:3.YY1
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY1-submit-pki-material-request.feature"
+    "ITI-YY1-submit-pki-material-request.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material Request – Gherkin Feature"
 
 
@@ -156,7 +156,7 @@ Scenarios are derived from section 2:3.YY3.4.1.3 (VHL Sharer Expected Actions) a
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY3-generate-vhl-response.feature"
+    "ITI-YY3-generate-vhl-response.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY3 Generate VHL Response – Gherkin Feature"
 
 
@@ -181,7 +181,7 @@ Scenarios are derived from section 2:3.YY5.4.1.5 (VHL Sharer Expected Actions), 
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY5-retrieve-manifest-response.feature"
+    "ITI-YY5-retrieve-manifest-response.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest Response – Gherkin Feature"
 
 
@@ -234,7 +234,7 @@ that claim support MUST pass all SHALL scenarios.
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY1-submit-pki-material-request.feature"
+    "ITI-YY1-submit-pki-material-request.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material Request – Gherkin Feature"
 
 
@@ -259,7 +259,7 @@ Expected Actions), and 2:3.YY2.5 (Security Considerations) of the transaction sp
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY2-retrieve-trust-list-request.feature"
+    "ITI-YY2-retrieve-trust-list-request.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List Request – Gherkin Feature"
 
 
@@ -285,7 +285,7 @@ Scenarios are derived from section 2:3.YY4.4.1.4 (VHL Receiver Expected Actions)
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY4-provide-vhl-response.feature"
+    "ITI-YY4-provide-vhl-response.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY4 Provide VHL Response (Receiver Decoder) – Gherkin Feature"
 
 
@@ -312,5 +312,5 @@ specification.
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
 * testCase[=].testRun[=].script.sourceReference.reference =
-    "https://profiles.ihe.net/ITI/VHL/tests/features/ITI-YY5-retrieve-manifest-request.feature"
+    "ITI-YY5-retrieve-manifest-request.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest Request – Gherkin Feature"
