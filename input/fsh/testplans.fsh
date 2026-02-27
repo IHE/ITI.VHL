@@ -53,7 +53,7 @@ scenarios are at least acknowledged.
 * testCase[=].testRun[=].script.language.coding.system  = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code    = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text           = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference ="https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-response.feature"
+* testCase[=].testRun[=].script.sourceReference.reference = "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-response.feature"
 * testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material Response – Gherkin Feature"
 
 
