@@ -56,7 +56,6 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 ##### 2:3.YY2.4.1.1 Trigger Events
 {{ reqRetrievePKIdescription.valueMarkdown}}
 
-**Preconditions:**
 
 The {{ linkta }} SHALL have made available at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network. The requesting participant ({{ linkvhlr }} or {{ linkvhls }}) knows in advance the endpoint from which to retrieve DID Documents and PKI material.
 
@@ -93,72 +92,57 @@ The requesting actor SHALL:
 
 {{ reqRetrievePKIRespdescription.valueMarkdown}}
 
-Upon receiving a Retrieve Trust List Request, the {{ linkta }} SHALL:
 
-1. **Authenticate Request**: Validate the requesting entity is authorized to retrieve trust material
-2. **Process Query**: Identify the requested DID Document(s) based on query parameters
-3. **Filter Results**: Return only active, non-revoked DID Documents
-4. **Construct Response**: Format the response according to the requested representation
-5. **Sign Response** (optional): Digitally sign the response to ensure integrity
 
 ##### 2:3.YY2.4.2.2  Message Semantics
 
-**Success Response (Single DID):**
-
-```http
-HTTP/1.1 200 OK
-Content-Type: application/did+json
-
-{
-  "@context": [
-    "https://www.w3.org/ns/did/v1",
-    "https://w3id.org/security/suites/jws-2020/v1"
-  ],
-  "id": "did:example:vhl-sharer-123456",
-  "verificationMethod": [{
-    "id": "did:example:vhl-sharer-123456#signing-key-1",
-    "type": "JsonWebKey2020",
-    "controller": "did:example:vhl-sharer-123456",
-    "publicKeyJwk": {
-      "kty": "EC",
-      "crv": "P-256",
-      "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
-      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4"
-    }
-  }],
-  "authentication": [
-    "did:example:vhl-sharer-123456#signing-key-1"
-  ],
-  "assertionMethod": [
-    "did:example:vhl-sharer-123456#signing-key-1"
-  ],
-  "service": [{
-    "id": "did:example:vhl-sharer-123456#vhl-endpoint",
-    "type": "VHLSharerService",
-    "serviceEndpoint": "https://vhl-sharer.example.org"
-  }]
-}
-```
-
-**Success Response (Multiple DIDs):**
+**Success Response:**
 
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "didDocuments": [
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:web:trust-anchor.example.org:v1:trustlist",
+  "controller": "did:web:trust-anchor.example.org:v1:trustlist",
+  "verificationMethod": [
     {
-      "@context": ["https://www.w3.org/ns/did/v1"],
-      "id": "did:example:vhl-sharer-123456",
-      "verificationMethod": [...]
+      "id": "did:web:trust-anchor.example.org:v1:trustlist#signing-key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:trust-anchor.example.org:v1:trustlist",
+      "publicKeyJwk": {
+        "kty": "EC",
+        "kid": "signing-key-1",
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4"
+      }
     },
     {
-      "@context": ["https://www.w3.org/ns/did/v1"],
-      "id": "did:example:vhl-receiver-789012",
-      "verificationMethod": [...]
+      "id": "did:example:vhl-sharer-123456#signing-key-2",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:trust-anchor.example.org:v1:trustlist",
+      "publicKeyJwk": {
+        "kty": "EC",
+        "kid": "signing-key-2",
+        "crv": "P-256",
+        "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8-Q",
+        "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4-"
+      }
     }
-  ]
+  ],
+  "proof": {
+    "type": "JsonWebSignature2020",
+    "created": "2025-01-15T12:00:00Z",
+    "verificationMethod": "did:web:trust-anchor.example.org:v1:trustlist#signing-DID",
+    "proofPurpose": "assertionMethod",
+    "nonce": "a3f8c2d1-9b4e-4f7a-b6e2-1c5d8f3a9e2b",
+    "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..example_signature_value"
+  }
 }
 ```
 
@@ -183,17 +167,30 @@ The response SHALL include one or more DID Documents, each containing:
 | authentication | [0..*] | Methods used for authentication |
 | assertionMethod | [0..*] | Methods used for signing/assertions |
 | service | [0..*] | Service endpoints |
+| proof | [1..1] | Cryptographic proof over the trust list document as defined in [W3C VC Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/). The proof SHALL include a `nonce` to prevent replay attacks. |
+{: .grid}
+
+The `proof` element SHALL contain:
+
+| Sub-element | Cardinality | Description |
+|-------------|-------------|-------------|
+| type | [1..1] | Proof type (e.g., `JsonWebSignature2020`) |
+| created | [1..1] | ISO 8601 datetime the proof was created |
+| verificationMethod | [1..1] | Reference to the key used to create the proof |
+| proofPurpose | [1..1] | Purpose of the proof (e.g., `assertionMethod`) |
+| nonce | [1..1] | Unique value to prevent replay attacks; SHALL be included by the Trust Anchor |
+| jws | [1..1] | The detached JSON Web Signature value |
 {: .grid}
 
 ##### 2:3.YY2.4.2.3 Expected Actions
 
-**Trust Anchor:**
+Upon receiving a Retrieve Trust List Request, the {{ linkta }} SHALL:
 
-The {{ linkta }} SHALL:
-- Return only active, non-revoked DID Documents
-- Ensure returned DID Documents conform to W3C DID Core specification
-- Include sufficient verification methods for signature validation
-- MAY sign the response payload for integrity protection
+1. **Authenticate Request**: Validate the requesting entity is authorized to retrieve trust material
+2. **Process Query**: Identify the requested DID Document(s) based on query parameters
+3. **Filter Results**: Return only active, non-revoked DID Documents
+4. **Construct Response**: Format the response according to the requested representation, ensure returned DID Documents conform to W3C DID Core specification and include sufficient verification methods for signature validation
+5. **Sign Response** (optional): Digitally sign the response to ensure integrity
 
 **VHL Receiver / VHL Sharer:**
 
