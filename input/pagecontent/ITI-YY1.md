@@ -37,9 +37,7 @@ The Submit PKI Material with DID transaction enables entities within a trust net
 
 - **W3C DID Core 1.0**: [Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/did-core/)
 - **RFC 7517**: JSON Web Key (JWK)
-- **RFC 8446**: TLS Protocol Version 1.3
-- **RFC 5280**: X.509 PKI Certificate and CRL Profile
- 
+
 
 ### 2:3.YY1.4 Messages
 
@@ -178,7 +176,13 @@ The {{ linkta }} SHALL reject submissions that:
 - Use prohibited cryptographic algorithms or insufficient key sizes
 - Lack required metadata or provenance information
 
-#### 2:3.YY1.4.2 Submit PKI Material Response Message 
+#### 2:3.YY1.4.2 Submit PKI Material Response Message
+
+##### 2:3.YY1.4.2.1 Trigger Events
+
+The {{ linkta }} sends a Submit PKI Material Response Message upon completing the processing of a Submit PKI Material Request Message. A response SHALL be returned regardless of whether the submission succeeded or failed.
+
+##### 2:3.YY1.4.2.2 Message Semantics
 
 The response message format is determined by the implementing jurisdiction of the {{ linkta }}.
 
@@ -195,6 +199,17 @@ On failure, the {{ linkta }} SHALL return an appropriate error response:
 - HTTP 403 Forbidden: Entity not authorized to submit
 - HTTP 422 Unprocessable Entity: Valid format but validation failed
 
+##### 2:3.YY1.4.2.3 Expected Actions
+
+Upon receiving the response, the submitting actor ({{ linkvhls }} or {{ linkvhlr }}) SHALL:
+
+1. **Handle Success**: On receipt of a success response, the submitting actor SHALL record that PKI material has been accepted by the {{ linkta }} and is available for distribution to trust network participants.
+2. **Handle Errors**: On receipt of an error response, the submitting actor SHALL inspect the error code and take corrective action as appropriate:
+   - For HTTP 400, correct the DID Document structure and resubmit
+   - For HTTP 401 or 403, resolve the authentication or authorization issue before retrying
+   - For HTTP 422, review the validation failure details and resubmit with corrected key material or metadata
+3. **Retain Private Keys**: Regardless of the response, the submitting actor SHALL continue to securely maintain the private key(s) corresponding to any submitted public key material.
+
 
 ### 2:3.YY1.5 Security Considerations 
 
@@ -204,7 +219,7 @@ The secure and verifiable exchange of PKI material via DID Documents is foundati
 
 - DID Documents SHOULD be signed by the submitting entity using a verification method
 - The {{ linkta }} SHALL verify the authenticity of submitted DID Documents
-- Submissions over HTTP MUST use secure, mutually authenticated TLS connections
+- Submissions over HTTP MUST use secure connections
 
 #### 2:3.YY1.5.2 Key Material Security
 

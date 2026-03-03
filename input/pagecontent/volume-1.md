@@ -127,18 +127,10 @@ This transaction is:
 - **REQUIRED (R)** for Trust Anchor actors
 - **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors
 
-**When to Implement:**
-
-VHL Sharer and VHL Receiver actors SHALL implement this transaction when:
-- They do not have pre-established PKI material exchange mechanisms with the {{ linkta }}, OR
-- They wish to demonstrate interoperability at IHE Connectathons
 
 **Alternative Implementations:**
 
-Actors that do not implement this transaction MUST establish trust relationships through jurisdiction-specific mechanisms that are out of scope for this profile. Such implementations:
-- Cannot participate in IHE Connectathon testing for trust establishment
-- Must document their trust establishment mechanisms in their IHE Integration Statement
-- Are responsible for ensuring PKI material is available for VHL signature verification
+Actors that do not implement this transaction MUST establish trust relationships through jurisdiction-specific mechanisms that are out of scope for this profile.
 
 For more details see the detailed [transaction description](ITI-YY1.html)
 
@@ -250,10 +242,10 @@ Options that may be selected for each actor in this implementation guide are lis
 | {{ linkvhlr }} | Sign Manifest Request                |
 | ^              | Include DocumentReference            |
 | ^              | Verify Document Signature            |
-| ^              | OAuth with FAST                      |
+| ^              | OAuth with SSRAA                     |
 | {{ linkvhls }} | Include DocumentReference            |
 | ^              | Sign Manifest Request                |
-| ^              | OAuth with FAST                      |
+| ^              | OAuth with SSRAA                     |
 {: .grid}
 
 
@@ -293,9 +285,9 @@ See cross-profile considerations for a discussion of the relationship of this op
 This option is captured in the following business requirement:
 * [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
 
-### XX.2.4 OAuth with FAST Option
+### XX.2.4 OAuth with SSRAA Option
 
-The OAuth with FAST Option enables the {{ linkvhlr }} and {{ linkvhls }} to use OAuth 2.0 access tokens for authentication during the ITI-YY5 Retrieve Manifest transaction, as an alternative to HTTP Message Signatures. This option provides interoperability with existing SMART on FHIR and [FAST Security](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/) implementations.
+The OAuth with SSRAA Option enables the {{ linkvhlr }} and {{ linkvhls }} to use OAuth 2.0 access tokens for authentication during the ITI-YY5 Retrieve Manifest transaction, as an alternative to HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA).
 
 
 **Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} must support this option for OAuth-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or other authentication mechanisms defined in ITI-YY5 SHALL be used instead.

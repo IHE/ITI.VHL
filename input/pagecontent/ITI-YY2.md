@@ -45,7 +45,6 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 
 - **W3C DID Core 1.0**: [Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/did-core/)
 - **RFC 7517**: JSON Web Key (JWK)
-- **RFC 8446**: TLS Protocol Version 1.3
 - **IHE mCSD**: [Mobile Care Services Discovery](https://profiles.ihe.net/ITI/mCSD/)
 
 
@@ -80,9 +79,6 @@ The requesting actor SHALL:
 1. **Determine Retrieval Endpoint**: Identify the {{ linkta }} endpoint for DID Document retrieval
 2. **Construct Request**: Build an HTTP GET request for retrieval of DID Document
 3. **Submit Request**: Send the request over a secure connection
-4. **Handle Response**: Process the returned DID Document(s) and extract public key material
-5. **Cache**: Cache the retrieved material according to caching policies
-6. **Validate**: Verify the integrity and authenticity of retrieved DID Documents
 
 
 
@@ -206,15 +202,14 @@ Upon receiving the Trust List response, the {{ linkvhlr }} or {{ linkvhls }} SHA
 4. **Map to Usage**: Associate each verification method with its intended use (authentication, assertion, etc.)
 5. **Cache**: Store the DID Documents according to caching policy
 6. **Monitor Expiry**: Track any expiration times and refresh cached material as needed
-
-The receiving actor SHALL process the received PKI material as specified in the [Receive Trust List](Requirements-ReceiveTrustList.html) requirement.
+4. **Handle Response**: Process the returned DID Document(s) and extract public key material
 
 
 ### 2:3.YY2.5 Security Considerations 
 
 #### 2:3.YY2.5.1 Secure Retrieval
 
-All Retrieve Trust List interactions MUST occur over secure channels (TLS 1.3 or equivalent). The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
+All Retrieve Trust List interactions MUST occur over a secure connection. The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
 
 #### 2:3.YY2.5.2 DID Document Validation
 

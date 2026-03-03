@@ -33,7 +33,7 @@ Feature: ITI-YY1 Submit PKI Material Request
     Then each verification method SHALL contain an "id" element
     And each verification method SHALL contain a "type" element
     And each verification method SHALL contain a "controller" element
-    And each verification method SHALL contain either "publicKeyJwk" or "publicKeyMultibase"
+    And each verification method SHALL contain a "publicKeyJwk" element
 
   Scenario: Verification method id references the parent DID
     Given the initiator has constructed a DID Document with id "did:example:vhl-sharer-123"
@@ -45,17 +45,11 @@ Feature: ITI-YY1 Submit PKI Material Request
     When the verification method is inspected
     Then the "controller" element SHALL equal "did:example:vhl-sharer-123"
 
-  Scenario: Public key is expressed in JWK format when publicKeyJwk is used
+  Scenario: Public key is expressed in JWK format conforming to RFC 7517
     Given the initiator has chosen to express the public key in JWK format
     When the initiator constructs the verification method
     Then the "publicKeyJwk" element SHALL conform to RFC 7517
     And the "publicKeyJwk" SHALL NOT include any private key parameters (e.g., "d")
-
-  Scenario: Public key is expressed in multibase format when publicKeyMultibase is used
-    Given the initiator has chosen to express the public key in multibase format
-    When the initiator constructs the verification method
-    Then the "publicKeyMultibase" value SHALL be a valid multibase-encoded public key
-    And the "publicKeyJwk" element SHALL NOT be present
 
   Scenario: Private key material is never included in the DID Document
     Given the initiator has generated an EC key pair
@@ -80,53 +74,13 @@ Feature: ITI-YY1 Submit PKI Material Request
     When the DID Document is constructed
     Then the key curve SHALL be "P-256" or stronger (e.g., P-384, P-521)
 
-  # ─── Optional DID Document Elements ──────────────────────────────────────────
+  # ─── Submission Pathway: Offline Submission ──────────────────────────────────
 
-  Scenario: DID Document may include authentication references
-    Given the initiator has a verification method "did:example:vhl-sharer-123#signing-key-1"
-    When the initiator constructs the DID Document with authentication references
-    Then the "authentication" array MAY reference the verification method id
-
-  Scenario: DID Document may include assertionMethod references
-    Given the initiator has a verification method "did:example:vhl-sharer-123#signing-key-1"
-    When the initiator constructs the DID Document with assertion method references
-    Then the "assertionMethod" array MAY reference the verification method id
-
-  Scenario: Service endpoint is well-formed when present
-    Given the initiator includes a service endpoint in the DID Document
-    When the "service" array is inspected
-    Then each service entry SHALL contain an "id" element
-    And each service entry SHALL contain a "type" element
-    And each service entry SHALL contain a "serviceEndpoint" element with a valid URI
-
-  # ─── Submission Pathway: Direct HTTP POST ────────────────────────────────────
-
-  Scenario: Direct HTTP POST submission uses the correct HTTP method
-    Given the initiator has constructed a valid DID Document
-    And the submission pathway is "Direct HTTP POST"
-    When the initiator submits the DID Document
-    Then the initiator SHALL issue an HTTP POST to the Trust Anchor endpoint
-
-  Scenario: Direct HTTP POST submission uses the correct Content-Type
-    Given the initiator has constructed a valid DID Document
-    And the submission pathway is "Direct HTTP POST"
-    When the initiator submits the DID Document
-    Then the HTTP request SHALL include the header "Content-Type: application/did+json"
-
-  Scenario: Direct HTTP POST submission uses mutually authenticated TLS
-    Given the initiator has constructed a valid DID Document
-    And the submission pathway is "Direct HTTP POST"
-    When the initiator establishes a connection to the Trust Anchor
-    Then the connection SHALL use TLS 1.3 or later
-    And the TLS session SHALL be mutually authenticated
-
-  # ─── Submission Pathway: Indirect Publication ────────────────────────────────
-
-  Scenario: Indirect publication places DID Document at a well-known URL
-    Given the initiator has chosen the "Indirect Publication" submission pathway
-    When the initiator publishes the DID Document
-    Then the DID Document SHALL be accessible at a well-known URL under the initiator's domain
-    And the initiator SHALL notify the Trust Anchor of the publication URL
+  Scenario: Offline submission delivers DID Document on secure physical media
+    Given the initiator has chosen the "Offline Submission" submission pathway
+    When the initiator prepares the submission
+    Then the DID Document SHALL be delivered on secure physical media
+    And the submission SHALL occur during a verified in-person encounter with formal identity attestation
 
   # ─── Provenance Metadata ─────────────────────────────────────────────────────
 
@@ -135,7 +89,7 @@ Feature: ITI-YY1 Submit PKI Material Request
     When provenance metadata is added
     Then the submission SHOULD include the asserted identity of the submitting entity
 
-  Scenario: Submission includes intended usage scope of the key(s)
+  Scenario: Submission declares intended usage scope of the key(s)
     Given the initiator is preparing a submission with a signing key
     When the DID Document references are set
     Then the key usage SHALL be declared via at least one of "authentication", "assertionMethod", or "keyAgreement"
@@ -145,15 +99,133 @@ Feature: ITI-YY1 Submit PKI Material Request
     When the DID Document is finalised
     Then the submission SHOULD include a digital signature or proof establishing the authenticity of the submission
 
+  Scenario: Submission includes expiry date or revocation reference when applicable
+    Given the initiator knows the intended lifetime of the key
+    When provenance metadata is set
+    Then the submission SHOULD include an expiry date or reference to a revocation mechanism
+
   # ─── Key Lifecycle ────────────────────────────────────────────────────────────
 
-  Scenario: Initiator maintains private keys securely
+  Scenario: Initiator maintains private keys securely after submission
     Given the initiator has submitted a DID Document
     When the submission is complete
     Then the initiator SHALL retain the corresponding private keys in secure storage
     And the private keys SHALL NOT be accessible to unauthorised parties
 
-  Scenario: DID Document includes an expiry date or revocation reference when applicable
-    Given the initiator knows the intended lifetime of the key
-    When provenance metadata is set
-    Then the submission SHOULD include an expiry date or reference to a revocation mechanism
+  # ─── Trust Anchor: Response Messages ─────────────────────────────────────────
+
+  Scenario: Trust Anchor returns HTTP 201 on successful DID Document submission
+    Given a valid DID Document has been submitted via HTTP POST
+    When the Trust Anchor accepts and catalogs the submission
+    Then the Trust Anchor SHALL return HTTP status 201 Created
+
+  Scenario: Trust Anchor returns HTTP 400 for a malformed DID Document
+    Given a DID Document that does not conform to W3C DID Core specification has been submitted
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL return HTTP status 400 Bad Request
+
+  Scenario: Trust Anchor returns HTTP 401 when authentication fails
+    Given the initiator has not provided valid authentication credentials
+    When the initiator submits a DID Document
+    Then the Trust Anchor SHALL return HTTP status 401 Unauthorized
+
+  Scenario: Trust Anchor returns HTTP 403 when the entity is not authorised to submit
+    Given the initiator has authenticated but is not in the list of authorised submitters
+    When the initiator submits a DID Document
+    Then the Trust Anchor SHALL return HTTP status 403 Forbidden
+
+  Scenario: Trust Anchor returns HTTP 422 for a structurally valid but semantically invalid submission
+    Given a DID Document that is well-formed JSON but fails validation rules has been submitted
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL return HTTP status 422 Unprocessable Entity
+
+  # ─── Trust Anchor: Expected Actions ──────────────────────────────────────────
+
+  Scenario: Trust Anchor validates DID Document structure against W3C DID Core
+    Given the Trust Anchor has received a DID Document submission
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL verify the DID Document conforms to the W3C DID Core specification
+
+  Scenario: Trust Anchor verifies public key is properly formatted as JWK
+    Given the Trust Anchor has received a DID Document with a publicKeyJwk element
+    When the Trust Anchor validates the cryptographic material
+    Then the Trust Anchor SHALL verify the public key is properly formatted per RFC 7517
+
+  Scenario: Trust Anchor rejects key types or curves not acceptable per trust framework policy
+    Given the Trust Anchor has received a DID Document with a prohibited key type or curve
+    When the Trust Anchor validates the cryptographic material
+    Then the Trust Anchor SHALL reject the submission
+
+  Scenario: Trust Anchor verifies key sizes meet minimum security requirements
+    Given the Trust Anchor has received a DID Document with an EC key below P-256 strength
+    When the Trust Anchor validates the cryptographic material
+    Then the Trust Anchor SHALL reject the submission as not meeting minimum key size requirements
+
+  Scenario: Trust Anchor authenticates the submitting entity via secure connection
+    Given the Trust Anchor has received a DID Document submission over a secure connection
+    When the Trust Anchor verifies the identity of the submitting entity
+    Then the Trust Anchor SHALL authenticate the entity through the secure connection
+
+  Scenario: Trust Anchor verifies the proof or signature on the DID Document
+    Given the Trust Anchor has received a signed DID Document
+    When the Trust Anchor verifies the identity of the submitting entity
+    Then the Trust Anchor SHALL verify the proof or signature on the DID Document
+
+  Scenario: Trust Anchor validates submitter against pre-registered organisational identifiers
+    Given the Trust Anchor maintains a registry of authorised participants
+    When the Trust Anchor verifies the identity of the submitting entity
+    Then the Trust Anchor SHALL validate the submitter against pre-registered organisational identifiers
+
+  Scenario: Trust Anchor catalogs the validated DID Document in its registry
+    Given the Trust Anchor has successfully validated a DID Document submission
+    When all validation checks pass
+    Then the Trust Anchor SHALL store the DID Document in its registry
+
+  Scenario: Trust Anchor makes the cataloged DID Document available for retrieval
+    Given the Trust Anchor has stored a validated DID Document
+    When the DID Document has been cataloged
+    Then the Trust Anchor SHALL make the DID Document accessible via its retrieval endpoint
+
+  # ─── Trust Anchor: Rejection Criteria ────────────────────────────────────────
+
+  Scenario: Trust Anchor rejects submission that does not conform to W3C DID Core
+    Given a submitted DID Document is missing required W3C DID Core elements
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL reject the submission
+
+  Scenario: Trust Anchor rejects submission with invalid or malformed cryptographic material
+    Given a submitted DID Document contains a malformed publicKeyJwk value
+    When the Trust Anchor validates the cryptographic material
+    Then the Trust Anchor SHALL reject the submission
+
+  Scenario: Trust Anchor rejects submission that cannot be authenticated to a known participant
+    Given the submitting entity is not a known trust network participant
+    When the Trust Anchor attempts to verify the identity
+    Then the Trust Anchor SHALL reject the submission
+
+  Scenario: Trust Anchor rejects submission using prohibited cryptographic algorithms
+    Given a submitted DID Document uses an algorithm not on the Trust Anchor's approved list
+    When the Trust Anchor validates the cryptographic material
+    Then the Trust Anchor SHALL reject the submission
+
+  Scenario: Trust Anchor rejects submission lacking required provenance information
+    Given a submitted DID Document contains no provenance metadata
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL reject the submission
+
+  # ─── Trust Anchor: Revocation and Updates ────────────────────────────────────
+
+  Scenario: Trust Anchor supports updating a previously registered DID Document
+    Given a DID Document has been previously registered by an initiator
+    When the initiator submits an updated DID Document for the same DID
+    Then the Trust Anchor SHALL support the update and replace the stored DID Document
+
+  Scenario: Trust Anchor supports revoking a registered DID Document
+    Given a DID Document is registered in the Trust Anchor registry
+    When the DID Document is revoked
+    Then the Trust Anchor SHALL mark the DID Document as revoked
+
+  Scenario: Trust Anchor does not distribute revoked or expired DID Documents
+    Given a DID Document has been revoked or has expired
+    When a participant requests the DID Document via the retrieval endpoint
+    Then the Trust Anchor SHALL NOT return the revoked or expired DID Document

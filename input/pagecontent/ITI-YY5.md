@@ -18,7 +18,7 @@ This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL H
 
 **Authentication:** All requests SHALL be authenticated using **HTTP Message Signatures (RFC 9421)**. This provides cryptographic proof of the receiver's identity, request integrity, and non-repudiation. The VHL Sharer validates the signature using the receiver's public key from the trust list before processing the request.
 
-**OAuth with FAST Option:** Implementations MAY additionally support the **OAuth with FAST Option** which uses OAuth 2.0 tokens for authentication as defined in the SMART App Launch and FAST Security specifications. When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
+**OAuth with SSRAA Option:** Implementations MAY additionally support the **OAuth with SSRAA Option** which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
 
 **Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, it SHALL ignore the `_include` parameter, and the {{ linkvhlr }} SHALL retrieve each DocumentReference individually using separate read requests.
 
@@ -58,11 +58,11 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 - **ITI TF-1: Section 9**: ATNA Profile
 - **ITI TF-2: 3.19**: Authenticate Node transaction
 
-**OAuth and FAST (Optional):**
-- **RFC 7515**: JSON Web Signature (JWS) - for OAuth with FAST Option
-- **RFC 7519**: JSON Web Token (JWT) - for OAuth with FAST Option
+**OAuth with SSRAA (Optional):**
+- **RFC 7515**: JSON Web Signature (JWS) - for OAuth with SSRAA Option
+- **RFC 7519**: JSON Web Token (JWT) - for OAuth with SSRAA Option
 - **SMART App Launch Backend Services**: [Backend Services](http://hl7.org/fhir/smart-app-launch/backend-services.html)
-- **FAST Security Framework**: [FAST Security](https://build.fhir.org/ig/HL7/fhir-udap-security-ig/)
+- **HL7 Security for Scalable Registration, Authentication, and Authorization IG**: [SSRAA](http://hl7.org/fhir/us/udap-security/)
 - **ITI Internet User Authorization (IUA)**: [IUA Profile](https://profiles.ihe.net/ITI/IUA/)
 
 **SHL Specifications:**
@@ -217,16 +217,25 @@ The following signature algorithms SHALL be supported:
 - Signature verification MUST enforce timestamp freshness (±2 minutes recommended)
 - HTTPS (TLS 1.2+) MUST be used for all requests
 
-##### 2:3.YY5.4.1.4 OAuth with FAST Option (Optional)
+##### 2:3.YY5.4.1.4 OAuth with SSRAA Option (Optional)
 
-Implementations that support the **OAuth with FAST Option** MAY use OAuth 2.0 access tokens for authentication instead of HTTP Message Signatures. This option provides interoperability with existing SMART on FHIR and FAST Security implementations.
+Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 access tokens for authentication instead of HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA).
+
+**Preconditions: SSRAA Discovery and Registration**
+
+Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} MUST complete SSRAA Discovery and Registration. These steps MUST take place at least once per {{ linkvhlr }} and {{ linkvhls }} pair. They MAY take place in advance or just in time.
+
+**Discovery (SSRAA Section 2):** Given the FHIR Base URL of the {{ linkvhls }} (included in the VHL payload), the {{ linkvhlr }} performs UDAP Discovery per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG. The {{ linkvhlr }} validates that the {{ linkvhls }} supports UDAP and determines the {{ linkvhls }}'s UDAP capabilities. If the {{ linkvhlr }} accepts the {{ linkvhls }}'s capabilities, it proceeds to Registration.
+
+**Registration (SSRAA Section 3):** The {{ linkvhlr }} performs UDAP Dynamic Client Registration per Section 3 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG. The {{ linkvhlr }} uses the X.509 certificate it obtained from the trust community PKI to register with the {{ linkvhls }} and obtain a client ID. This client ID is required when requesting OAuth access tokens.
 
 **Option Requirements:**
 
-When both {{ linkvhlr }} and {{ linkvhls }} support the OAuth with FAST Option:
+When both {{ linkvhlr }} and {{ linkvhls }} support the OAuth with SSRAA Option:
+- SSRAA Discovery and Registration SHALL be completed before requesting access tokens
 - OAuth 2.0 Backend Services authentication MAY be used
 - JWT client assertions SHALL be used for client authentication
-- Access tokens SHALL include appropriate FHIR resource scopes
+- Access token scope vocabulary is determined by trust community policies per the HL7 Security for Scalable Registration, Authentication, and Authorization IG
 
 **Step 1: Obtain Access Token**
 
@@ -236,22 +245,24 @@ Host: authorization-server.example.org
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=client_credentials
-&scope=system/List.read system/DocumentReference.read system/Binary.read
+&scope=system/List.r system/DocumentReference.r system/Binary.r
 &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
 &client_assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InJlY2VpdmVyLWtleS0xMjMifQ.eyJpc3MiOiJodHRwczovL3ZobC1yZWNlaXZlci5leGFtcGxlLm9yZyIsInN1YiI6Imh0dHBzOi8vdmhsLXJlY2VpdmVyLmV4YW1wbGUub3JnIiwiYXVkIjoiaHR0cHM6Ly9hdXRob3JpemF0aW9uLXNlcnZlci5leGFtcGxlLm9yZyIsImV4cCI6MTczNTY4OTkwMCwiaWF0IjoxNzM1Njg5NjAwLCJqdGkiOiJyYW5kb20tdW5pcXVlLWlkIn0.signature-here
 ```
 
 **JWT Client Assertion:**
 - Algorithm: RS256, ES256, or ES384
-- Header: `{"alg":"RS256","typ":"JWT","kid":"receiver-key-123"}`
+- Header: `{"alg":"RS256","typ":"JWT","x5c":["<base64-encoded-client-cert>","<base64-encoded-intermediate>"]}`
+  - `x5c`: The receiver's X.509 certificate (and optionally the full chain) from the trust community PKI, per the HL7 Security for Scalable Registration, Authentication, and Authorization IG
 - Payload:
-  - `iss`: Client identifier (VHL Receiver)
-  - `sub`: Client identifier (same as iss)
+  - `iss`: Client ID assigned to the {{ linkvhlr }} during SSRAA Registration (same as `sub`)
+  - `sub`: Client ID assigned to the {{ linkvhlr }} during SSRAA Registration (same as `iss`)
   - `aud`: Authorization server token endpoint
   - `exp`: Expiration time (typically 5 minutes from iat)
   - `iat`: Issued at time
   - `jti`: Unique identifier for this JWT (prevents replay)
-- Signature: Signed with receiver's private key
+  - `extensions`: An object containing an `hl7-b2b` member with the business-to-business identity context, per Section 5.2.1 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG
+- Signature: Signed with receiver's private key associated with the X.509 certificate in the `x5c` header
 
 **Token Response:**
 ```json
@@ -259,7 +270,7 @@ grant_type=client_credentials
   "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2F1dGhvcml6YXRpb24tc2VydmVyLmV4YW1wbGUub3JnIiwic3ViIjoiaHR0cHM6Ly92aGwtcmVjZWl2ZXIuZXhhbXBsZS5vcmciLCJleHAiOjE3MzU2OTMyMDAsImlhdCI6MTczNTY4OTYwMCwic2NvcGUiOiJzeXN0ZW0vTGlzdC5yZWFkIHN5c3RlbS9Eb2N1bWVudFJlZmVyZW5jZS5yZWFkIHN5c3RlbS9CaW5hcnkucmVhZCJ9.token-signature-here",
   "token_type": "Bearer",
   "expires_in": 3600,
-  "scope": "system/List.read system/DocumentReference.read system/Binary.read"
+  "scope": "system/List.r system/DocumentReference.r system/Binary.r"
 }
 ```
 
@@ -277,9 +288,9 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 
 **OAuth Process:**
 
-1. {{ linkvhlr }} creates JWT client assertion signed with private key
+1. {{ linkvhlr }} creates JWT client assertion signed with the receiver's private key associated with the receiver's X.509 certificate within the trust community
 2. {{ linkvhlr }} requests access token from authorization server
-3. Authorization server validates JWT signature and issues access token
+3. Authorization server validates the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community, then issues access token
 4. {{ linkvhlr }} includes access token in Authorization header
 5. {{ linkvhls }} validates token signature, expiration, and scope
 6. If valid, {{ linkvhls }} processes request and returns Bundle
@@ -288,21 +299,21 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 
 - Grant Type: `client_credentials`
 - Client Authentication: `private_key_jwt` (JWT client assertion)
-- Required Scopes:
-  - `system/List.read` - Read List resources
-  - `system/DocumentReference.read` - Read DocumentReference resources
-  - `system/Binary.read` - Read Binary resources (document content)
+- Required Scopes (SMART v2 vocabulary; specific scope requirements are determined by trust community policies per the HL7 Security for Scalable Registration, Authentication, and Authorization IG):
+  - `system/List.r` - Read List resources
+  - `system/DocumentReference.r` - Read DocumentReference resources
+  - `system/Binary.r` - Read Binary resources (document content)
 - Token Lifetime: Typically 1 hour (3600 seconds)
 - Token Reuse: Access token MAY be reused for multiple requests until expiration
 
 **Security Considerations for OAuth:**
 
-- JWT client assertions MUST be signed with receiver's private key
+- JWT client assertions MUST be signed with the receiver's private key associated with the receiver's X.509 certificate within the trust community
 - JWT `jti` claim SHOULD be checked to prevent replay attacks
 - Access tokens MUST include appropriate FHIR scopes
 - Access tokens MUST be validated for signature, expiration, and scope
 - Token lifetime SHOULD be limited (recommended: 1 hour maximum)
-- Authorization server MUST validate receiver's public key from trust list
+- Authorization server MUST validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
 
 ##### 2:3.YY5.4.1.5 Expected Actions - VHL Receiver
 
@@ -327,7 +338,7 @@ The {{ linkvhlr }} SHALL:
      - Construct signature base from HTTP components
      - Sign using receiver's private key
      - Include Content-Digest, Signature-Input, and Signature headers
-   - **OAuth with FAST Option (if supported)**:
+   - **OAuth with SSRAA Option (if supported)**:
      - Obtain access token using JWT client assertion
      - Include token in Authorization header
      - Reuse token for subsequent requests until expiration
@@ -348,9 +359,9 @@ The {{ linkvhlr }} SHALL:
    - Parse List entries to identify available documents
 
 The {{ linkvhlr }} MAY:
-- Cache OAuth access tokens for reuse (OAuth with FAST Option)
+- Cache OAuth access tokens for reuse (OAuth with SSRAA Option)
 - Implement retry logic for transient failures
-- Support both HTTP Message Signatures and OAuth with FAST Option
+- Support both HTTP Message Signatures and OAuth with SSRAA Option
 
 ##### 2:3.YY5.4.1.6 Expected Actions - VHL Sharer
 
@@ -370,7 +381,7 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Verify Content-Digest matches request body
      - Verify `created` timestamp is within acceptable range (±2 minutes)
      - Reject if signature invalid or receiver not in trust list (401 Unauthorized)
-   - **OAuth with FAST Option** (if supported):
+   - **OAuth with SSRAA Option** (if supported):
      - Extract Bearer token from Authorization header
      - Validate token signature using authorization server's public key
      - Verify token expiration (exp claim)
@@ -655,8 +666,8 @@ All implementations SHALL support HTTP Message Signatures per RFC 9421:
 - Timestamp validation MUST enforce freshness (±2 minutes recommended)
 - Replay attacks prevented by timestamp validation
 
-#### 2:3.YY5.5.3 OAuth with FAST Option (Optional)
-Implementations that support OAuth with FAST Option SHALL:
+#### 2:3.YY5.5.3 OAuth with SSRAA Option (Optional)
+Implementations that support OAuth with SSRAA Option SHALL:
 - Use OAuth 2.0 Backend Services (client_credentials grant)
 - Use JWT client assertions (private_key_jwt) for client authentication
 - Include appropriate FHIR scopes in access token
@@ -681,7 +692,7 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHALL:
 - Authenticate each other's participation in trust network
 - Obtain public keys from trust list (ITI-YY2 Retrieve Trust List with DID)
 - Validate certificates are not expired or revoked
-- Use `keyid` (HTTP signatures) or `kid` (OAuth JWT) to locate public keys
+- Use `keyid` (HTTP signatures) or the client key (OAuth JWT) to identify the client's key
 - Reject requests from participants not in trust list (401 Unauthorized)
 
 #### 2:3.YY5.5.6 Audit Logging
