@@ -32,6 +32,10 @@
 - **ISO/IEC 18004:2015**: QR Code specification
 - **FHIR R4**: [HL7 FHIR Release 4](http://hl7.org/fhir/R4/)
 
+**OAuth with SSRAA (Optional):**
+- **RFC 7519**: JSON Web Token (JWT)
+- **HL7 Security for Scalable Registration, Authentication, and Authorization IG**: [SSRAA](http://hl7.org/fhir/us/udap-security/) — used by the VHL Receiver to perform UDAP Discovery and Dynamic Client Registration with the VHL Sharer prior to making authenticated manifest requests
+
 
 ### 2:3.YY3.4 Messages
 
@@ -128,23 +132,29 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
    - `flag`: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term, 'U' for direct file access)
    - `label`: (optional) description string (max 80 characters)
    - `v`: version number (defaults to 1)
+   - `extensions`: (optional) object containing implementation-defined extensions. When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include:
+     - `fhirBaseUrl`: the FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`). This enables the {{ linkvhlr }} to perform UDAP Discovery (per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG) and Dynamic Client Registration (per Section 3) with the {{ linkvhls }} before making an authenticated manifest request via ITI-YY5.
 
 
 
 **Example VHL Construction:**
 
 ```json
-// Step 4: SHL Payload JSON
+// Step 4: SHL Payload JSON (with OAuth with SSRAA extension)
 {
   "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
   "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
   "exp": 1735689600,
   "flag": "LP",
   "label": "Patient Health Summary",
-  "v": 1
+  "v": 1,
+  "extensions": {
+    "fhirBaseUrl": "https://vhl-sharer.example.org"
+  }
 }
 
 // The SHL payload from step 4 will be embedded in the HCERT structure (see QR Code Generation below)
+// NOTE: extensions.fhirBaseUrl is only present when the VHL Sharer supports the OAuth with SSRAA Option
 ```
 
 **QR Code Generation (HCERT/CWT Encoding)**
@@ -190,7 +200,10 @@ After constructing the SHL payload (steps 1-4 above), the VHL Sharer SHALL encod
       "exp": 1735689600,
       "flag": "LP",
       "label": "Patient Health Summary",
-      "v": 1
+      "v": 1,
+      "extensions": {
+        "fhirBaseUrl": "https://vhl-sharer.example.org"
+      }
     }
   }
 }
@@ -284,3 +297,11 @@ The VHL Holder MAY:
 - The manifest URL MUST include all mandatory FHIR search parameters
 - The `_include` parameter SHOULD only be included if the VHL Sharer supports the Include DocumentReference Option
 - This ensures VHL Receivers can successfully retrieve the manifest using ITI-YY5
+
+#### 2:3.YY3.5.5 OAuth with SSRAA Option — FHIR Base URL Extension
+When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `extensions.fhirBaseUrl` in the SHL payload:
+- The `fhirBaseUrl` value MUST be the canonical FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`)
+- This URL is used by the {{ linkvhlr }} to perform UDAP Discovery (`{fhirBaseUrl}/.well-known/udap`) and, if not already registered, Dynamic Client Registration with the {{ linkvhls }} before initiating ITI-YY5
+- The `fhirBaseUrl` value is typically derivable from the `url` field (manifest URL) by stripping the path, but including it explicitly avoids ambiguity when the authorization server is hosted separately
+- The {{ linkvhlr }} SHOULD cache its UDAP registration per `fhirBaseUrl` to avoid re-registering on every VHL scan
+- The `fhirBaseUrl` field MUST NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily

@@ -16,9 +16,9 @@ This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL H
 
 **FHIR Search Transaction:** This transaction uses a standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists. The manifest URL from the VHL payload contains all necessary FHIR search parameters. No custom operation is required.
 
-**Authentication:** All requests SHALL be authenticated using **HTTP Message Signatures (RFC 9421)**. This provides cryptographic proof of the receiver's identity, request integrity, and non-repudiation. The VHL Sharer validates the signature using the receiver's public key from the trust list before processing the request.
+**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)** or **OAuth with SSRAA** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
 
-**OAuth with SSRAA Option:** Implementations MAY additionally support the **OAuth with SSRAA Option** which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
+**OAuth with SSRAA Option:** Implementations MAY support the **OAuth with SSRAA Option**, which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
 
 **Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, it SHALL ignore the `_include` parameter, and the {{ linkvhlr }} SHALL retrieve each DocumentReference individually using separate read requests.
 
@@ -39,7 +39,6 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 ### 2:3.YY5.3 Referenced Standards
 
 **Core Standards:**
-- **RFC 8446**: TLS Protocol Version 1.3
 - **RFC 5280**: X.509 PKI Certificate and CRL Profile
 - **RFC 9110**: HTTP Semantics
 - **RFC 9421**: HTTP Message Signatures
@@ -66,7 +65,7 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 - **ITI Internet User Authorization (IUA)**: [IUA Profile](https://profiles.ihe.net/ITI/IUA/)
 
 **SHL Specifications:**
-- **SHL Manifest Request**: [SHL Manifest Request](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#smart-health-link-manifest-request)
+- **SHL Manifest Request**: [SHL Manifest Request](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-request)
 
 ### 2:3.YY5.4 Messages
 
@@ -126,9 +125,9 @@ In addition to the FHIR search parameters in the URL, the following SHL-specific
 | embeddedLengthMax | integer | [0..1] | Integer upper bound on the length of embedded payloads (optional optimization hint) |
 {: .grid}
 
-##### 2:3.YY5.4.1.3 Authentication - HTTP Message Signatures (Required)
+##### 2:3.YY5.4.1.3 Authentication Option - HTTP Message Signatures
 
-All requests SHALL be authenticated using **HTTP Message Signatures** per RFC 9421. This provides cryptographic proof of the receiver's identity, request integrity, and non-repudiation.
+Implementations MAY authenticate using **HTTP Message Signatures** per RFC 9421. This option is not required; participants MAY instead use OAuth with SSRAA (see Section 2:3.YY5.4.1.4). HTTP Message Signatures provide cryptographic proof of the receiver's identity, request integrity, and non-repudiation.
 
 **Request Structure:**
 
@@ -217,7 +216,7 @@ The following signature algorithms SHALL be supported:
 - Signature verification MUST enforce timestamp freshness (±2 minutes recommended)
 - HTTPS (TLS 1.2+) MUST be used for all requests
 
-##### 2:3.YY5.4.1.4 OAuth with SSRAA Option (Optional)
+##### 2:3.YY5.4.1.4 Authentication option - OAuth with SSRAA Option
 
 Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 access tokens for authentication instead of HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA).
 
@@ -332,13 +331,13 @@ The {{ linkvhlr }} SHALL:
      - embeddedLengthMax (optional) - size hint for embedded content
    - Encode parameters as `application/x-www-form-urlencoded`
 
-3. **Authenticate Request**:
-   - **Default (Required)**: Create HTTP Message Signature
+3. **Authenticate Request** (use one of the following options; neither is required):
+   - **Option A - HTTP Message Signatures** (if supported):
      - Compute Content-Digest (SHA-256 of request body)
      - Construct signature base from HTTP components
      - Sign using receiver's private key
      - Include Content-Digest, Signature-Input, and Signature headers
-   - **OAuth with SSRAA Option (if supported)**:
+   - **Option B - OAuth with SSRAA** (if supported):
      - Obtain access token using JWT client assertion
      - Include token in Authorization header
      - Reuse token for subsequent requests until expiration
@@ -381,7 +380,7 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Verify Content-Digest matches request body
      - Verify `created` timestamp is within acceptable range (±2 minutes)
      - Reject if signature invalid or receiver not in trust list (401 Unauthorized)
-   - **OAuth with SSRAA Option** (if supported):
+   - **OAuth with SSRAA Option**:
      - Extract Bearer token from Authorization header
      - Validate token signature using authorization server's public key
      - Verify token expiration (exp claim)
@@ -655,7 +654,7 @@ The {{ linkvhlr }} MAY:
 - Perfect Forward Secrecy (PFS) cipher suites SHOULD be used
 - Certificate validation SHALL be enforced
 
-#### 2:3.YY5.5.2 HTTP Message Signatures (Required)
+#### 2:3.YY5.5.2 HTTP Message Signatures 
 All implementations SHALL support HTTP Message Signatures per RFC 9421:
 - Signature MUST include `@method`, `@path`, `@authority`, `content-type`, `content-digest`
 - Content-Digest MUST be SHA-256 or stronger
@@ -666,7 +665,7 @@ All implementations SHALL support HTTP Message Signatures per RFC 9421:
 - Timestamp validation MUST enforce freshness (±2 minutes recommended)
 - Replay attacks prevented by timestamp validation
 
-#### 2:3.YY5.5.3 OAuth with SSRAA Option (Optional)
+#### 2:3.YY5.5.3 OAuth with SSRAA Option 
 Implementations that support OAuth with SSRAA Option SHALL:
 - Use OAuth 2.0 Backend Services (client_credentials grant)
 - Use JWT client assertions (private_key_jwt) for client authentication
