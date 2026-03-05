@@ -214,7 +214,6 @@ The following signature algorithms SHALL be supported:
 - `keyid` MUST uniquely identify receiver's public key in trust list
 - Signatures MUST include timestamp (`created`) to prevent replay attacks
 - Signature verification MUST enforce timestamp freshness (±2 minutes recommended)
-- HTTPS (TLS 1.2+) MUST be used for all requests
 
 ##### 2:3.YY5.4.1.4 Authentication option - OAuth with SSRAA Option
 
@@ -382,7 +381,7 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Reject if signature invalid or receiver not in trust list (401 Unauthorized)
    - **OAuth with SSRAA Option**:
      - Extract Bearer token from Authorization header
-     - Validate token signature using authorization server's public key
+     - Validate token signature using authorization server's certificate
      - Verify token expiration (exp claim)
      - Verify token scope includes required FHIR resource types
      - Verify token issuer (iss claim) is trusted authorization server
@@ -649,10 +648,8 @@ The {{ linkvhlr }} MAY:
 ### 2:3.YY5.5 Security Considerations
 
 #### 2:3.YY5.5.1 Transport Security
-- All requests SHALL use HTTPS with TLS 1.2 or higher
-- TLS 1.3 is RECOMMENDED for improved security and performance
-- Perfect Forward Secrecy (PFS) cipher suites SHOULD be used
-- Certificate validation SHALL be enforced
+
+Secure transport is required for all communications in this transaction. Implementations SHALL comply with the **IHE ATNA Profile** (ITI TF-1: Section 9) for transport security requirements
 
 #### 2:3.YY5.5.2 HTTP Message Signatures 
 All implementations SHALL support HTTP Message Signatures per RFC 9421:
@@ -714,7 +711,6 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 
 #### 2:3.YY5.5.8 Passcode Security
 When VHL is passcode-protected (P flag):
-- Passcode MUST be transmitted over HTTPS only
 - Passcode MUST be validated using constant-time comparison
 - Failed passcode attempts SHOULD be rate limited
 - Passcode SHOULD NOT be logged in audit trails

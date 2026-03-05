@@ -18,6 +18,8 @@
 
 - ToDo_006: ITI-YY5 Receiver Authentication for Sharer using Embedded JWS/VC as an option
 
+- ToDo_007: ITI-YY5 Retrieve Manifest Message Semantics alignment with SHL — The current message semantics in ITI-YY5 (Section 2:3.YY5.4.1.2) may diverge from the SMART Health Links retrieve manifest specification. Liaise with the SHL team to identify gaps and request updates to the [SHL Manifest logical model](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-file)
+
 ### Closed Issues
 
 - ToDo_002: Can we use the same transaction to retrieve a single doc VHL as well as retrieve the docs in a folder VHL?

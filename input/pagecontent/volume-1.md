@@ -16,7 +16,7 @@ The **Verifiable Health Link (VHL)** profile defines a set of protocols and patt
 
 VHL leverages **Public Key Infrastructure (PKI)** to establish trust among actors and to verify the authenticity and integrity of exchanged artifacts.
 
-Within the VHL trust model, both the {{ linkvhlr }} and the {{ linkvhls }} are participants in a shared **trust network**. This network enables:
+Within the VHL trust model, both the {{ linkvhlr }} and the {{ linkvhls }} are participants in a shared **[trust network](other.html#ihe-technical-frameworks-general-introduction-appendix-d-glossary)**. This network enables:
 - Verification of the origin of a health document,
 - Validation of any access mechanism (i.e., the VHL itself),
 - Authentication of requests that seek to utilize these mechanisms.
