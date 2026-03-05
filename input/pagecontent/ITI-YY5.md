@@ -657,7 +657,7 @@ All implementations SHALL support HTTP Message Signatures per RFC 9421:
 - Content-Digest MUST be SHA-256 or stronger
 - Signature algorithm: ECDSA P-256 SHA-256 (recommended) or RSA 2048+ with PSS or PKCS#1 v1.5
 - Private keys MUST be stored securely (Hardware Security Module recommended)
-- Public keys MUST be obtained from trust list (ITI-YY2)
+- Public keys MUST be obtained from trust network
 - `keyid` MUST uniquely identify receiver's public key in trust list
 - Timestamp validation MUST enforce freshness (±2 minutes recommended)
 - Replay attacks prevented by timestamp validation

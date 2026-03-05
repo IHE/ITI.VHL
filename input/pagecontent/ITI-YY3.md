@@ -135,7 +135,10 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
    - `extensions`: (optional) object containing implementation-defined extensions. When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include:
      - `fhirBaseUrl`: the FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`). This enables the {{ linkvhlr }} to perform UDAP Discovery (per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG) and Dynamic Client Registration (per Section 3) with the {{ linkvhls }} before making an authenticated manifest request via ITI-YY5.
 
-
+5. The JSON Payload is then:
+    - Minified
+    - Base64urlencoded
+    - Prefixed with vhlink:/
 
 **Example VHL Construction:**
 
@@ -143,7 +146,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 // Step 4: SHL Payload JSON (with OAuth with SSRAA extension)
 {
   "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
-  "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
+  "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
   "exp": 1735689600,
   "flag": "LP",
   "label": "Patient Health Summary",
@@ -152,38 +155,29 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
     "fhirBaseUrl": "https://vhl-sharer.example.org"
   }
 }
+```
 
-// The SHL payload from step 4 will be embedded in the HCERT structure (see QR Code Generation below)
+```text
+// Step 5: Minify, Base64url-encode, and prefix with vhlink:/
+
+// Step 5a – Minified JSON:
+{"url":"https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item","key":"86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk","exp":1735689600,"flag":"LP","label":"Patient Health Summary","v":1,"extensions":{"fhirBaseUrl":"https://vhl-sharer.example.org"}}
+
+// Step 5b – Base64url-encoded:
+eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
+
+// Step 5c – Final VHL link (prefixed with vhlink:/):
+vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
+
 // NOTE: extensions.fhirBaseUrl is only present when the VHL Sharer supports the OAuth with SSRAA Option
+// The VHL link (step 5c) will be embedded in the HCERT structure (see QR Code Generation below)
 ```
 
 **QR Code Generation (HCERT/CWT Encoding)**
 
-After constructing the SHL payload (steps 1-4 above), the VHL Sharer SHALL encode it within an HCERT structure:
+After constructing the SHL payload (steps 1-4 above), the VHL Sharer SHALL encode it within an [HCERT](https://smart.who.int/trust/StructureDefinition-HCert.html) structure as per the WHO SMART TRUST specification. The HCERT claim SHALL be 5 for VHL.
 
-5. Create a CBOR Web Token (CWT) structure per RFC 8392 with protected header containing:
-   - `alg` (algorithm): ES256 (ECDSA with SHA-256, primary) or PS256 (RSASSA-PSS with SHA-256, secondary)
-   - `kid` (key identifier): truncated SHA-256 fingerprint of DSC (first 8 bytes)
-
-6. Add CWT claims:
-   - `iss` (issuer, claim key 1): optional ISO 3166-1 alpha-2 country code
-   - `iat` (issued at, claim key 6): timestamp in NumericDate format
-   - `exp` (expiration, claim key 4): timestamp in NumericDate format
-   - `hcert` (health certificate, claim key -260): object containing:
-     - claim key 5: the SHL payload object from step 4
-
-7. Sign the CWT using asymmetric signature algorithm (COSE, RFC 8152) with VHL Sharer's private key
-
-8. Compress the signed CWT using ZLIB (RFC 1950) with Deflate (RFC 1951) compression
-
-9. Encode the compressed CWT as Base45
-
-10. Prefix with context identifier `HC1:`
-
-11. Generate QR code using ISO/IEC 18004:2015:
-    - Error correction level: Q (25% recommended)
-    - Mode: Alphanumeric (Mode 2)
-    - Recommended diagonal size: 35-60mm for physical QR codes
+The VHL Sharer shall than generate the QR Code as per the [HCERT Specification](https://smart.who.int/trust/hcert_spec.html).
 
 **Example HCERT/CWT Structure:**
 
@@ -194,17 +188,7 @@ After constructing the SHL payload (steps 1-4 above), the VHL Sharer SHALL encod
   "4": 1735689600,              // exp: expiration timestamp
   "6": 1704067200,              // iat: issued at timestamp
   "-260": {                     // hcert: health certificate claim
-    "5": {                      // SHL payload at claim key 5
-      "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
-      "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
-      "exp": 1735689600,
-      "flag": "LP",
-      "label": "Patient Health Summary",
-      "v": 1,
-      "extensions": {
-        "fhirBaseUrl": "https://vhl-sharer.example.org"
-      }
-    }
+    "5": "vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19"
   }
 }
 
