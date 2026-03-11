@@ -1,109 +1,21 @@
 Feature: ITI-YY1 Submit PKI Material – Trust Anchor Expected Actions
   As the Trust Anchor (Responder) receiving DID Document submissions,
-  these scenarios verify that the Trust Anchor correctly validates structure and
-  cryptographic material, authenticates submitters, catalogs approved submissions,
-  and returns the correct HTTP response codes.
+  these scenarios verify that the Trust Anchor correctly authenticates submitters,
+  catalogs approved submissions, and returns the correct HTTP response codes.
+  Message semantics (structure and cryptographic material validation) are defined
+  in ITI-YY1-submit-pki-material-message.feature.
 
   Background:
     Given the Trust Anchor is running at "https://trust-anchor.example.org/did"
     And the Trust Anchor has a registry of pre-authorised trust network participants
 
-  # ─── Structural Validation ──────────────────────────────────────────────────
+  # ─── HTTP Response ───────────────────────────────────────────────────────────
 
   @responder-actions @SHALL
   Scenario: Trust Anchor accepts a fully conformant DID Document with HTTP 201
     Given a conforming DID Document is submitted via HTTP POST
     When the Trust Anchor processes the submission
     Then the Trust Anchor SHALL return HTTP 201 Created
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a DID Document missing the @context element
-    Given a submitted DID Document has no "@context" element
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 400 Bad Request
-    And the response SHALL indicate the "@context" element is missing
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a DID Document whose @context does not include the W3C DID context
-    Given a submitted DID Document "@context" does not include "https://www.w3.org/ns/did/v1"
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 400 Bad Request
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a DID Document missing the id element
-    Given a submitted DID Document has no "id" element
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 400 Bad Request
-    And the response SHALL indicate the "id" element is missing
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a DID Document with a malformed DID identifier
-    Given a submitted DID Document has "id" value "not-a-valid-did"
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 400 Bad Request
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a DID Document with an empty verificationMethod array
-    Given a submitted DID Document has an empty "verificationMethod" array
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 400 Bad Request
-    And the response SHALL indicate at least one verification method is required
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a verification method missing the id element
-    Given a submitted DID Document has a verification method with no "id"
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 422 Unprocessable Entity
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a verification method missing the type element
-    Given a submitted DID Document has a verification method with no "type"
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 422 Unprocessable Entity
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a verification method missing the controller element
-    Given a submitted DID Document has a verification method with no "controller"
-    When the Trust Anchor validates the structure
-    Then the Trust Anchor SHALL return HTTP 422 Unprocessable Entity
-
-  # ─── Cryptographic Material Validation ──────────────────────────────────────
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor verifies public key is properly formatted as JWK per RFC 7517
-    Given a submitted DID Document includes a publicKeyJwk element
-    When the Trust Anchor validates the cryptographic material
-    Then the Trust Anchor SHALL verify the public key conforms to RFC 7517
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a verification method containing a private key parameter
-    Given a submitted DID Document has a publicKeyJwk with a "d" parameter
-    When the Trust Anchor validates the cryptographic material
-    Then the Trust Anchor SHALL return HTTP 422 Unprocessable Entity
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a malformed publicKeyJwk value
-    Given a submitted DID Document contains a malformed publicKeyJwk
-    When the Trust Anchor validates the cryptographic material
-    Then the Trust Anchor SHALL reject the submission
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects key types or curves not acceptable per trust framework policy
-    Given a submitted DID Document uses a prohibited key type or curve
-    When the Trust Anchor validates the cryptographic material
-    Then the Trust Anchor SHALL reject the submission
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects an EC key below P-256 strength
-    Given a submitted DID Document contains an EC key weaker than P-256
-    When the Trust Anchor validates the key size
-    Then the Trust Anchor SHALL reject the submission as not meeting minimum key size requirements
-
-  @responder-actions @SHALL
-  Scenario: Trust Anchor rejects a submission using a prohibited cryptographic algorithm
-    Given a submitted DID Document uses an algorithm not on the Trust Anchor's approved list
-    When the Trust Anchor validates the cryptographic material
-    Then the Trust Anchor SHALL reject the submission
 
   # ─── Identity and Authentication ────────────────────────────────────────────
 
@@ -163,7 +75,7 @@ Feature: ITI-YY1 Submit PKI Material – Trust Anchor Expected Actions
     When cataloging is complete
     Then the Trust Anchor SHALL make the DID Document accessible via its retrieval endpoint
 
-  # ─── Revocation and Updates ─────────────────────────────────────────────────
+  # ─── §2:3.YY1.5.5 Revocation and Updates ─────────────────────────────────────────────────
 
   @responder-actions @SHALL
   Scenario: Trust Anchor supports updating a previously registered DID Document
@@ -188,3 +100,31 @@ Feature: ITI-YY1 Submit PKI Material – Trust Anchor Expected Actions
     Given a DID Document has been updated or revoked
     When an audit query is made
     Then the Trust Anchor MAY provide a history of prior DID Document versions
+
+  # ─── §2:3.YY1.5.1 DID Document Integrity ───────────────────────────────────
+
+  @security @SHALL
+  Scenario: Trust Anchor verifies the authenticity of submitted DID Documents
+    Given the Trust Anchor has received a DID Document submission
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL verify the authenticity of the DID Document
+
+  # ─── §2:3.YY1.5.3 Identity Verification ────────────────────────────────────
+
+  @security @SHALL
+  Scenario: Trust Anchor authenticates the identity of every submitting entity
+    Given a DID Document submission is received
+    When the Trust Anchor evaluates the submission
+    Then the Trust Anchor SHALL authenticate the identity of the submitting entity
+
+  @security @MAY
+  Scenario: Trust Anchor may authenticate using pre-registered certificates
+    Given the Trust Anchor is authenticating a submitter
+    When pre-registered certificates are available for that submitter
+    Then the Trust Anchor MAY authenticate using those certificates over the secure connection
+
+  @security @MAY
+  Scenario: Trust Anchor may use out-of-band identity verification for initial registration
+    Given a submitter is registering for the first time and no prior credentials exist
+    When the Trust Anchor performs identity verification
+    Then the Trust Anchor MAY use out-of-band identity verification

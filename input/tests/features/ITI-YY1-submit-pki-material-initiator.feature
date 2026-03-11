@@ -8,40 +8,6 @@ Feature: ITI-YY1 Submit PKI Material – Initiator Expected Actions
     Given the initiator is a VHL Sharer or VHL Receiver
     And the Trust Anchor endpoint is "https://trust-anchor.example.org/did"
 
-  # ─── Key Generation ─────────────────────────────────────────────────────────
-
-  @initiator-actions @SHALL
-  Scenario: Initiator generates a cryptographic key pair using a CSPRNG
-    Given the initiator is preparing a PKI submission
-    When a key pair is generated
-    Then it SHALL be produced by a cryptographically secure random number generator
-
-  # ─── Submission Pathway: Direct HTTP POST ───────────────────────────────────
-
-  @initiator-actions @SHALL
-  Scenario: Initiator submits the DID Document via HTTP POST over a secure connection
-    Given the initiator has constructed a conforming DID Document
-    When the initiator submits via the direct pathway
-    Then the DID Document SHALL be sent as an HTTP POST to "[trust-anchor-base]/did"
-    And the connection SHALL use TLS
-
-  # ─── Submission Pathway: Indirect Publication ───────────────────────────────
-
-  @initiator-actions @SHALL
-  Scenario: Indirect submission publishes the DID Document at a well-known URL and notifies the Trust Anchor
-    Given the initiator has chosen the "Indirect Publication" submission pathway
-    When the DID Document is published
-    Then the DID Document SHALL be made available at a well-known, resolvable URL
-    And the Trust Anchor SHALL be notified of the publication URL
-
-  # ─── Submission Pathway: Offline Submission ─────────────────────────────────
-
-  @initiator-actions @SHALL
-  Scenario: Offline submission delivers DID Document on secure physical media during a verified encounter
-    Given the initiator has chosen the "Offline Submission" pathway
-    When the initiator prepares the submission
-    Then the DID Document SHALL be delivered on secure physical media
-    And the submission SHALL occur during a verified in-person encounter with formal identity attestation
 
   # ─── Provenance Metadata ────────────────────────────────────────────────────
 
@@ -103,3 +69,18 @@ Feature: ITI-YY1 Submit PKI Material – Initiator Expected Actions
     When the submission is complete (success or failure)
     Then the initiator SHALL retain the corresponding private keys in secure storage
     And the private keys SHALL NOT be accessible to unauthorised parties
+
+  # ─── §2:3.YY1.5.1 DID Document Integrity ───────────────────────────────────
+
+  @security @SHOULD
+  Scenario: Submitting entity signs the DID Document using its own verification method
+    Given the submitting entity has a private signing key
+    When the DID Document is finalised for submission
+    Then the DID Document SHOULD be signed by the submitting entity using its verification method
+
+  @security @SHALL
+  Scenario: HTTP submission uses a secure TLS connection
+    Given a DID Document is being submitted via HTTP POST
+    When the connection is established
+    Then the connection SHALL use TLS
+    And plain HTTP SHALL NOT be used
