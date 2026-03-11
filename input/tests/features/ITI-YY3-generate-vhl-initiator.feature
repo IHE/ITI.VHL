@@ -59,3 +59,12 @@ Feature: ITI-YY3 Generate VHL – VHL Holder Expected Actions
     When the VHL Holder checks validity
     Then the VHL Holder SHALL NOT present the expired QR code
     And the VHL Holder SHOULD request a new VHL from the VHL Sharer
+
+  # ─── Security ────────────────────────────────────────────────────────────────
+
+  @security @SHALL
+  Scenario: $generate-vhl request is transmitted over HTTPS
+    Given the VHL Holder is sending the Generate VHL request
+    When the connection is established
+    Then the request SHALL use HTTPS
+    And plain HTTP SHALL NOT be used

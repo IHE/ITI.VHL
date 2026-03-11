@@ -158,3 +158,17 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Given a Retrieve Manifest request has been processed
     When the audit event is recorded
     Then the VHL Sharer SHOULD log receiver identity, folder ID, authentication method, authorization decision, and timestamp
+
+  # ─── Security ────────────────────────────────────────────────────────────────
+
+  @security @SHALL
+  Scenario: Authorization server rejects any OAuth JWT client assertion whose jti has been seen before
+    Given the VHL Receiver has sent a JWT client assertion
+    When the "jti" claim is evaluated
+    Then the authorization server SHALL reject any assertion whose "jti" has been seen before
+
+  @security @SHALL
+  Scenario: VHL Sharer does not log the plaintext passcode
+    Given a request includes a passcode
+    When the audit event is written
+    Then the plaintext passcode SHALL NOT appear in the log entry

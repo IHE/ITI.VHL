@@ -151,3 +151,18 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     When the VHL Sharer handles the error
     Then the response SHALL be HTTP 5xx
     And the response body SHALL be a FHIR OperationOutcome with the error description
+
+  # ─── Security ────────────────────────────────────────────────────────────────
+
+  @security @SHALL
+  Scenario: Passcode is never embedded in the QR code or VHL URL
+    Given a passcode was provided in the request
+    When the QR code and VHL URL are generated
+    Then the plaintext passcode SHALL NOT appear in the QR code content
+    And the plaintext passcode SHALL NOT appear in the VHL URL
+
+  @security @SHALL
+  Scenario: Generated QR code contains no protected health information
+    When the QR code payload is inspected
+    Then the QR code SHALL NOT contain any PHI
+    And it SHALL contain only a reference URL and authorization metadata (SHL payload)

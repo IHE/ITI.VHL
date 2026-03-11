@@ -60,3 +60,11 @@ Feature: ITI-YY2 Retrieve Trust List – Trust Anchor Expected Actions
     When it assembles a successful Retrieve Trust List response
     Then the Trust Anchor MAY include a digital signature over the response payload
     And clients SHALL be able to verify that signature using the Trust Anchor's public key
+
+  # ─── Security ────────────────────────────────────────────────────────────────
+
+  @security @SHALL
+  Scenario: Trust Anchor restricts retrieval to authenticated and authorised participants
+    Given a retrieval request is received
+    When the Trust Anchor applies access control
+    Then only authenticated and authorised trust network participants SHALL receive DID Documents
