@@ -54,6 +54,16 @@ The Submit PKI Material with DID transaction enables entities within a trust net
 
 {% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
 
+**VHL Sharer / VHL Receiver (Submitter):**
+
+The submitting actor:
+
+1. **Generates Key Pair**: Generate one or more cryptographic key pairs suitable for the intended use (signing, encryption, authentication)
+2. **Constructs DID Document**: Create a DID Document containing:
+   - A unique DID identifier for the entity
+   - Verification methods with public key material in JWK format
+3. **Submits to Trust Anchor**: Sends the DID Document to the {{ linkta }} via the designated submission pathway
+
 ##### 2:3.YY1.4.1.2 Message Semantics
 
 PKI material SHALL be submitted to the {{ linkta }} using DID Documents formatted according to the [W3C DID Core specification](https://www.w3.org/TR/did-core/).
@@ -135,17 +145,6 @@ Submissions SHOULD include sufficient **provenance metadata** to support validat
 - Digital signature or proof establishing the authenticity of the submission
 
 ##### 2:3.YY1.4.1.3 Expected Actions
-
-**VHL Sharer / VHL Receiver (Submitter):**
-
-The submitting actor SHALL:
-
-1. **Generate Key Pair**: Generate one or more cryptographic key pairs suitable for the intended use (signing, encryption, authentication)
-2. **Construct DID Document**: Create a DID Document containing:
-   - A unique DID identifier for the entity
-   - Verification methods with public key material in JWK format
-3. **Submit to Trust Anchor**: Send the DID Document to the {{ linkta }} via the designated submission pathway
-4. **Maintain Private Keys**: Securely store the corresponding private keys and protect them from unauthorized access
 
 **Trust Anchor (Receiver):**
 
