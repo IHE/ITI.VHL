@@ -40,16 +40,10 @@ Feature: ITI-YY4 Provide VHL – VHL Holder Expected Actions
     Then the VHL Holder SHALL provide the plaintext passcode to the VHL Receiver through a separate secure channel
 
   @initiator-actions @SHALL
-  Scenario: VHL Holder does not embed the passcode in the QR code
-    Given the VHL Holder has a passcode-protected VHL
-    When the QR code is presented
-    Then the plaintext passcode SHALL NOT be present anywhere in the QR code content
-
-  @initiator-actions @SHALL
-  Scenario: VHL Holder uses secure transmission when sharing the passcode with the VHL Receiver
-    Given the VHL Holder needs to communicate the passcode
-    When the passcode is transmitted
-    Then the VHL Holder SHALL use a secure out-of-band transmission method
+  Scenario: VHL Holder ensures QR code is displayed at appropriate size for reliable scanning
+    Given the VHL Holder is presenting the QR code
+    When the display size is determined
+    Then the QR code SHALL be displayed at an appropriate size for reliable scanning
 
   # ─── Post-presentation Optional Actions ──────────────────────────────────────
 

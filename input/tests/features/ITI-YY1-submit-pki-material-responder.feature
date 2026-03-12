@@ -12,10 +12,70 @@ Feature: ITI-YY1 Submit PKI Material – Trust Anchor Expected Actions
   # ─── HTTP Response ───────────────────────────────────────────────────────────
 
   @responder-actions @SHALL
+  Scenario: Trust Anchor returns a response regardless of outcome
+    Given a DID Document submission is received
+    When the Trust Anchor completes processing
+    Then the Trust Anchor SHALL return a response regardless of whether the submission succeeded or failed
+
+  @responder-actions @SHALL
   Scenario: Trust Anchor accepts a fully conformant DID Document with HTTP 201
     Given a conforming DID Document is submitted via HTTP POST
     When the Trust Anchor processes the submission
     Then the Trust Anchor SHALL return HTTP 201 Created
+
+  @responder-actions @SHALL
+  Scenario: Trust Anchor returns HTTP 400 for a malformed DID Document
+    Given a submitted DID Document is malformed
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL return HTTP 400 Bad Request
+
+  @responder-actions @SHALL
+  Scenario: Trust Anchor returns HTTP 422 when format is valid but validation fails
+    Given a submitted DID Document has valid format but fails validation
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL return HTTP 422 Unprocessable Entity
+
+  # ─── DID Document Validation ───────────────────────────────────────────────
+
+  @responder-actions @SHALL
+  Scenario: Trust Anchor validates DID Document structure against W3C DID Core
+    Given a DID Document submission is received
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL verify the DID Document conforms to the W3C DID Core specification
+
+  @responder-actions @SHALL
+  Scenario: Trust Anchor verifies cryptographic material is properly formatted
+    Given a DID Document submission is received
+    When the Trust Anchor validates cryptographic material
+    Then the Trust Anchor SHALL validate public keys are properly formatted in JWK
+    And the Trust Anchor SHALL validate key types and curves are acceptable per trust framework policy
+    And the Trust Anchor SHALL validate key sizes meet minimum security requirements
+
+  @responder-actions @SHALL
+  Scenario: Trust Anchor rejects submissions with invalid or malformed cryptographic material
+    Given a submitted DID Document contains invalid or malformed cryptographic material
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL reject the submission
+
+  @responder-actions @SHALL
+  Scenario: Trust Anchor rejects submissions using prohibited algorithms or insufficient key sizes
+    Given a submitted DID Document uses prohibited cryptographic algorithms or insufficient key sizes
+    When the Trust Anchor processes the submission
+    Then the Trust Anchor SHALL reject the submission
+
+  # ─── §2:3.YY1.5.4 DID Document Validation ─────────────────────────────────
+
+  @security @SHALL
+  Scenario: Trust Anchor validates cryptographic algorithms are from an approved list
+    Given a DID Document submission is received
+    When the Trust Anchor validates the DID Document
+    Then the Trust Anchor SHALL validate that cryptographic algorithms are from an approved list
+
+  @security @SHALL
+  Scenario: Trust Anchor validates verification methods are properly referenced
+    Given a DID Document submission is received
+    When the Trust Anchor validates the DID Document
+    Then the Trust Anchor SHALL validate that verification methods are properly referenced in authentication or assertion arrays
 
   # ─── Identity and Authentication ────────────────────────────────────────────
 

@@ -78,9 +78,9 @@ Feature: ITI-YY1 Submit PKI Material – Initiator Expected Actions
     When the DID Document is finalised for submission
     Then the DID Document SHOULD be signed by the submitting entity using its verification method
 
-  @security @SHALL
-  Scenario: HTTP submission uses a secure TLS connection
+  @security @MUST
+  Scenario: HTTP submission uses a secure connection
     Given a DID Document is being submitted via HTTP POST
     When the connection is established
-    Then the connection SHALL use TLS
+    Then the connection MUST use a secure connection
     And plain HTTP SHALL NOT be used

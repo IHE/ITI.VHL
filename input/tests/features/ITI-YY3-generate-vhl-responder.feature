@@ -6,7 +6,7 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
 
   Background:
     Given the VHL Sharer has received a valid $generate-vhl request
-    And the VHL Sharer has access to its private signing key and DSC
+    And the VHL Sharer has access to its private signing key
 
   # ─── Passcode Handling ───────────────────────────────────────────────────────
 
@@ -80,29 +80,43 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     When the "v" field is set in the SHL payload
     Then the "v" field SHALL default to 1
 
-  # ─── HCERT/CWT Encoding Pipeline ─────────────────────────────────────────────
+  # ─── OAuth with SSRAA Option ───────────────────────────────────────────────
 
   @responder-actions @SHALL
-  Scenario: CWT protected header specifies a permitted signing algorithm ES256 or PS256
-    When the CWT protected header is assembled
-    Then the "alg" field SHALL be "ES256" (primary) or "PS256" (secondary)
+  Scenario: VHL Sharer includes extension.fhirBaseUrl when OAuth with SSRAA Option is supported
+    Given the VHL Sharer supports the OAuth with SSRAA Option
+    When the SHL payload is constructed
+    Then the "extension" object SHALL include "fhirBaseUrl" set to the canonical FHIR base URL of the VHL Sharer
+
+  @responder-actions @MUST
+  Scenario: VHL Sharer does not include extension.fhirBaseUrl when OAuth with SSRAA Option is not supported
+    Given the VHL Sharer does NOT support the OAuth with SSRAA Option
+    When the SHL payload is constructed
+    Then the "extension.fhirBaseUrl" field MUST NOT be present
+
+  # ─── SHL Payload Encoding ──────────────────────────────────────────────────
 
   @responder-actions @SHALL
-  Scenario: CWT protected header includes the key identifier as first 8 bytes of DSC SHA-256 fingerprint
-    When the CWT protected header is assembled
-    Then the "kid" field SHALL be set to the first 8 bytes of the SHA-256 fingerprint of the DSC
+  Scenario: SHL payload JSON is minified before encoding
+    When the SHL payload JSON is finalized
+    Then the JSON SHALL be minified (whitespace removed)
 
   @responder-actions @SHALL
-  Scenario: CWT iat claim is set to the current time and is not in the future
-    When the CWT claims are assembled
-    Then the "iat" claim (key 6) SHALL be the current time in NumericDate format
-    And the "iat" SHALL NOT be in the future
+  Scenario: Minified SHL payload is base64url-encoded
+    When the minified JSON payload is encoded
+    Then it SHALL be base64url-encoded per RFC 4648
 
   @responder-actions @SHALL
-  Scenario: CWT exp claim is set from the request exp parameter when provided
-    Given the request includes "exp=1735689600"
-    When the CWT claims are assembled
-    Then the "exp" claim (key 4) SHALL be 1735689600 in NumericDate format
+  Scenario: Encoded SHL payload is prefixed with vhlink:/
+    When the base64url-encoded string is assembled
+    Then it SHALL be prefixed with "vhlink:/"
+
+  # ─── HCERT/CWT Encoding ───────────────────────────────────────────────────
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer encodes the SHL payload within an HCERT structure
+    When the VHL Sharer encodes the VHL
+    Then the SHL payload SHALL be encoded within an HCERT structure as per the WHO SMART Trust HCERT specification
 
   @responder-actions @SHALL
   Scenario: SHL payload is placed at claim key 5 within the CWT hcert claim
@@ -110,24 +124,22 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     Then the SHL payload SHALL be placed at claim key 5 within the hcert object
 
   @responder-actions @SHALL
-  Scenario: CWT is signed using COSE with the VHL Sharer's private key
-    When the signing step is performed
-    Then the CWT SHALL be signed using COSE (RFC 8152) with the VHL Sharer's private key
-
-  @responder-actions @SHALL
-  Scenario: Signed CWT is compressed using ZLIB with DEFLATE
-    When the compression step is performed
-    Then the signed CWT SHALL be compressed using ZLIB (RFC 1950) with DEFLATE (RFC 1951)
-
-  @responder-actions @SHALL
-  Scenario: Compressed CWT is encoded as Base45
-    When the encoding step is performed
-    Then the compressed bytes SHALL be encoded using Base45
+  Scenario: VHL Sharer generates the QR code as per the HCERT specification
+    When the QR code is generated
+    Then the VHL Sharer SHALL generate the QR code as per the HCERT specification
 
   @responder-actions @SHALL
   Scenario: Encoded payload is prefixed with HC1:
     When the context identifier is prepended
     Then the final string SHALL begin with "HC1:"
+
+  # ─── Successful Response ───────────────────────────────────────────────────
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer returns the generated QR code on success
+    Given the VHL generation process completes successfully
+    When the VHL Sharer returns the response
+    Then the response SHALL include a QR code image containing the HCERT-encoded VHL
 
   # ─── Error Responses ─────────────────────────────────────────────────────────
 
@@ -154,6 +166,11 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
 
   # ─── Security ────────────────────────────────────────────────────────────────
 
+  @security @MUST
+  Scenario: Encryption key is generated using a cryptographically secure random number generator
+    When the 32-byte encryption key is generated
+    Then it MUST be generated using a cryptographically secure random number generator
+
   @security @SHALL
   Scenario: Passcode is never embedded in the QR code or VHL URL
     Given a passcode was provided in the request
@@ -162,7 +179,6 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     And the plaintext passcode SHALL NOT appear in the VHL URL
 
   @security @SHALL
-  Scenario: Generated QR code contains no protected health information
-    When the QR code payload is inspected
-    Then the QR code SHALL NOT contain any PHI
-    And it SHALL contain only a reference URL and authorization metadata (SHL payload)
+  Scenario: QR codes are encoded as HCERT with digital signatures for authenticity
+    When the QR code is generated
+    Then the QR code SHALL be encoded as HCERT with digital signatures for authenticity

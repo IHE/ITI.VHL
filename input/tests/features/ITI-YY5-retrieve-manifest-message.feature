@@ -1,7 +1,8 @@
 Feature: ITI-YY5 Retrieve Manifest – Message Semantics
   Defines the format of the ITI-YY5 request and response messages.
-  The request is an HTTP POST to /List/_search with FHIR, SHL, and
-  authentication parameters. The response is a FHIR searchset Bundle.
+  The request is an HTTP POST to /List/_search with FHIR search parameters
+  and SHL parameters. Authentication is via HTTP Message Signatures (RFC 9421)
+  or OAuth with SSRAA Option. The response is a FHIR searchset Bundle.
   Defined once here for both the VHL Receiver (initiator) and VHL Sharer (responder).
 
   Background:
@@ -82,16 +83,18 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
     When the optional SHL parameters are assembled
     Then the body MAY include an "embeddedLengthMax" integer parameter
 
-  # ─── Request: HTTP Message Signature Headers ─────────────────────────────────
+  # ─── Request: HTTP Message Signature Headers (when Option A is used) ────────
 
   @message-semantics @SHALL
-  Scenario: Request includes Content-Digest header with SHA-256 hash of the body
+  Scenario: Request includes Content-Digest header with SHA-256 hash of the body when HTTP signatures are used
+    Given the VHL Receiver is authenticating using HTTP Message Signatures
     When the Content-Digest header is computed
     Then it SHALL be present in the format "Content-Digest: sha-256=<base64-encoded-hash>"
     And the hash SHALL be the SHA-256 digest of the raw request body bytes
 
   @message-semantics @SHALL
-  Scenario: Request includes Signature-Input header with required components
+  Scenario: Request includes Signature-Input header with required components when HTTP signatures are used
+    Given the VHL Receiver is authenticating using HTTP Message Signatures
     When the Signature-Input header is constructed
     Then it SHALL list signed components "@method", "@path", "@authority", "content-type", "content-digest"
     And it SHALL include a "created" parameter with the current Unix timestamp
@@ -99,12 +102,14 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
     And it SHALL include an "alg" parameter specifying the signing algorithm
 
   @message-semantics @SHALL
-  Scenario: Request includes a Signature header with the computed base64-encoded signature value
+  Scenario: Request includes a Signature header with the computed base64-encoded signature value when HTTP signatures are used
+    Given the VHL Receiver is authenticating using HTTP Message Signatures
     When the signature is computed using the receiver's private key
     Then the request SHALL include a "Signature" header with the base64-encoded signature value
 
   @message-semantics @SHALL
   Scenario Outline: Signature algorithm is one of the approved algorithms
+    Given the VHL Receiver is authenticating using HTTP Message Signatures
     When the "alg" parameter is set to "<algorithm>"
     Then the algorithm SHALL be accepted as a valid HTTP Message Signature algorithm
 
@@ -114,6 +119,14 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
       | ecdsa-p384-sha384   |
       | rsa-pss-sha256      |
       | rsa-v1_5-sha256     |
+
+  # ─── Request: OAuth with SSRAA Option Headers (when Option B is used) ───────
+
+  @message-semantics @SHALL
+  Scenario: Request includes Authorization Bearer header when OAuth with SSRAA is used
+    Given the VHL Receiver is authenticating using OAuth with SSRAA Option
+    When the authorization header is set
+    Then the request SHALL include "Authorization: Bearer <access-token>"
 
   # ─── Response: Success Structure ─────────────────────────────────────────────
 

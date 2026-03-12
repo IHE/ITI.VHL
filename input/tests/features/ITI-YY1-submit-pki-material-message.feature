@@ -49,19 +49,7 @@ Feature: ITI-YY1 Submit PKI Material – Message Semantics
     Then it SHALL contain an "id" element
     And it SHALL contain a "type" element
     And it SHALL contain a "controller" element
-    And it SHALL contain a "publicKeyJwk" element
-
-  @message-semantics @SHALL
-  Scenario: Verification method id is of the form parentDID#fragment
-    Given the DID Document has id "did:example:vhl-sharer-123"
-    When a verification method "id" is inspected
-    Then the value SHALL be of the form "did:example:vhl-sharer-123#<fragment>"
-
-  @message-semantics @SHALL
-  Scenario: Verification method controller matches the DID Document id
-    Given the DID Document has id "did:example:vhl-sharer-123"
-    When a verification method "controller" field is inspected
-    Then the value SHALL equal "did:example:vhl-sharer-123"
+    And it MAY contain a "publicKeyJwk" element
 
   @message-semantics @SHALL
   Scenario: Public key in JWK format conforms to RFC 7517 and excludes private key material
@@ -87,14 +75,14 @@ Feature: ITI-YY1 Submit PKI Material – Message Semantics
       | JsonWebKey2020                        |
       | EcdsaSecp256k1VerificationKey2019     |
 
-  @message-semantics @SHALL
+  @message-semantics @SHOULD
   Scenario: EC key curve meets minimum cryptographic strength
     When an EC key is present in a verification method
-    Then the key curve SHALL be "P-256" or stronger (e.g., P-384, P-521)
+    Then the key curve SHOULD be "P-256" or stronger (e.g., P-384, P-521)
 
   # ─── Key Usage Declaration ──────────────────────────────────────────────────
 
-  @message-semantics @SHALL
+  @message-semantics @SHOULD
   Scenario: Key usage is declared via authentication assertionMethod or keyAgreement
     When the DID Document declares the intended use of a key
-    Then the key SHALL be referenced in at least one of "authentication", "assertionMethod", or "keyAgreement"
+    Then the key SHOULD be referenced in at least one of "authentication", "assertionMethod", or "keyAgreement"

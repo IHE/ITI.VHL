@@ -156,11 +156,11 @@ Feature: ITI-YY4 Provide VHL – VHL Receiver Expected Actions
     When the SHL payload expiry is checked
     Then the VHL Receiver SHALL reject the VHL
 
-  @responder-actions @SHALL
-  Scenario: VHL Receiver prompts for passcode when P flag is present
+  @responder-actions @MAY
+  Scenario: VHL Receiver may prompt for passcode when P flag is present
     Given the SHL payload "flag" contains "P"
     When the VHL Receiver processes the payload
-    Then the VHL Receiver SHALL obtain the passcode from the VHL Holder before proceeding
+    Then the VHL Receiver MAY prompt the user for the passcode (required for ITI-YY5)
 
   # ─── Post-decoding Actions ───────────────────────────────────────────────────
 
@@ -198,10 +198,53 @@ Feature: ITI-YY4 Provide VHL – VHL Receiver Expected Actions
     Examples:
       | error_type                      |
       | QR code unreadable or damaged   |
+      | Invalid HC1: prefix             |
       | Base45 decode error             |
       | ZLIB decompression error        |
       | CBOR parse error                |
       | Invalid CWT structure           |
+      | Missing hcert claim or claim key 5 |
+      | Signature verification failure  |
+
+  @responder-actions @SHALL
+  Scenario: VHL Receiver requests user to rescan QR code on decode failure
+    Given a QR code decoding step has failed
+    When the VHL Receiver handles the error
+    Then the VHL Receiver SHALL request the user to rescan the QR code
+
+  # ─── §2:3.YY4.5.1 VHL Integrity and Authenticity ──────────────────────────
+
+  @security @MUST
+  Scenario: VHL Receiver verifies COSE signatures before trusting content
+    Given a VHL has been decoded
+    When the VHL Receiver processes the CWT
+    Then the VHL Receiver MUST verify the COSE signature before trusting the content
+
+  # ─── §2:3.YY4.5.5 Trust Network Validation ────────────────────────────────
+
+  @security @MUST
+  Scenario: VHL Receiver validates VHL Sharer is current participant in trust network
+    Given the VHL Receiver has decoded the CWT
+    When trust network validation is performed
+    Then the VHL Receiver MUST validate the VHL Sharer is a current participant in the trust network
+
+  @security @MUST
+  Scenario: VHL Receiver retrieves DSC from trust list using kid from CWT protected header
+    Given the "kid" has been extracted from the CWT protected header
+    When the VHL Receiver performs DSC lookup
+    Then the VHL Receiver MUST retrieve the DSC from the trust list using the kid
+
+  @security @MUST
+  Scenario: VHL Receiver checks certificate revocation status where applicable
+    Given the DSC has been retrieved from the trust list
+    When revocation status is checked
+    Then the VHL Receiver MUST check certificate revocation status where applicable
+
+  @security @MUST
+  Scenario: VHL Receiver rejects VHLs from untrusted participants
+    Given the VHL Sharer is not a trusted participant in the trust network
+    When the VHL Receiver evaluates the trust status
+    Then the VHL Receiver MUST reject the VHL
 
   # ─── Optional Acknowledgment ─────────────────────────────────────────────────
 
@@ -210,4 +253,4 @@ Feature: ITI-YY4 Provide VHL – VHL Receiver Expected Actions
     Given the VHL has been successfully decoded and validated
     When the VHL Receiver sends an acknowledgment (if supported)
     Then the acknowledgment SHALL NOT include any sensitive health information
-    And the acknowledgment MAY include a receipt identifier, receiver identity, and timestamp
+    And the acknowledgment MAY include a receipt identifier, VHL Receiver organization identifier, and timestamp

@@ -14,10 +14,10 @@ Feature: ITI-YY4 Provide VHL – Message Semantics
     When the QR code is inspected
     Then it SHALL be encoded in Alphanumeric mode (Mode 2) per ISO/IEC 18004:2015
 
-  @message-semantics @SHALL
-  Scenario: QR code diagonal size is between 35mm and 60mm for physical display
+  @message-semantics @SHOULD
+  Scenario: QR code diagonal size is recommended between 35mm and 60mm for physical display
     When the QR code is rendered on a physical medium
-    Then the diagonal size SHALL be at least 35mm and not exceed 60mm
+    Then the minimum recommended diagonal size SHOULD be between 35mm and 60mm
 
   # ─── Encoded String: HC1: Context Identifier ─────────────────────────────────
 

@@ -18,20 +18,32 @@ Feature: ITI-YY2 Retrieve Trust List – Initiator Expected Actions
 
   # ─── Request Construction ────────────────────────────────────────────────────
 
-  @initiator-actions @SHALL
-  Scenario: Requester sends the request over a secure TLS connection
+  @initiator-actions @MUST
+  Scenario: Requester sends the request over a secure connection
     Given the requester has constructed a valid Retrieve Trust List request
     When the requester sends the request
-    Then the connection SHALL use TLS 1.3 or equivalent
+    Then the connection MUST use a secure connection
     And the request SHALL NOT be sent over plain HTTP
+
+  @initiator-actions @SHALL
+  Scenario: Requester constructs an HTTP GET request for DID Document retrieval
+    Given the requester needs to retrieve trust material
+    When the request is constructed
+    Then the request SHALL be an HTTP GET
 
   # ─── Response Processing ─────────────────────────────────────────────────────
 
   @initiator-actions @SHALL
   Scenario: Requester validates the response signature before trusting the content
-    Given the Trust Anchor has returned a response that includes a digital signature
+    Given the Trust Anchor has returned a response that includes a proof element
     When the requester processes the response
-    Then the requester SHALL verify the response signature before trusting the content
+    Then the requester SHALL verify the response proof before trusting the content
+
+  @initiator-actions @SHALL
+  Scenario: Requester validates the proof nonce to prevent replay attacks
+    Given the Trust Anchor has returned a response with a proof element
+    When the requester validates the proof
+    Then the requester SHALL verify the nonce is present and unique
 
   @initiator-actions @SHALL
   Scenario: Requester validates each returned DID Document against W3C DID Core
@@ -43,7 +55,7 @@ Feature: ITI-YY2 Retrieve Trust List – Initiator Expected Actions
   Scenario: Requester validates the key material within each returned verification method
     Given the Trust Anchor has returned DID Documents with verification methods
     When the requester extracts public key material
-    Then each verification method SHALL contain a well-formed "publicKeyJwk" or "publicKeyMultibase"
+    Then each verification method SHALL contain a well-formed "publicKeyJwk"
     And each key type and algorithm SHALL be acceptable per the trust framework policy
 
   @initiator-actions @SHALL
@@ -53,51 +65,44 @@ Feature: ITI-YY2 Retrieve Trust List – Initiator Expected Actions
     Then the requester SHALL associate each method with its declared use (authentication, assertionMethod, keyAgreement, etc.)
 
   @initiator-actions @SHALL
-  Scenario: Requester parses a single DID Document response and extracts all verification methods
-    Given the Trust Anchor has returned a single DID Document
+  Scenario: Requester parses DID Documents and extracts all verification methods
+    Given the Trust Anchor has returned one or more DID Documents
     When the requester processes the response
-    Then the requester SHALL extract all verification methods from the DID Document
+    Then the requester SHALL extract all verification methods from each DID Document
     And SHALL store the public key material for use in signature verification
-
-  @initiator-actions @SHALL
-  Scenario: Requester iterates all DID Documents in a bulk collection response
-    Given the Trust Anchor has returned a "didDocuments" array with multiple entries
-    When the requester processes the bulk response
-    Then the requester SHALL iterate over each DID Document
-    And SHALL extract and store public key material from each entry
 
   # ─── Caching ─────────────────────────────────────────────────────────────────
 
-  @initiator-actions @SHALL
+  @initiator-actions @SHOULD
   Scenario: Requester caches retrieved DID Documents per the applicable caching policy
     Given the Trust Anchor has returned a successful response
     When the requester stores the DID Documents
-    Then the requester SHALL cache the DID Documents according to the applicable caching policy
-    And the requester SHALL respect any cache-control headers or expiration times provided
+    Then the requester SHOULD cache the DID Documents according to the applicable caching policy
+    And the requester SHOULD respect any cache-control headers or expiration times provided
 
-  @initiator-actions @SHALL
+  @initiator-actions @SHOULD
   Scenario: Requester tracks expiry of cached DID Documents and refreshes before expiry
     Given the requester has cached a DID Document with a known expiry time
     When the expiry time approaches
-    Then the requester SHALL refresh the cached material before it expires
+    Then the requester SHOULD refresh the cached material before it expires
 
-  @initiator-actions @SHALL
+  @initiator-actions @SHOULD
   Scenario: Requester checks revocation status of retrieved DID Documents before trusting them
     Given DID Documents have been retrieved and cached
     When they are applied to trust decisions
     Then the requester SHOULD verify each DID Document has not been revoked before trusting it
 
-  @initiator-actions @SHALL
+  @initiator-actions @SHOULD
   Scenario: Requester immediately invalidates a cached DID Document upon receiving a revocation notification
     Given the requester has a cached DID Document
     When the requester receives a revocation notification for that DID
-    Then the requester SHALL immediately invalidate the cached entry
+    Then the requester SHOULD immediately invalidate the cached entry
 
-  @initiator-actions @SHALL
+  @initiator-actions @SHOULD
   Scenario: Requester issues a new retrieval request when the cache reaches its expiry threshold
     Given the requester has cached DID Documents from a prior retrieval
     When the cache reaches its expiry threshold
-    Then the requester SHALL issue a new Retrieve Trust List request to refresh the material
+    Then the requester SHOULD issue a new Retrieve Trust List request to refresh the material
 
   # ─── Error Handling ──────────────────────────────────────────────────────────
 

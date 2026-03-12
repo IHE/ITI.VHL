@@ -240,8 +240,8 @@ Source: sections 2:3.YY2.4.1 (Request Message) and 2:3.YY2.4.2.3 (Initiator Expe
 * testCase[+].sequence = 3
 * testCase[=].testRun[+].narrative = """
 **ITI-YY3 Message Semantics** – Verifies the $generate-vhl request parameter definitions
-(sourceIdentifier, targetSystem, exp, flag, label, passcode) and the response format
-(HTTP 200, FHIR Parameters, Binary qrcode, HC1: prefix, Alphanumeric mode Q error correction).
+(sourceIdentifier, exp, flag, label, passcode) and the response format
+(HTTP 200, FHIR Parameters, Binary qrcode, HC1: prefix).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin

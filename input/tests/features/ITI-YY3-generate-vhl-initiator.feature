@@ -25,11 +25,19 @@ Feature: ITI-YY3 Generate VHL – VHL Holder Expected Actions
     When the request is assembled
     Then the "flag" parameter SHALL include "P"
 
+  # ─── Response Handling ─────────────────────────────────────────────────────
+
   @initiator-actions @SHALL
-  Scenario: VHL Holder rejects a label that exceeds 80 characters before sending
-    Given the VHL Holder provides a label that is 81 characters long
-    When the request is evaluated for completeness
-    Then the request SHALL be considered invalid for the label parameter
+  Scenario: VHL Holder displays or prints the QR code for scanning by VHL Receivers
+    Given the VHL Sharer has returned a QR code
+    When the VHL Holder receives the response
+    Then the VHL Holder SHALL display or print the QR code for scanning by VHL Receivers
+
+  @initiator-actions @SHALL
+  Scenario: VHL Holder caches the encryption key securely
+    Given the VHL Sharer has returned a QR code containing the SHL payload
+    When the VHL Holder processes the response
+    Then the VHL Holder SHALL cache the encryption key securely (extracted from the SHL payload) for future document decryption
 
   # ─── Passcode Handling ───────────────────────────────────────────────────────
 
@@ -40,31 +48,21 @@ Feature: ITI-YY3 Generate VHL – VHL Holder Expected Actions
     Then the VHL Holder SHALL securely store the plaintext passcode
 
   @initiator-actions @SHALL
-  Scenario: VHL Holder uses secure transmission when sharing the passcode out-of-band
+  Scenario: VHL Holder provides the passcode to authorized VHL Receivers out-of-band
     Given the VHL Holder needs to communicate the passcode to an authorised VHL Receiver
     When the passcode is transmitted
-    Then the VHL Holder SHALL use a secure out-of-band transmission method
+    Then the VHL Holder SHALL use secure transmission methods when sharing the passcode out-of-band
 
-  # ─── Pre-presentation Validity ───────────────────────────────────────────────
+  # ─── Optional Actions ──────────────────────────────────────────────────────
 
-  @initiator-actions @SHALL
-  Scenario: VHL Holder verifies the QR code has not expired before presenting it
-    Given the VHL Holder has a QR code with a future CWT exp claim
-    When the VHL Holder checks validity before presentation
-    Then the QR code SHALL be considered valid for presentation
+  @initiator-actions @MAY
+  Scenario: VHL Holder may maintain a record of QR code presentations
+    Given the VHL Holder has a QR code
+    When the QR code is presented to a VHL Receiver
+    Then the VHL Holder MAY maintain a record of QR code presentations
 
-  @initiator-actions @SHALL
-  Scenario: VHL Holder does not present an expired QR code
-    Given the VHL Holder has a QR code whose CWT exp claim has already passed
-    When the VHL Holder checks validity
-    Then the VHL Holder SHALL NOT present the expired QR code
-    And the VHL Holder SHOULD request a new VHL from the VHL Sharer
-
-  # ─── Security ────────────────────────────────────────────────────────────────
-
-  @security @SHALL
-  Scenario: $generate-vhl request is transmitted over HTTPS
-    Given the VHL Holder is sending the Generate VHL request
-    When the connection is established
-    Then the request SHALL use HTTPS
-    And plain HTTP SHALL NOT be used
+  @initiator-actions @MAY
+  Scenario: VHL Holder may revoke VHL access if supported by VHL Sharer
+    Given the VHL Holder wishes to revoke a previously generated VHL
+    When revocation is supported by the VHL Sharer
+    Then the VHL Holder MAY revoke VHL access

@@ -25,7 +25,7 @@ The Trust Anchor must be tested for its ability to receive and validate PKI mate
 
 #### VHL Generation and Provision
 
-The VHL Sharer must be tested for its ability to process `$generate-vhl` operation requests [ITI-YY3] from a VHL Holder, including validation of input parameters (sourceIdentifier, targetSystem, exp, flag, label, passcode) and generation of a correctly structured QR code containing an HCERT/CWT-encoded VHL with the HC1: prefix. The VHL Holder's ability to present the VHL to a VHL Receiver [ITI-YY4] via QR code is tested as part of the end-to-end workflow.
+The VHL Sharer must be tested for its ability to process `$generate-vhl` operation requests [ITI-YY3] from a VHL Holder, including validation of input parameters (sourceIdentifier, exp, flag, label, passcode) and generation of a correctly structured QR code containing an HCERT/CWT-encoded VHL with the HC1: prefix. The VHL Holder's ability to present the VHL to a VHL Receiver [ITI-YY4] via QR code is tested as part of the end-to-end workflow.
 
 #### VHL Decoding and Verification
 

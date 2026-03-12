@@ -7,10 +7,10 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Given the VHL Sharer has received an HTTP POST to "/List/_search"
     And the VHL Sharer has access to the trust list
 
-  # ─── HTTP Message Signature Verification ─────────────────────────────────────
+  # ─── HTTP Message Signature Verification (Option A) ─────────────────────────
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer extracts keyid from the Signature-Input header
+  Scenario: VHL Sharer extracts keyid from the Signature-Input header when HTTP signatures are used
     Given the request includes a valid "Signature-Input" header
     When the VHL Sharer processes the authentication headers
     Then the VHL Sharer SHALL extract the "keyid" value from the Signature-Input header
@@ -45,27 +45,27 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     And the response SHALL include a FHIR OperationOutcome with issue.code "security"
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer enforces signature timestamp freshness within 2 minutes
-    Given the "created" timestamp in Signature-Input is more than 2 minutes in the past
+  Scenario: VHL Sharer enforces signature timestamp freshness
+    Given the "created" timestamp in Signature-Input is more than the acceptable range in the past
     When the timestamp is validated
     Then the VHL Sharer SHALL reject the request as a potential replay
     And the response SHALL be HTTP 401 Unauthorized
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer accepts a request whose signature timestamp is within the 2-minute window
-    Given the "created" timestamp is within 2 minutes of the current server time
+  Scenario: VHL Sharer accepts a request whose signature timestamp is within the acceptable window
+    Given the "created" timestamp is within the acceptable range of the current server time
     When the timestamp is validated
     Then the VHL Sharer SHALL proceed with processing the request
 
-  # ─── OAuth with FAST Option Verification (Optional) ──────────────────────────
+  # ─── OAuth with SSRAA Option Verification (Option B) ───────────────────────
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer validates an OAuth Bearer token when FAST Option is supported
-    Given the request includes "Authorization: Bearer <token>" and the FAST Option is supported
+  Scenario: VHL Sharer validates an OAuth Bearer token when SSRAA Option is supported
+    Given the request includes "Authorization: Bearer <token>" and the SSRAA Option is supported
     When the token is validated
-    Then the VHL Sharer SHALL verify the token signature against the authorization server's public key
+    Then the VHL Sharer SHALL verify the token signature using the authorization server's certificate
     And SHALL verify "exp" has not passed
-    And SHALL verify "scope" includes "system/List.read"
+    And SHALL verify "scope" includes required FHIR resource types
     And SHALL verify "iss" is a trusted authorization server
 
   @responder-actions @SHALL
@@ -76,9 +76,37 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
 
   @responder-actions @SHALL
   Scenario: VHL Sharer returns HTTP 401 for an OAuth token with insufficient scope
-    Given the Bearer token does not include "system/List.read"
+    Given the Bearer token does not include required FHIR scopes
     When the token scope is validated
     Then the VHL Sharer SHALL return HTTP 401 Unauthorized
+
+  @responder-actions @MUST
+  Scenario: Authorization server validates JWT signature and certificate chain to trust anchor
+    Given a JWT client assertion is received
+    When the authorization server processes the assertion
+    Then the authorization server MUST validate the JWT signature and the associated certificate validity
+    And MUST validate that the certificate chains to a trust anchor in the trust community
+
+  @responder-actions @SHOULD
+  Scenario: Authorization server checks JWT jti claim to prevent replay attacks
+    Given a JWT client assertion is received
+    When the "jti" claim is evaluated
+    Then the authorization server SHOULD check the "jti" claim to prevent replay attacks
+
+  # ─── §2:3.YY5.5.5 Trust Network Validation ────────────────────────────────
+
+  @security @SHALL
+  Scenario: VHL Sharer authenticates the VHL Receiver's participation in the trust network
+    Given a Retrieve Manifest request is received
+    When the VHL Sharer processes authentication
+    Then the VHL Sharer SHALL authenticate the VHL Receiver's participation in the trust network
+    And SHALL reject requests from participants not in the trust list with HTTP 401 Unauthorized
+
+  @security @SHALL
+  Scenario: VHL Sharer validates certificates are not expired or revoked
+    Given the VHL Receiver's key or certificate has been retrieved
+    When certificate validation is performed
+    Then the VHL Sharer SHALL validate certificates are not expired or revoked
 
   # ─── VHL Authorization ────────────────────────────────────────────────────────
 
@@ -88,6 +116,12 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the VHL Sharer performs VHL authorization
     Then the VHL Sharer SHALL confirm a valid VHL with that folder ID exists
     And SHALL return HTTP 403 Forbidden if no matching VHL is found
+
+  @responder-actions @MUST
+  Scenario: VHL Sharer validates the VHL COSE signature from HCERT
+    Given the VHL Sharer is authorizing the request
+    When VHL validation is performed
+    Then the VHL Sharer MUST validate the VHL signature (HCERT/CWT COSE signature from ITI-YY3)
 
   @responder-actions @SHALL
   Scenario: VHL Sharer rejects a request for an expired VHL with HTTP 403
@@ -101,11 +135,11 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the VHL Sharer checks revocation status
     Then the VHL Sharer SHALL return HTTP 403 Forbidden
 
-  @responder-actions @SHALL
+  @responder-actions @MUST
   Scenario: VHL Sharer validates passcode using constant-time comparison when P flag is set
     Given the VHL has a P flag and the request includes "passcode=user-pin"
     When the passcode is validated
-    Then the VHL Sharer SHALL compare using constant-time comparison against the stored hash
+    Then the VHL Sharer MUST compare using constant-time comparison against the stored hash
     And SHALL return HTTP 422 Unprocessable Entity if the passcode is incorrect
 
   @responder-actions @SHALL
@@ -117,10 +151,10 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
   # ─── FHIR Search Execution ────────────────────────────────────────────────────
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer executes a FHIR search matching _id code status and patient.identifier
+  Scenario: VHL Sharer executes a FHIR search matching _id code status and patient identifier
     Given authentication and VHL authorization have succeeded
     When the VHL Sharer executes the search
-    Then the VHL Sharer SHALL search for a List resource matching "_id", "code", "status", and "patient.identifier"
+    Then the VHL Sharer SHALL search for a List resource matching "_id", "code", "status", and the patient identifier
     And SHALL apply VHL scope filters to include only documents authorized by the VHL
 
   @responder-actions @SHALL
@@ -144,14 +178,30 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Then the VHL Sharer SHALL ignore the "_include" parameter
     And the response Bundle SHALL contain only the List resource
 
-  # ─── Rate Limiting and Audit ─────────────────────────────────────────────────
+  # ─── §2:3.YY5.5.1 Transport Security ──────────────────────────────────────
+
+  @security @SHALL
+  Scenario: VHL Sharer complies with IHE ATNA Profile for transport security
+    Given a Retrieve Manifest request is received
+    When transport security is evaluated
+    Then the implementation SHALL comply with the IHE ATNA Profile (ITI TF-1: Section 9) for transport security requirements
+
+  # ─── §2:3.YY5.5.7 Rate Limiting ───────────────────────────────────────────
+
+  @responder-actions @SHOULD
+  Scenario: VHL Sharer implements rate limiting per receiver and per folder ID
+    Given the VHL Sharer is receiving Retrieve Manifest requests
+    When traffic is evaluated
+    Then the VHL Sharer SHOULD implement rate limiting per receiver and per folder ID
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer returns HTTP 429 when a receiver exceeds the request rate limit
-    Given the VHL Receiver has exceeded the rate limit for a given time window
+  Scenario: VHL Sharer returns HTTP 429 when rate limit is exceeded
+    Given the VHL Receiver has exceeded the rate limit
     When the next request arrives
     Then the VHL Sharer SHALL return HTTP 429 Too Many Requests
     And the response SHALL include a FHIR OperationOutcome with issue.code "throttled"
+
+  # ─── §2:3.YY5.5.6 Audit Logging ───────────────────────────────────────────
 
   @responder-actions @SHOULD
   Scenario: VHL Sharer logs all manifest access requests including failed ones
@@ -159,16 +209,16 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the audit event is recorded
     Then the VHL Sharer SHOULD log receiver identity, folder ID, authentication method, authorization decision, and timestamp
 
-  # ─── Security ────────────────────────────────────────────────────────────────
+  # ─── §2:3.YY5.5.8 Passcode Security ───────────────────────────────────────
 
-  @security @SHALL
-  Scenario: Authorization server rejects any OAuth JWT client assertion whose jti has been seen before
-    Given the VHL Receiver has sent a JWT client assertion
-    When the "jti" claim is evaluated
-    Then the authorization server SHALL reject any assertion whose "jti" has been seen before
+  @security @SHOULD
+  Scenario: VHL Sharer rate limits failed passcode attempts
+    Given the VHL is passcode-protected
+    When multiple failed passcode attempts are received
+    Then the VHL Sharer SHOULD rate limit failed passcode attempts
 
-  @security @SHALL
+  @security @SHOULD
   Scenario: VHL Sharer does not log the plaintext passcode
     Given a request includes a passcode
     When the audit event is written
-    Then the plaintext passcode SHALL NOT appear in the log entry
+    Then the plaintext passcode SHOULD NOT appear in the log entry

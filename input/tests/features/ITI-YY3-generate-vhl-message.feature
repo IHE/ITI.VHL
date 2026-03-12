@@ -1,7 +1,7 @@
 Feature: ITI-YY3 Generate VHL – Message Semantics
   Defines the format of the ITI-YY3 request and response messages.
-  The request is an HTTP GET FHIR operation; the response is a FHIR Parameters
-  resource containing a Binary QR code. Defined here once for both the
+  The request is an HTTP GET FHIR operation; the response is a FHIR operation
+  response containing a Binary QR code. Defined here once for both the
   VHL Holder (initiator) and VHL Sharer (responder) actor files.
 
   Background:
@@ -14,12 +14,6 @@ Feature: ITI-YY3 Generate VHL – Message Semantics
     When the request is constructed
     Then the HTTP method SHALL be GET
     And the URL SHALL be "[base]/Patient/$generate-vhl"
-
-  @message-semantics @SHALL
-  Scenario: Request uses HTTPS
-    When the connection is established
-    Then the request SHALL use HTTPS
-    And plain HTTP SHALL NOT be used
 
   # ─── Request: Required Parameters ────────────────────────────────────────────
 
@@ -36,12 +30,6 @@ Feature: ITI-YY3 Generate VHL – Message Semantics
     Then the value SHALL be formatted as "urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123"
 
   # ─── Request: Optional Parameters ────────────────────────────────────────────
-
-  @message-semantics @SHALL
-  Scenario: targetSystem parameter filters identifier domains and supports multiple values
-    When "targetSystem" is included in the request
-    Then its cardinality SHALL be [0..*]
-    And multiple "targetSystem" values SHALL be accepted
 
   @message-semantics @SHALL
   Scenario: exp parameter is a positive integer representing epoch seconds
@@ -95,10 +83,10 @@ Feature: ITI-YY3 Generate VHL – Message Semantics
   # ─── Response: Success Structure ─────────────────────────────────────────────
 
   @message-semantics @SHALL
-  Scenario: Successful response is HTTP 200 with a FHIR Parameters resource containing a qrcode Binary
+  Scenario: Successful response is HTTP 200 with a FHIR operation response containing a qrcode Binary
     When the VHL Sharer returns a successful response
     Then the HTTP status SHALL be 200 OK
-    And the response SHALL include a FHIR Parameters resource
+    And the response SHALL be a FHIR operation response
     And the output parameter "qrcode" SHALL be of type Binary
 
   @message-semantics @SHALL
@@ -109,19 +97,36 @@ Feature: ITI-YY3 Generate VHL – Message Semantics
   # ─── Response: QR Code Format ────────────────────────────────────────────────
 
   @message-semantics @SHALL
-  Scenario: QR code encoded string begins with HC1: prefix
+  Scenario: QR code is encoded as HCERT with HC1: prefix
     When the QR code content is decoded
     Then the encoded string SHALL begin with "HC1:"
 
   @message-semantics @SHALL
-  Scenario: QR code uses Alphanumeric mode per ISO/IEC 18004:2015
-    When the QR code is inspected
-    Then it SHALL use Alphanumeric mode (Mode 2) per ISO/IEC 18004:2015
+  Scenario: QR code contains SHL payload embedded in HCERT claim structure
+    When the QR code content is decoded and the CWT claims are extracted
+    Then the SHL payload SHALL be embedded at claim key 5 within the hcert claim (claim key -260)
 
   @message-semantics @SHALL
-  Scenario: QR code uses error correction level Q
+  Scenario: QR code is suitable for camera scanning
     When the QR code is inspected
-    Then the error correction level SHALL be Q (25% recovery)
+    Then it SHALL be suitable for camera scanning
+
+  # ─── Response: SHL Payload Encoding ──────────────────────────────────────────
+
+  @message-semantics @SHALL
+  Scenario: SHL payload JSON is minified before encoding
+    When the SHL payload is prepared for encoding
+    Then the JSON payload SHALL be minified
+
+  @message-semantics @SHALL
+  Scenario: Minified SHL payload is base64url-encoded
+    When the minified SHL payload is encoded
+    Then it SHALL be base64url-encoded
+
+  @message-semantics @SHALL
+  Scenario: Encoded SHL payload is prefixed with vhlink:/
+    When the base64url-encoded payload is assembled
+    Then it SHALL be prefixed with "vhlink:/"
 
   # ─── Response: Error Format ──────────────────────────────────────────────────
 

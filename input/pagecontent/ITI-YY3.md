@@ -26,7 +26,7 @@
 
 ### 2:3.YY3.3 Referenced Standards
 
-- **SMART Health Links Specification**: [SMART Health Links and SMART Health Cards](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html)
+- **SMART Health Links Specification**: [SMART Health Links and SMART Health Cards](http://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)
 - **RFC 4648**: Base64url Encoding
 - **RFC 7515**: JSON Web Signature (JWS)
 - **ISO/IEC 18004:2015**: QR Code specification
@@ -70,7 +70,7 @@ Where **[base]** is the URL of VHL Sharer Service provider.
 The Generate VHL message is performed by an HTTP GET command shown below:
 
 ```
-GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&exp=[integer]}{&flag=[string]}{&label=[string]}{&passcode=[string]}
+GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[integer]}{&flag=[string]}{&label=[string]}{&passcode=[string]}
 ```
 
 **Note:** The `goal` parameter has been removed. The operation always generates a QR code containing the VHL encoded as an HCERT/CWT structure.
@@ -80,7 +80,6 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&
 | Query parameter Name | Cardinality | Type | Description |
 | -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | sourceIdentifier     | [1..1]    | token       | The Patient Identifier that will be used to find documents associated with the Patient |
-| targetSystem         | [0..*]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected |
 | exp      |  [0..1]  | integer        | Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Application determine if this QR is stale. |
 | flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
 | label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink. |
@@ -132,7 +131,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
    - `flag`: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term, 'U' for direct file access)
    - `label`: (optional) description string (max 80 characters)
    - `v`: version number (defaults to 1)
-   - `extensions`: (optional) object containing implementation-defined extensions. When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include:
+   - `extension`: (conditional) object containing implementation-defined extensions. Required when the {{ linkvhls }} supports the OAuth with SSRAA Option, in which case it SHALL include:
      - `fhirBaseUrl`: the FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`). This enables the {{ linkvhlr }} to perform UDAP Discovery (per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG) and Dynamic Client Registration (per Section 3) with the {{ linkvhls }} before making an authenticated manifest request via ITI-YY5.
 
 5. The JSON Payload is then:
@@ -151,7 +150,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
   "flag": "LP",
   "label": "Patient Health Summary",
   "v": 1,
-  "extensions": {
+  "extension": {
     "fhirBaseUrl": "https://vhl-sharer.example.org"
   }
 }
@@ -161,7 +160,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 // Step 5: Minify, Base64url-encode, and prefix with vhlink:/
 
 // Step 5a – Minified JSON:
-{"url":"https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item","key":"86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk","exp":1735689600,"flag":"LP","label":"Patient Health Summary","v":1,"extensions":{"fhirBaseUrl":"https://vhl-sharer.example.org"}}
+{"url":"https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item","key":"86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk","exp":1735689600,"flag":"LP","label":"Patient Health Summary","v":1,"extension":{"fhirBaseUrl":"https://vhl-sharer.example.org"}}
 
 // Step 5b – Base64url-encoded:
 eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
@@ -169,7 +168,7 @@ eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMx
 // Step 5c – Final VHL link (prefixed with vhlink:/):
 vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
 
-// NOTE: extensions.fhirBaseUrl is only present when the VHL Sharer supports the OAuth with SSRAA Option
+// NOTE: extension.fhirBaseUrl is only present when the VHL Sharer supports the OAuth with SSRAA Option
 // The VHL link (step 5c) will be embedded in the HCERT structure (see QR Code Generation below)
 ```
 
@@ -283,7 +282,7 @@ The VHL Holder MAY:
 - This ensures VHL Receivers can successfully retrieve the manifest using ITI-YY5
 
 #### 2:3.YY3.5.5 OAuth with SSRAA Option — FHIR Base URL Extension
-When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `extensions.fhirBaseUrl` in the SHL payload:
+When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `extension.fhirBaseUrl` in the SHL payload:
 - The `fhirBaseUrl` value MUST be the canonical FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`)
 - This URL is used by the {{ linkvhlr }} to perform UDAP Discovery (`{fhirBaseUrl}/.well-known/udap`) and, if not already registered, Dynamic Client Registration with the {{ linkvhls }} before initiating ITI-YY5
 - The `fhirBaseUrl` value is typically derivable from the `url` field (manifest URL) by stripping the path, but including it explicitly avoids ambiguity when the authorization server is hosted separately
