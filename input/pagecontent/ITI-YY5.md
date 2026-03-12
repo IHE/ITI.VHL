@@ -381,10 +381,9 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Reject if signature invalid or receiver not in trust list (401 Unauthorized)
    - **OAuth with SSRAA Option**:
      - Extract Bearer token from Authorization header
-     - Validate token signature using authorization server's certificate
-     - Verify token expiration (exp claim)
-     - Verify token scope includes required FHIR resource types
-     - Verify token issuer (iss claim) is trusted authorization server
+     - Validate that the token was issued by the authorization server
+     - Verify token expiration
+     - Verify token scope authorizes access to the VHL
      - Reject if token invalid or expired (401 Unauthorized)
 
 3. **Authorize Request**:
