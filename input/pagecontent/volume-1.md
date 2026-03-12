@@ -326,12 +326,14 @@ A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to sh
 
 #### XX.4.2.1 Use Case \#1: WHO Global Digital Health Certification Network
 
-The World Health Organization (WHO) operates a trust network, the Global Digital Health Certification Network (GDHCN), for use by public sector health jurisdictions. The WHO GDHCN uses the notion of a Trust Domain which is defined by a set of:
+{% assign UseCaseGDHCN = site.data.ExampleScenario-UseCaseGDHCN %}
 
-- use cases and business processes related to the utilization of Verifiable Digital Health Certificates; * open, interoperable technical specifications that define the applicable Trusted Services and verifiable digital health certificates for the use case; and
-- policy and regulatory standards describing expected behavior of participants for to the use case.
-The PKI operated by the WHO supports a variety of trust domains, two of which are described below.
+{{ UseCaseGDHCN.purpose }}
 
+This use case has the following business requirements:
+* [Establish Trust](Requirements-EstablishTrust.html)
+* [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
+* [Initiate Retrieve Trust List Request](Requirements-InitiateRetrieveTrustListRequest.html)
 
 ##### XX.4.2.1.1 Hajj Pilgrimage Use Case Description
 {% assign useCaseHajjPilgrimage = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
@@ -360,6 +362,16 @@ This use case has the following business requirement:
 This use case has the following business requirement:
 * [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
 
+#### XX.4.2.3 Use Case \#3: US Trusted Exchange Framework and Common Agreement (TEFCA)
+
+{% assign UseCaseTEFCA = site.data.ExampleScenario-UseCaseTEFCA %}
+
+{{ UseCaseTEFCA.purpose }}
+
+This use case has the following business requirements:
+* [Establish Trust](Requirements-EstablishTrust.html)
+* [Create Secure Channel](Requirements-CreateSecureChannel.html)
+* [Request VHL Documents](Requirements-RequestVHLDocuments.html)
 
 <a name = "security-considerations"></a>
 ## XX.5 Security Considerations

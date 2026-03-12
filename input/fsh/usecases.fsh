@@ -1,3 +1,52 @@
+Instance: UseCaseGDHCN
+InstanceOf: ExampleScenario
+Usage: #definition
+* name = "GDHCN"
+* status = $pubStatus#active
+* publisher = "IHE"
+* purpose = """
+The World Health Organization (WHO) operates the [Global Digital Health Certification Network (GDHCN)](https://smart.who.int/trust), a trust network for public-sector health jurisdictions. The GDHCN provides the infrastructure for the bilateral verification and utilization of Verifiable Digital Health Certificates across participating jurisdictions.
+
+The GDHCN uses the notion of a **Trust Domain** which is defined by a set of:
+- use cases and business processes related to the utilization of Verifiable Digital Health Certificates
+- open, interoperable technical specifications that define the applicable Trusted Services and verifiable digital health certificates for the use case
+- policy and regulatory standards describing expected behavior of participants for the use case
+
+**How Trust is Established:**
+
+Trust in the GDHCN is established through a Public Key Infrastructure (PKI). Each participating jurisdiction submits its PKI material — including Signing Certificate Authority (SCA) certificates and Document Signer Certificates (DSCs) — to the WHO Trust Anchor through a formal onboarding process. The Trust Anchor publishes this key material in trust lists that other participants can retrieve and use to verify the digital signatures on health certificates.
+
+
+**DID-Based Trust List Distribution:**
+
+The GDHCN distributes trust lists using [Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/). Each participating jurisdiction's key material is represented as a DID Document containing verification methods with the jurisdiction's public keys. These DID Documents are published as endpoints by the Trust Anchor, analogous to how the [IHE mCSD Profile](https://profiles.ihe.net/ITI/mCSD/) distributes service endpoints for Organizations. This enables participants to discover and retrieve the PKI material needed for signature verification through a standardized, cacheable, and federated mechanism.
+
+**Trust Network Gateway:**
+
+The GDHCN Trust Network Gateway (TNG) provides a federated architecture that enables multiple trust anchors and cross-gateway trust propagation. The TNG supports both an API gateway method and DID-based resolution for trust list distribution, ensuring interoperability across diverse jurisdictional implementations.
+
+The PKI operated by the WHO supports a variety of trust domains, two of which — the Hajj Pilgrimage and the Pan-American Highway for Health — are described below.
+
+<figure>
+  <img src="trust_network.png" caption="WHO GDHCN Trust Network" style="width:45em; max-width:100%;"/>
+  <p id="fX.X.X.X-TN" class="figureTitle">Figure X.X.X.X-TN: WHO GDHCN Trust Network</p>
+</figure>
+"""
+* process.title = "GDHCN Trust Establishment"
+* process.description = "Process for establishing trust within the WHO GDHCN trust network through PKI material submission and trust list distribution."
+* process.preConditions = "Jurisdiction has completed the GDHCN onboarding process and has generated SCA and DSC certificates."
+* process.postConditions = "Jurisdiction's PKI material is published in the GDHCN trust list and available for retrieval by other participants."
+* process.step[0].operation.number = "1"
+* process.step[0].operation.name = "Jurisdiction Onboarding"
+* process.step[0].operation.description = "A participating jurisdiction completes the GDHCN onboarding process and submits its Signing Certificate Authority (SCA) and Document Signer Certificates (DSCs) to the WHO Trust Anchor. The Trust Anchor validates the submitted certificates and onboards the jurisdiction into the trust network."
+* process.step[1].operation.number = "2"
+* process.step[1].operation.name = "Trust List Publication"
+* process.step[1].operation.description = "The WHO Trust Anchor publishes the jurisdiction's PKI material as DID Documents in the GDHCN trust list. Each DID Document contains verification methods with the jurisdiction's public keys, distributed as endpoints that can be discovered and retrieved by other trust network participants."
+* process.step[2].operation.number = "3"
+* process.step[2].operation.name = "Trust List Retrieval"
+* process.step[2].operation.description = "Participating jurisdictions (acting as VHL Sharers or VHL Receivers) retrieve the trust list from the Trust Anchor. The retrieved DID Documents provide the public keys needed to verify digital signatures on health certificates and to establish secure channels for document exchange."
+
+
 Instance: UseCaseHajjPilgrimage
 InstanceOf: ExampleScenario
 Usage: #definition
@@ -66,16 +115,15 @@ Usage: #definition
 * publisher = "IHE"
 * purpose = """
 In the region of the Americas,  "countries identified several priorities for cross-border digital
-health, including optimizing available human resources through international telehealth, validating digital certificates, ensuring continuity of care, and regional resilience to face health emergencies by sharing data for public health. During the IDB-PAHO co-led event, RELACSIS 4.0,1 a plan was launched to strengthen regional digital health services and resilience, through regional data exchange and policy harmonization. Sixteen countries successfully exchanged digital vaccine certificates (COVID-19, Polio, Measles, and Yellow Fever) and critical clinical information
-(diagnosis, allergy, and prescription information) using international standards during the 2nd Regional LACPASS Connectathon.2 Regional bodies and network such as the Council of Ministers of Health of Central America and the Dominican Republic (COMISCA), The Caribbean Public Health Agency (CARPHA), and the LAC Digital Health Network (RACSEL) have all identified cross-border data sharing as a priority."  
+health, including optimizing available human resources through international telehealth, validating digital certificates, ensuring continuity of care, and regional resilience to face health emergencies by sharing data for public health. During the IDB-PAHO co-led event, RELACSIS 4.0.1 a plan was launched to strengthen regional digital health services and resilience, through regional data exchange and policy harmonization. Sixteen countries successfully exchanged digital vaccine certificates (COVID-19, Polio, Measles, and Yellow Fever) and critical clinical information (diagnosis, allergy, and prescription information) using international standards during the 2nd Regional LACPASS Connectathon.2 Regional bodies and network such as the Council of Ministers of Health of Central America and the Dominican Republic (COMISCA), The Caribbean Public Health Agency (CARPHA), and the LAC Digital Health Network (RACSEL) have all identified cross-border data sharing as a priority."  
 [footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
 
-The Pan American Health Organization (PAHO) and the InterAmerican Development Bank (IADB) are supporting the development of policues and digital infrastructrue to support this need. One particular priority is to improve the continuity of care for internal migrants within the region, by ensuring individuals have access to and can share their vaccination records and the International Patient Summary.
+The Pan American Health Organization (PAHO) and the InterAmerican Development Bank (IADB) are supporting the development of policies and digital infrastructrue to support this need. One particular priority is to improve the continuity of care for internal migrants within the region, by ensuring individuals have access to and can share their vaccination records and the International Patient Summary.
 
 The Pan-American Highway for Health (PH4H)  "aims to provide patients with better healthcare services, regardless of their location. It will also enhance healthcare for those who move temporarily for work or study, as well as for migrants, by enabling them to share their health history, thus improving their employability and access to education. "  
 [footnote](https://ewsdata.rightsindevelopment.org/files/documents/46/IADB-RG-T4546_BBZnmFh.pdf)
 
-While there currently there is no single legal framework that broadly enables data sharing across the region, there are sub-regional networks (e.g. COMISCA, CARPHA) that have policies that can be leveraged in the short term while neccesary data sharing agreements are developed.   Thus, individuals in this region will need to be able to move through overlapping trust networks.
+While there currently there is no single legal framework that broadly enables data sharing across the region, there are sub-regional networks (e.g. COMISCA, CARPHA) that have policies that can be leveraged in the short term while necessary data sharing agreements are developed.   Thus, individuals in this region will need to be able to move through overlapping trust networks.
 
 <figure>
   <img src="PH4H.png" caption="Pan-American Highway for Digital Health Goals" style="width:38em; max-width: 100%;"/>
@@ -115,4 +163,28 @@ A critical privacy requirement for the EVC is unlinkability: Article 5a(16) of [
 <figure>
   <img src="ehds_legal.png" caption="European Health Data Spaces" style="width:45em; max-width:100%"/>
 </figure>
+"""
+
+
+Instance: UseCaseTEFCA
+InstanceOf: ExampleScenario
+Usage: #definition
+* name = "TEFCA"
+* status = $pubStatus#active
+* publisher = "IHE"
+* purpose = """
+The [Trusted Exchange Framework and Common Agreement (TEFCA)](https://www.healthit.gov/topic/interoperability/policy/trusted-exchange-framework-and-common-agreement-tefca) is a United States initiative established by the Office of the National Coordinator for Health IT (ONC) and operated by the Sequoia Project as the Recognized Coordinating Entity (RCE). TEFCA provides a single on-ramp for nationwide health information exchange by establishing a common set of principles, terms, and conditions that enable nationwide interoperability.
+
+Under TEFCA, Qualified Health Information Networks (QHINs) serve as the primary exchange intermediaries, facilitating data sharing among Health Information Networks (HINs), healthcare providers, payers, and public health agencies. Each QHIN must meet rigorous security, privacy, and technical requirements to participate in the TEFCA ecosystem.
+
+**Relevance to VHL:**
+
+TEFCA's trust model aligns with the VHL profile's trust network architecture. In the context of VHL:
+- QHINs and their participants can act as VHL Sharers and VHL Receivers within the TEFCA trust framework
+- TEFCA's credential and certificate management infrastructure can serve as a trust anchor for VHL exchanges
+- The individual (patient) retains control over sharing their health records via VHL, consistent with TEFCA's patient access principles
+
+**OAuth with SSRAA Option:**
+
+Organizations already using OAuth with UDAP (via the [HL7 SSRAA IG](http://hl7.org/fhir/us/udap-security/)) can leverage VHL for health record sharing without additional authentication infrastructure. TEFCA participants, for example, can use their existing TEFCA-issued X.509 certificates and UDAP Dynamic Client Registration to authenticate VHL exchanges, enabling seamless interoperability within established national-scale health information networks.
 """
