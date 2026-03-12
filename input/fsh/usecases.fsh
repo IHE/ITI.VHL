@@ -159,10 +159,6 @@ A critical privacy requirement for the EVC is unlinkability: Article 5a(16) of [
 > (a) not allow providers of electronic attestations of attributes or any other party, after the issuance of the attestation of attributes, to obtain data that allows transactions or user behaviour to be tracked, linked or correlated, or knowledge of transactions or user behaviour to be otherwise obtained, unless explicitly authorised by the user;
 
 > (b) enable privacy preserving techniques which ensure unlinkability, where the attestation of attributes does not require the identification of the user.
-
-<figure>
-  <img src="ehds_legal.png" caption="European Health Data Spaces" style="width:45em; max-width:100%"/>
-</figure>
 """
 
 
