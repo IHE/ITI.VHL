@@ -1,15 +1,11 @@
 @startuml
 skinparam svgDimensionStyle false
 hide footbox
-participant "VHL Sharer" as VHLS
-participant "VHL Holder" as VHLH
 
-activate VHLH
-activate VHLS
+participant "VHL Sharer\nor\nVHL Receiver" as Submitter
+participant "Trust Anchor" as TA
 
-
-VHLH -> VHLS : Generate VHL request [ITI-YY1]
-VHLS -> VHLH : Generate VHL response [ITI-YY1]
-
+Submitter -> TA : Submit PKI Material Request [ITI-YY1]
+TA --> Submitter: Submit PKI Material Response [ITI-YY1]
 
 @enduml

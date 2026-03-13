@@ -35,7 +35,7 @@ This section modifies other IHE profiles or the General Introduction appendices 
 
 | Term                         | Definition                                                    | Acronyms/Abbreviations | Synonyms    |
 | ---------------------------- | --------------------------------------------------------------| -----------------------| ------------|
-| none |  |
+| Trust Network | A federated community of organizations that have agreed to mutually recognize each other's digital identities and credentials. Participation is governed by a legal or policy framework (a Trust Framework) that defines eligibility criteria, obligations, and rules of engagement. Technically, a trust network is anchored by one or more Trust Anchors — root CA certificates or DID-based keys — whose public keys are published in a shared Trust List. A new participant joins by obtaining an X.509 certificate or DID issued or endorsed by the trust network operator, and having that credential published in the Trust List. Relying parties then verify a participant's identity by confirming that their certificate or key chains to a recognized Trust Anchor in the Trust List. | | Federated Trust Community; Trust Community |
 {:.grid .table-striped}
 
 

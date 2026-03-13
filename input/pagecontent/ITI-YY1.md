@@ -1,32 +1,42 @@
-
-{% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
+{% assign linkta = '<a href="ActorDefinition-TrustAnchor.html">Trust Anchor</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
+{% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
 
-## 2:3.YY1 Generate VHL
- {% assign reqGenerateVHLRequest = site.data.Requirements-InitiateVHLGenerationRequest %}
- {% assign reqGenerateVHLResponse = site.data.Requirements-RespondtoGenerateVHLRequest %}
+> **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for Trust Anchor actors and **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors. Implementations that do not support this transaction must use alternative mechanisms (out of scope for this profile) to establish trust relationships with the Trust Anchor. Only implementations that claim support for this transaction can participate in IHE Connectathon testing for trust establishment. See Volume 1 Section XX.2.1 for details on trust establishment approaches.
+
+{% assign reqSubmitPKI = site.data.Requirements-InitiateSubmitPKIMaterialRequest %}
+{% assign reqDistributePKI = site.data.Requirements-RespondtoSubmitPKIMaterialRequest %}
+
+
+{% assign reqSubmitPKItitle = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
+{% assign reqDistributePKItitle = reqDistributePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
+
+
+{% assign reqSubmitPKIdescription = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
+{% assign reqDistributePKIdescription = reqDistributePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
+
 
 
 ### 2:3.YY1.1 Scope
 
-{% assign reqGenerateVHLRequestTitle = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
-{% assign reqGenerateVHLResponseTitle = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
-
-
-{% assign reqGenerateVHLRequestDescription = reqGenerateVHLRequest.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
-{% assign reqGenerateVHLResponseDescription = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
+The Submit PKI Material with DID transaction enables entities within a trust network—specifically, {{ linkvhls }}s and {{ linkvhlr }}s—to submit their public key material to a designated {{ linkta }} using Decentralized Identifiers (DIDs). This transaction uses DID Documents conforming to the W3C DID Core specification to package and transmit cryptographic key material. The {{ linkta }} validates, catalogs, and makes this material available for retrieval, enabling participants to verify digital signatures and establish secure communications within the VHL ecosystem.
 
 ### 2:3.YY1.2 Actor Roles
 
+
+
 | Actor | Role |
 |-------|------|
-| {{ linkvhlh}} | {{ reqGenerateVHLRequestTitle.valueString }}     |
-| {{ linkvhls }}            | {{ reqGenerateVHLResponseTitle.valueString }} |
+| {{ linkvhlr}}, {{ linkvhls}} | {{ reqSubmitPKItitle.valueString }}     |
+| {{ linkta }}            | {{ reqDistributePKItitle.valueString }} |
 {: .grid}
 
 
 ### 2:3.YY1.3 Referenced Standards
+
+- **W3C DID Core 1.0**: [Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/did-core/)
+- **RFC 7517**: JSON Web Key (JWK)
 
 
 ### 2:3.YY1.4 Messages
@@ -35,70 +45,207 @@
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY1.svg%}
   </div>
-  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Interaction Diagram</p>
+  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Submit PKI Material with DID Interaction Diagram</p>
 </figure>
 
-#### 2:3.YY1.4.1 Generate VHL Request Message
-This message is implemented as an HTTP GET operation from the client app used by the Holder to the VHL Sharer using the FHIR $generate-vhl operation described in [2:3.YY1.4.1.2 Message Semantics](#23yy1412-message-semantics).
-
-
+#### 2:3.YY1.4.1 Submit PKI Material Request Message
 ##### 2:3.YY1.4.1.1 Trigger Events
-{{ reqGenerateVHLRequestDescription.valueMarkdown}}
+{{ reqSubmitPKIdescription.valueMarkdown }}
 
-{% include requirements-list-statements.liquid site=site req=reqGenerateVHLRequest  %}
+{% include requirements-list-statements.liquid site=site req=reqSubmitPKI  %}
+
+**VHL Sharer / VHL Receiver (Submitter):**
+
+The submitting actor:
+
+1. **Generates Key Pair**: Generate one or more cryptographic key pairs suitable for the intended use (signing, encryption, authentication)
+2. **Constructs DID Document**: Create a DID Document containing:
+   - A unique DID identifier for the entity
+   - Verification methods with public key material in JWK format
+3. **Submits to Trust Anchor**: Sends the DID Document to the {{ linkta }} via the designated submission pathway
+
 ##### 2:3.YY1.4.1.2 Message Semantics
-The Get Corresponding Identifiers message is a FHIR operation request as
-defined in FHIR (<http://hl7.org/fhir/operations.html>) with the [$generate-vhl operation definition](OperationDefinition-Generate.VHL.html)
-and the input parameters shown in Table 2:3.83.4.1.2-1.
 
-Given that the parameters are not complex types, the HTTP GET operation shall be used as defined in FHIR (<http://hl7.org/fhir/operations.html#request>).
+PKI material SHALL be submitted to the {{ linkta }} using DID Documents formatted according to the [W3C DID Core specification](https://www.w3.org/TR/did-core/).
 
-The name of the operation is `$generate-vhl`, and it is applied to FHIR Patient Resource type.
+**DID Document Structure**
 
-The URL for this operation is: `[base]/Patient/$generate-vhl`
+The DID Document SHALL be formatted as a JSON document containing:
 
-Where **[base]** is the URL of VHL Sharer Service provider.
+- A unique DID identifier for the submitting entity
+- One or more verification methods containing public key material
+- Service endpoints where the entity can be reached
+- Authentication and assertion methods as appropriate
 
-The Generate VHL message is performed by an HTTP GET command shown below:
+**Required DID Document Elements:**
 
+| Element | Cardinality | Description |
+|---------|-------------|-------------|
+| @context | [1..*] | JSON-LD context, MUST include "https://www.w3.org/ns/did/v1" |
+| id | [1..1] | The DID for the submitting entity (e.g., "did:example:123456789abcdefghi") |
+| verificationMethod | [1..*] | Array of verification methods containing public key material |
+{: .grid}
+
+**Verification Method Structure:**
+
+Each verification method SHALL include:
+
+| Element | Cardinality | Description |
+|---------|-------------|-------------|
+| id | [1..1] | Unique identifier for this verification method (e.g., "did:example:123#keys-1") |
+| type | [1..1] | Cryptographic suite type (e.g., "JsonWebKey2020", "EcdsaSecp256k1VerificationKey2019") |
+| controller | [1..1] | DID that controls this verification method |
+| publicKeyJwk | [0..1] | Public key in JWK format (RFC 7517) |
+{: .grid}
+
+**Example DID Document:**
+
+```json
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:example:vhl-sharer-123456",
+  "verificationMethod": [{
+    "id": "did:example:vhl-sharer-123456#signing-key-1",
+    "type": "JsonWebKey2020",
+    "controller": "did:example:vhl-sharer-123456",
+    "publicKeyJwk": {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "38M1FDts7Oea7urmseiugGW7tWc3mLpJh6rKe7xINZ8",
+      "y": "nDQW6XZ7b_u2Sy9slofYLlG03sOEoug3I0aAPQ0exs4"
+    }
+  }]
+}
 ```
-GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&targetSystem=[uri]}{&_format=[token]}
-```
 
-**Table 2:3.83.4.1.2-1: $generate-vhl Message HTTP query Parameters**
+**Submission Pathways**
 
-| Query parameter Name | Cardinality | Search Type | Description                                                                                                                                                                                                      |
-| -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| sourceIdentifier     | \[1..1\]    | token       | The Patient Identifier that will be used by the Patient Identifier Cross-reference Manager to find cross matching identifiers associated with the Patient. See Section 2:3.83.4.1.2.1. |
-| targetSystem         | \[0..\*\]   | uri         | The Assigning Authorities for the Patient Identifier Domains from which the returned identifiers shall be selected. See Section 2:3.83.4.1.2.2.                                                                    |
-| \_goal             | \[0..1\]    | token       | returned VHL rendering type |
-| expirationTime      |  \[0..1\]  | token        | expiration time in Epoch seconds |
-| flag |  \[0..1\]  | token        | Flag to indicate if Passcode is required |
+The DID Document SHALL be submitted to the {{ linkta }} via one of the following pathways (as determined by the implementing jurisdiction):
 
+- **Direct HTTP POST**: Submit the DID Document directly to the {{ linkta }}'s designated endpoint over a secure connection
+  ```
+  POST [trust-anchor-base]/did
+  Content-Type: application/did+json
+  ```
+
+- **Indirect Publication**: Publish the DID Document at a well-known URL under the control of the submitting organization and notify the {{ linkta }} of the location
+
+- **Offline Submission**: Submit the DID Document on secure physical media during a verified in-person encounter with formal identity attestation
+
+**Required Metadata**
+
+Submissions SHOULD include sufficient **provenance metadata** to support validation by the {{ linkta }}:
+
+- The asserted identity of the submitting entity
+- The intended usage scope of the key(s) (specified via authentication, assertionMethod, keyAgreement, etc.)
+- An expiry date or revocation mechanism (if applicable)
+- Digital signature or proof establishing the authenticity of the submission
 
 ##### 2:3.YY1.4.1.3 Expected Actions
-{{ reqGenerateVHLResponseDescription.valueMarkdown }}
 
-{% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
+**Trust Anchor (Receiver):**
 
-#### 2:3.YY1.4.2  Generate VHL Response Message 
-The {{ linkvhls }} returns failure, or generates and returns zero to many VHL. Depending on the use case, the VHL maybe rendered using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC.
+{{ reqDistributePKIdescription.valueMarkdown }}
+
+{% include requirements-list-statements.liquid req=reqDistributePKI site=site  %}
+
+Upon receiving a DID Document submission, the {{ linkta }} SHALL:
+
+1. **Validate DID Document Structure**: Verify the DID Document conforms to W3C DID Core specification
+2. **Verify Cryptographic Material**: Validate that:
+   - Public keys are properly formatted (JWK)
+   - Key types and curves are acceptable per trust framework policy
+   - Key sizes meet minimum security requirements
+3. **Verify Identity**: Authenticate the submitting entity's identity through:
+   - secure connection
+   - Verification of proof/signature on the DID Document
+   - Validation against pre-registered organizational identifiers
+4. **Catalog DID Document**: Store the validated DID Document in the Trust Anchor's registry
+5. **Make Available for Retrieval**: Ensure the DID Document is accessible via the retrieval endpoint(s)
+
+**Rejection Criteria**
+
+The {{ linkta }} SHALL reject submissions that:
+- Do not conform to W3C DID Core specification
+- Contain invalid or malformed cryptographic material
+- Cannot be authenticated to a known trust network participant
+- Use prohibited cryptographic algorithms or insufficient key sizes
+- Lack required metadata or provenance information
+
+#### 2:3.YY1.4.2 Submit PKI Material Response Message
 
 ##### 2:3.YY1.4.2.1 Trigger Events
-This message shall be sent when a request initiated by the {{linkvhlh}} has been processed successfully. 
 
-##### 2:3.YY1.4.2.2  Message Semantics
+The {{ linkta }} sends a Submit PKI Material Response Message upon completing the processing of a Submit PKI Material Request Message. A response SHALL be returned regardless of whether the submission succeeded or failed.
 
-See [ITI TF-2: Appendix Z.6](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.6-populating-the-expected-response-format) for more details on response format handling.
+##### 2:3.YY1.4.2.2 Message Semantics
 
-The response message is a FHIR operation response (<http://hl7.org/fhir/operations.html#response>).
+The response message format is determined by the implementing jurisdiction of the {{ linkta }}.
 
-On Failure, the response message is an HTTP status code of 4xx or 5xx
-indicates an error, and an OperationOutcome Resource shall be returned
-with details.
+**Success Response:**
+
+On successful submission and validation, the {{ linkta }} SHALL return:
+- HTTP 201 Created (for HTTP POST submissions)
+
+**Error Response:**
+
+On failure, the {{ linkta }} SHALL return an appropriate error response:
+- HTTP 400 Bad Request: Malformed DID Document
+- HTTP 401 Unauthorized: Authentication failed
+- HTTP 403 Forbidden: Entity not authorized to submit
+- HTTP 422 Unprocessable Entity: Valid format but validation failed
 
 ##### 2:3.YY1.4.2.3 Expected Actions
-The VHL Sharer processes the results according to application-defined rules.
+
+Upon receiving the response, the submitting actor ({{ linkvhls }} or {{ linkvhlr }}) SHALL:
+
+1. **Handle Success**: On receipt of a success response, the submitting actor SHALL record that PKI material has been accepted by the {{ linkta }} and is available for distribution to trust network participants.
+2. **Handle Errors**: On receipt of an error response, the submitting actor SHALL inspect the error code and take corrective action as appropriate:
+   - For HTTP 400, correct the DID Document structure and resubmit
+   - For HTTP 401 or 403, resolve the authentication or authorization issue before retrying
+   - For HTTP 422, review the validation failure details and resubmit with corrected key material or metadata
+3. **Retain Private Keys**: Regardless of the response, the submitting actor SHALL continue to securely maintain the private key(s) corresponding to any submitted public key material.
 
 
 ### 2:3.YY1.5 Security Considerations 
+
+The secure and verifiable exchange of PKI material via DID Documents is foundational to the operation of a Verified Health Link (VHL) trust network. Any compromise in the integrity, authenticity, or provenance of this material undermines the ability of network participants to verify digital signatures, authenticate service endpoints, or enforce trust relationships.
+
+#### 2:3.YY1.5.1 DID Document Integrity
+
+- DID Documents SHOULD be signed by the submitting entity using a verification method
+- The {{ linkta }} SHALL verify the authenticity of submitted DID Documents
+- Submissions over HTTP MUST use secure connections
+
+#### 2:3.YY1.5.2 Key Material Security
+
+- Private keys MUST never be included in DID Documents (only public keys)
+- Submitting entities MUST securely store private keys with appropriate access controls
+- Key material SHOULD meet minimum cryptographic strength requirements (e.g., EC P-256 or stronger)
+
+#### 2:3.YY1.5.3 Identity Verification
+
+- The {{ linkta }} MUST authenticate the identity of submitting entities
+- Authentication mechanisms MAY include:
+  - Secure connection with pre-registered certificates
+  - Signed proof-of-control over the DID
+  - Out-of-band identity verification for initial registration
+
+#### 2:3.YY1.5.4 DID Document Validation
+
+The {{ linkta }} SHALL validate that:
+- DID Documents conform to W3C DID Core specification
+- Cryptographic algorithms are from an approved list
+- Key sizes meet minimum security requirements
+- Verification methods are properly referenced in authentication/assertion arrays
+
+#### 2:3.YY1.5.5 Revocation and Updates
+
+- The {{ linkta }} SHALL support mechanisms for updating or revoking DID Documents
+- Revoked or expired DID Documents MUST NOT be distributed to participants
+- The {{ linkta }} MAY maintain a history of DID Document versions for audit purposes
+
+Jurisdictions MAY define additional security controls, such as specific cryptographic algorithm requirements, certificate chaining policies, offline verification workflows, or restrictions on submission endpoints.

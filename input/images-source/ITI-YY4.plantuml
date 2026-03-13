@@ -1,0 +1,20 @@
+@startuml
+skinparam svgDimensionStyle false
+hide footbox
+
+participant "VHL Holder" as Holder
+participant "VHL Receiver" as Receiver
+
+Holder -> Receiver: Provide VHL [ITI-YY4]
+note right
+  Transmission via:
+  - QR code 
+end note
+
+Receiver --> Holder: (Optional Acknowledgment)
+note left
+  Optional receipt
+  confirmation
+end note
+
+@enduml

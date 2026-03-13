@@ -193,7 +193,7 @@ Usage: #definition
 * description = """
 When a [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html) generates a new public-private key pair for use within the VHL trust network, they SHALL submit the corresponding public key material to the [Trust Anchor](ActorDefinition-TrustAnchor.html) for validation and inclusion in the trust list.
 
-The submission MAY include metadata to support categorization of key usage (e.g., digital signatures, encryption, mTLS) and business or operational context.
+The submission MAY include metadata to support categorization of key usage (e.g., digital signatures, encryption, secure channels) and business or operational context.
 """
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(VHLSharer)
@@ -202,7 +202,7 @@ The submission MAY include metadata to support categorization of key usage (e.g.
 * statement[+].key = "generate-private-public-key-pair"
 * statement[=].label = "Generate Private-Public Key Pair"
 * statement[=].requirement = """
-Generate one or more private-public key pairs for use within the VHL trust network. Key pairs SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or mTLS) and MAY be categorized by business domain or participant role.
+Generate one or more private-public key pairs for use within the VHL trust network. Key pairs SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or secure channels) and MAY be categorized by business domain or participant role.
 """
 
 * statement[+].key = "prepare-submission-metadata"
@@ -253,14 +253,14 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-A [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html), as a participant in the trust network, SHALL be capable of requesting public key infrastructure (PKI) material from a designated [Trust Anchor](ActorDefinition-TrustAnchor.html).
+A [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html), as a participant in the trust network, SHALL be capable of retrieving public key infrastructure (PKI) material from a designated [Trust Anchor](ActorDefinition-TrustAnchor.html).
 
 The retrieved material MAY include:
 * Public key certificates and associated trust lists
 * Certificate revocation data (e.g., CRLs, OCSP responses)
 * Metadata used to:
   - Validate digital signatures on VHLs and related resources
-  - Establish mutually authenticated TLS (mTLS) connections
+  - Establish secure connections
   - Decrypt content protected via asymmetric encryption
 
 Participants SHOULD cache the received trust list to reduce network and server load.
@@ -287,7 +287,9 @@ This MAY include:
 * Revocation data (CRL or OCSP)
 * Usage metadata (e.g., key type, scope, intended usage)
 
-The Trust Anchor SHALL only respond with validated and trustworthy material in accordance with the governance policies of the VHL trust framework.This signed trust list enables all participants in the VHL trust network to verify digital signatures and establish secure connections in accordance with the governance policies of the Trust Anchor.
+The Trust Anchor SHALL only respond with validated and trustworthy material in accordance with the governance policies of the VHL trust framework. This signed trust list enables all participants in the VHL trust network to verify digital signatures and establish secure connections in accordance with the governance policies of the Trust Anchor.
+
+Upon receipt of this response, participants SHALL process the trust list as described in [Receive Trust List](Requirements-ReceiveTrustList.html).
 """
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(TrustAnchor)
@@ -298,7 +300,7 @@ The Trust Anchor SHALL only respond with validated and trustworthy material in a
 
 * statement[+].key = "assemble-trust-list"
 * statement[=].label = "Assemble Trust List"
-* statement[=].requirement = "Organize validated PKI material into a structured trust list. The Trust Anchor SHOULD support categorization by submitting participant, key usage type (e.g., signing, encryption, mTLS), and operational context."
+* statement[=].requirement = "Organize validated PKI material into a structured trust list. The Trust Anchor SHOULD support categorization by submitting participant, key usage type (e.g., signing, encryption, secure channels), and operational context."
 
 * statement[+].key = "sign-trust-list"
 * statement[=].label = "Sign Trust List"
@@ -316,11 +318,17 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Holder](ActorDefinition-VHLHolder.html) SHALL provide a Verified Health Link (VHL)  to a [VHL Receiver](ActorDefinition-VHLHolder.html). This includes preparing or retrieving the referenced health content, constructing the VHL payload, and digitally signing it to ensure authenticity and integrity.
+The Provide VHL transaction enables a [VHL Holder](ActorDefinition-VHLHolder.html) to transmit a Verified Health Link (VHL) to a [VHL Receiver](ActorDefinition-VHLReceiver.html). The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer.
 
-Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code, Verifiable Credentials, Bluetooth, or NFC. Supported mechanisms are defined in [Volume 3](volume-3.html).
+Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code or deep link (HTTPS URL). 
 """
 * actor[+] = Canonical(VHLHolder)
+* statement[+].key = "transmit-vhl"
+* statement[=].label = "Transmit VHL"
+* statement[=].requirement = "This transaction SHALL support at least one rendering and transmission mechanism to accommodate the use cases and deployment scenario, including:
+- QR codes displayed on mobile devices or printed materials
+- Deep links shared via secure messaging or email"
+* statement[=].conformance = #SHALL
 
 Instance:   RespondtoProvideVHL
 InstanceOf: Requirements
@@ -351,10 +359,11 @@ Usage: #definition
 * description = """
 The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL initiate a request to retrieve a set of health documents from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL).
 
-This transaction SHALL be conducted over a secure channel, as defined in the [Audit Trail and Node Authentication (ATNA)](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html#9.1) Profile. Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
+Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
 
 **Optional behaviors:**
 * The VHL Sharer MAY record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement.
+* This transaction MAY be conducted over a secure channel, as defined in the [Audit Trail and Node Authentication (ATNA)](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html#9.1) Profile.
 """
 * actor[+] = Canonical(VHLReceiver)
 * statement[+].key = "retrieve-health-documents"
@@ -364,7 +373,7 @@ This transaction SHALL be conducted over a secure channel, as defined in the [Au
 * statement[+].key = "initiate-authenticate-node"
 * statement[=].label = "Initiate Authenticate Node"
 * statement[=].requirement = "Initiate Authenticate Node [ITI-19](https://profiles.ihe.net/ITI/TF/Volume2/ITI-19.html#3.19) transaction to establish a secure connection and validate participation in the trust network using PKI material published by the trust anchor."
-* statement[=].conformance = #SHALL
+* statement[=].conformance = #MAY
 * statement[+].key = "record-audit-event"
 * statement[=].label = "Record audit event"
 * statement[=].requirement = "Record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement"
@@ -380,7 +389,7 @@ Usage: #definition
 * description = """
 The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL initiate a request to retrieve a single health document from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL).
 
-This transaction SHALL be conducted over a mutually authenticated TLS (mTLS) channel. Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
+This transaction SHALL be conducted over a secure channel. Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
 
 **Optional behaviors:**
 * The VHL Receiver MAY verify the digital signature of the returned health document to confirm its authenticity, integrity, and provenance, as defined in the [Verify Document Signature](Requirements-VerifyDocumentSignature.html) requirement.
@@ -412,7 +421,7 @@ A [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition
 
 Participants SHOULD:
 * Cache the received trust list or certificate material to reduce network and server load
-* Validate digital signatures or trust paths before use in VHL validation or mTLS sessions
+* Validate digital signatures or trust paths before use in VHL validation or secure channel sessions
 * Monitor certificate expiration or revocation status where applicable
 """
 * derivedFrom = Canonical(EstablishTrust)
@@ -434,66 +443,27 @@ Validate digital signatures or trust paths
 Monitor certificate expiration or revocation status where applicable
 """
 
-Instance:   CreateTrustedChannel
+Instance:   CreateSecureChannel
 InstanceOf: Requirements
 Usage: #definition
-* name = "CreateTrustedChannel"
-* title = "Create Trusted Channel"
+* name = "CreateSecureChannel"
+* title = "Create Secure Channel"
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
 The [VHL Sharer](ActorDefinition-VHLSharer.html) and [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL jointly establish a secure connection prior to executing any Verified Health Link (VHL) transactions involving the exchange of sensitive data.
 
-This requirement entails:
-* The VHL Receiver initiating the mTLS handshake as the client and presenting a valid X.509 certificate
-* The VHL Sharer responding as the server, presenting its own certificate and validating the client's certificate against a trusted Certificate Authority or Trust Anchor
+This requirement is satisfied by implementing secure channel establishment as defined in the [Audit Trail and Node Authentication (ATNA)](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) Profile, specifically through the Authenticate Node [ITI-19] transaction.
 
-Establishing this trusted channel ensures confidentiality, integrity, and bilateral authentication of all subsequent communications, and fulfills the trust obligations defined in the [Establish Trust](Requirements-EstablishTrust.html) requirement.
+This requirement entails:
+* The VHL Receiver initiating a secure connection as the client and presenting valid credentials
+* The VHL Sharer responding as the server, presenting its own credentials and validating the client's credentials against a trusted Certificate Authority or Trust Anchor
+
+Establishing this secure channel ensures confidentiality, integrity, and bilateral authentication of all subsequent communications, and fulfills the trust obligations defined in the [Establish Trust](Requirements-EstablishTrust.html) requirement.
 """
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(VHLReceiver)
 * actor[+] = Canonical(VHLSharer)
-
-
-Instance:   AcceptMTLSConnection
-InstanceOf: Requirements
-Usage: #definition
-* name = "AcceptMTLSConnection"
-* title = "Accept mTLS"
-* status = $pubStatus#active
-* publisher = "IHE"
-* description = """
-The [VHL Sharer](ActorDefinition-VHLSharer.html), when acting as a server in a Verified Health Link (VHL) transaction, SHALL accept a mutually authenticated TLS (mTLS) connection initiated by a [VHL Receiver](ActorDefinition-VHLReceiver.html).
-
-During the TLS handshake, the Sharer SHALL:
-* Present a valid X.509 server certificate that is anchored to a recognized Trust Anchor
-* Validate the client certificate presented by the Receiver against the same trust framework
-* Establish a secure channel over which all subsequent VHL-related transactions are conducted
-
-Successful completion of the mTLS handshake is a prerequisite for all VHL operations involving sensitive data exchange. This requirement refines the bilateral obligations described in [Create Trusted Channel](Requirements-CreateTrustedChannel.html).
-"""
-* derivedFrom = Canonical(CreateTrustedChannel)
-* actor[+] = Canonical(VHLSharer)
-
-
-Instance:   InitiateMTLSConnection
-InstanceOf: Requirements
-Usage: #definition
-* name = "InitiateMTLSConnection"
-* title = "Initiate mTLS"
-* status = $pubStatus#active
-* publisher = "IHE"
-* description = """
-The [VHL Receiver](ActorDefinition-VHLReceiver.html), when acting as a client in a Verified Health Link (VHL) transaction, SHALL initiate a mutually authenticated TLS (mTLS) connection to the [VHL Sharer](ActorDefinition-VHLSharer.html).
-
-This initiation includes:
-* Presenting a valid X.509 client certificate
-* Validating the Sharer's server certificate against an accepted Trust Anchor
-
-Successful completion of the mTLS handshake is a prerequisite for all subsequent transactions involving sensitive data exchange, including the retrieval of VHLs or associated health documents.
-"""
-* derivedFrom = Canonical(CreateTrustedChannel)
-* actor[+] = Canonical(VHLReceiver)
 
 
 Instance: VerifyDocumentSignature

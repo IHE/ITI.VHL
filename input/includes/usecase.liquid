@@ -1,0 +1,55 @@
+{% comment %}
+  usecase.liquid
+  Renders an ExampleScenario use case: purpose, process flow with
+  pre-conditions, steps, and post-conditions.
+
+  Parameters:
+    scenario - ExampleScenario resource from site.data
+    site     - the site object
+
+  R4 fields (may appear as native fields or R5 cross-version extensions
+  depending on IG Publisher version):
+    purpose (markdown)
+    process[0].title, process[0].description, process[0].preConditions,
+    process[0].postConditions, process[0].step[n].operation
+
+  Usage:
+    {% assign uc = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
+    {% include usecase.liquid site=site scenario=uc %}
+{% endcomment %}
+
+{% assign _purpose = scenario.purpose %}
+{% unless _purpose %}
+  {% assign _ext_purpose = "http://hl7.org/fhir/5.0/StructureDefinition/extension-ExampleScenario.purpose" %}
+  {% assign _purpose = scenario.extension | where: "url", _ext_purpose | first | map: "valueMarkdown" %}
+{% endunless %}
+
+{% if _purpose %}
+{{ _purpose | markdownify }}
+{% endif %}
+
+{% assign _process = scenario.process | first %}
+{% if _process %}
+
+{% if _process.preConditions %}
+<p><b>Pre-conditions:</b></p>
+{{ _process.preConditions | markdownify }}
+{% endif %}
+
+{% if _process.step and _process.step.size > 0 %}
+<p><b>Main Flow:</b></p>
+<ol>
+{% for _step in _process.step %}
+  {% if _step.operation %}
+  <li><b>{{ _step.operation.name }}</b>: {{ _step.operation.description | markdownify }}</li>
+  {% endif %}
+{% endfor %}
+</ol>
+{% endif %}
+
+{% if _process.postConditions %}
+<p><b>Post-conditions:</b></p>
+{{ _process.postConditions | markdownify }}
+{% endif %}
+
+{% endif %}

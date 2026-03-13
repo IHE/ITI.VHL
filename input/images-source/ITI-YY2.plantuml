@@ -1,19 +1,20 @@
 @startuml
 skinparam svgDimensionStyle false
 hide footbox
-participant "VHL Sharer" as VHLS
-participant "VHL Receiver" as VHLR
+
+participant "VHL Sharer\nor\nVHL Receiver" as Client
 participant "Trust Anchor" as TA
 
-activate VHLS
-activate TA
-activate VHLR
+Client -> TA: Retrieve Trust List Request [ITI-YY2]
+note right
+  Request PKI material
+  (certificates, keys, CRLs)
+end note
 
-
-VHLS -> TA : Submit PKI Material request [ITI-YY2]
-TA -> VHLS : Submit PKI Material response [ITI-YY2]
-VHLR -> TA : Submit PKI Material request [ITI-YY2]
-TA -> VHLR : Submit PKI Material response [ITI-YY2]
-
+TA --> Client: Retrieve Trust List Response [ITI-YY2]
+note left
+  Trust List with
+  validated PKI material
+end note
 
 @enduml
