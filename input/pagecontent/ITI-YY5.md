@@ -127,7 +127,7 @@ In addition to the FHIR search parameters in the URL, the following SHL-specific
 
 ##### 2:3.YY5.4.1.3 Authentication Option - HTTP Message Signatures
 
-Implementations MAY authenticate using **HTTP Message Signatures** per RFC 9421. This option is not required; participants MAY instead use OAuth with SSRAA (see Section 2:3.YY5.4.1.4). HTTP Message Signatures provide cryptographic proof of the receiver's identity, request integrity, and non-repudiation.
+Implementations MAY authenticate using **HTTP Message Signatures** per RFC 9421. HTTP Message Signatures provide cryptographic proof of the receiver's identity, request integrity, and non-repudiation.
 
 **Request Structure:**
 
