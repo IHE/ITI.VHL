@@ -80,17 +80,17 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     When the "v" field is set in the SHL payload
     Then the "v" field SHALL default to 1
 
-  # ─── OAuth with SSRAA Option ───────────────────────────────────────────────
+  # ─── OAuth with SSRAA Option / Verifiable Credentials Option ────────────────
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer includes extension.fhirBaseUrl when OAuth with SSRAA Option is supported
-    Given the VHL Sharer supports the OAuth with SSRAA Option
+  Scenario: VHL Sharer includes extension.fhirBaseUrl when OAuth with SSRAA Option or Verifiable Credentials Option is supported
+    Given the VHL Sharer supports the OAuth with SSRAA Option or the Verifiable Credentials Option
     When the SHL payload is constructed
     Then the "extension" object SHALL include "fhirBaseUrl" set to the canonical FHIR base URL of the VHL Sharer
 
   @responder-actions @MUST
-  Scenario: VHL Sharer does not include extension.fhirBaseUrl when OAuth with SSRAA Option is not supported
-    Given the VHL Sharer does NOT support the OAuth with SSRAA Option
+  Scenario: VHL Sharer does not include extension.fhirBaseUrl when neither OAuth with SSRAA Option nor Verifiable Credentials Option is supported
+    Given the VHL Sharer does NOT support the OAuth with SSRAA Option or the Verifiable Credentials Option
     When the SHL payload is constructed
     Then the "extension.fhirBaseUrl" field MUST NOT be present
 

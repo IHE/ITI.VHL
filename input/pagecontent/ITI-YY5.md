@@ -16,9 +16,11 @@ This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL H
 
 **FHIR Search Transaction:** This transaction uses a standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists. The manifest URL from the VHL payload contains all necessary FHIR search parameters. No custom operation is required.
 
-**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)** or **OAuth with SSRAA** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
+**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)**, **OAuth with SSRAA**, or **Verifiable Credentials (W3C VC Data Model 2.0)** depending on their deployment context. All three options are equal alternatives; none is mandatory. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
 
 **OAuth with SSRAA Option:** Implementations MAY support the **OAuth with SSRAA Option**, which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
+
+**Verifiable Credentials Option:** Implementations MAY support the **Verifiable Credentials Option**, which uses [W3C Verifiable Credentials Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/) for authentication. When this option is supported, the {{ linkvhlr }} presents a Verifiable Presentation (VP) containing a Verifiable Credential (VC) issued by the Trust Anchor, with a challenge derived from the request body to bind the presentation to the specific request.
 
 **Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, it SHALL ignore the `_include` parameter, and the {{ linkvhlr }} SHALL retrieve each DocumentReference individually using separate read requests.
 
@@ -63,6 +65,11 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 - **SMART App Launch Backend Services**: [Backend Services](http://hl7.org/fhir/smart-app-launch/backend-services.html)
 - **HL7 Security for Scalable Registration, Authentication, and Authorization IG**: [SSRAA](http://hl7.org/fhir/us/udap-security/)
 - **ITI Internet User Authorization (IUA)**: [IUA Profile](https://profiles.ihe.net/ITI/IUA/)
+
+**Verifiable Credentials (Optional):**
+- **W3C VC Data Model 2.0**: [Verifiable Credentials Data Model v2.0](https://www.w3.org/TR/vc-data-model-2.0/) - for Verifiable Credentials Option
+- **W3C DID Core 1.0**: [Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/did-core/) - DID-based identity for VC holder and issuer
+- **JsonWebSignature2020**: [JSON Web Signature 2020](https://w3id.org/security/suites/jws-2020/v1) - proof suite for VC and VP signatures
 
 **SHL Specifications:**
 - **SHL Manifest Request**: [SHL Manifest Request](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-request)
@@ -313,7 +320,135 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 - Token lifetime SHOULD be limited (recommended: 1 hour maximum)
 - Authorization server MUST validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
 
-##### 2:3.YY5.4.1.5 Expected Actions - VHL Receiver
+##### 2:3.YY5.4.1.5 Authentication Option - Verifiable Credentials
+
+Implementations MAY authenticate using **Verifiable Credentials** per the [W3C Verifiable Credentials Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/). This option is not required; participants MAY instead use HTTP Message Signatures (see Section 2:3.YY5.4.1.3) or OAuth with SSRAA (see Section 2:3.YY5.4.1.4). Verifiable Credentials provide decentralized, attribute-rich authentication with cryptographic request binding via Verifiable Presentations.
+
+**Preconditions: Verifiable Credential Issuance**
+
+Before a Verifiable Credential can be presented, the {{ linkvhlr }} MUST obtain a **VHLParticipantCredential** from the Trust Anchor or a recognized issuer in the trust network. This credential is issued when the {{ linkvhlr }} registers its PKI material via ITI-YY1 (Submit PKI Material with DID). The credential MAY be long-lived and reused across multiple requests.
+
+**Verifiable Credential Structure:**
+
+The VC issued to the {{ linkvhlr }} SHALL conform to the W3C VC Data Model 2.0 and use the JsonWebSignature2020 proof suite, consistent with the proof structure defined in ITI-YY2:
+
+```json
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "type": ["VerifiableCredential", "VHLParticipantCredential"],
+  "issuer": "did:web:trust-anchor.example.org",
+  "validFrom": "2025-01-15T00:00:00Z",
+  "validUntil": "2026-01-15T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:web:vhl-receiver.example.org",
+    "organizationName": "General Hospital",
+    "role": "VHLReceiver",
+    "trustNetwork": "example-trust-network"
+  },
+  "proof": {
+    "type": "JsonWebSignature2020",
+    "created": "2025-01-15T12:00:00Z",
+    "verificationMethod": "did:web:trust-anchor.example.org#signing-key-1",
+    "proofPurpose": "assertionMethod",
+    "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..vc_signature_value"
+  }
+}
+```
+
+**Verifiable Presentation Structure (Request Binding):**
+
+To bind the credential presentation to the specific HTTP request, the {{ linkvhlr }} SHALL construct a Verifiable Presentation (VP) with a `challenge` derived from the request body. This ensures that the VP cannot be replayed for a different request.
+
+```json
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "type": ["VerifiablePresentation"],
+  "holder": "did:web:vhl-receiver.example.org",
+  "verifiableCredential": [
+    { "...VC as above..." }
+  ],
+  "proof": {
+    "type": "JsonWebSignature2020",
+    "created": "2025-06-15T10:30:00Z",
+    "verificationMethod": "did:web:vhl-receiver.example.org#key-1",
+    "proofPurpose": "authentication",
+    "challenge": "X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=",
+    "domain": "vhl-sharer.example.org",
+    "jws": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..vp_signature_value"
+  }
+}
+```
+
+**Request Structure:**
+
+```http
+POST /List/_search HTTP/1.1
+Host: vhl-sharer.example.org
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 234
+Content-Digest: sha-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=
+VP: eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIi...
+Accept: application/fhir+json
+
+_id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.840.1.113883.2.4.6.3%7CPASSPORT123&_include=List%3Aitem&recipient=Dr.+Smith+Hospital&passcode=user-pin&embeddedLengthMax=10000
+```
+
+**VP Header Components:**
+
+1. **Content-Digest Header:**
+   - SHA-256 hash of the request body (same as HTTP Message Signatures)
+   - Format: `sha-256=<base64-encoded-hash>`
+   - MUST be included for POST requests with body
+
+2. **VP Header:**
+   - Base64url-encoded Verifiable Presentation JSON
+   - Contains the VC and the VP proof with challenge and domain
+   - The `challenge` in the VP proof SHALL be the base64-encoded SHA-256 hash value from the Content-Digest header (binding the VP to the request body)
+   - The `domain` in the VP proof SHALL be the `@authority` of the request (the VHL Sharer's hostname)
+
+**Signing Process:**
+
+1. {{ linkvhlr }} constructs request body with FHIR search parameters and SHL parameters
+2. {{ linkvhlr }} computes Content-Digest (SHA-256 of body)
+3. {{ linkvhlr }} constructs VP containing the VHLParticipantCredential
+4. {{ linkvhlr }} sets VP proof `challenge` to the Content-Digest hash value
+5. {{ linkvhlr }} sets VP proof `domain` to the VHL Sharer's authority
+6. {{ linkvhlr }} signs VP using their private key (corresponding to the DID in the trust list)
+7. {{ linkvhlr }} base64url-encodes the VP and includes it as the `VP` header
+8. {{ linkvhlr }} includes Content-Digest header in request
+
+**Verification Process:**
+
+1. {{ linkvhls }} extracts `VP` header and base64url-decodes it
+2. {{ linkvhls }} extracts the VC from the VP's `verifiableCredential` array
+3. {{ linkvhls }} verifies VC issuer is in the trust list (ITI-YY2)
+4. {{ linkvhls }} verifies VC proof signature using the issuer's public key from the trust list
+5. {{ linkvhls }} verifies VC is not expired (`validFrom` / `validUntil`)
+6. {{ linkvhls }} verifies VC `credentialSubject.id` matches the VP `holder`
+7. {{ linkvhls }} verifies VP proof signature using the holder's public key from the trust list
+8. {{ linkvhls }} verifies VP proof `challenge` matches the Content-Digest header value
+9. {{ linkvhls }} verifies VP proof `domain` matches the server's authority
+10. {{ linkvhls }} verifies VP proof `created` timestamp is within acceptable range (±2 minutes recommended)
+11. If valid, {{ linkvhls }} processes request and returns Bundle
+12. If invalid, {{ linkvhls }} returns 401 Unauthorized
+
+**Security Considerations for Verifiable Credentials:**
+
+- Private keys MUST be stored securely (Hardware Security Module recommended)
+- Public keys for VC issuers and VP holders MUST be obtained from trust list (ITI-YY2)
+- The VP `challenge` MUST match the Content-Digest to bind the presentation to the request body
+- The VP `domain` MUST match the server authority to prevent cross-domain replay
+- VP proof `created` timestamp MUST be validated for freshness (±2 minutes recommended)
+- VCs SHOULD be checked for revocation if the trust network maintains a revocation list
+- The VC issuer MUST be a Trust Anchor or recognized issuer in the trust network
+
+##### 2:3.YY5.4.1.6 Expected Actions - VHL Receiver
 
 The {{ linkvhlr }} SHALL:
 
@@ -330,7 +465,7 @@ The {{ linkvhlr }} SHALL:
      - embeddedLengthMax (optional) - size hint for embedded content
    - Encode parameters as `application/x-www-form-urlencoded`
 
-3. **Authenticate Request** (use one of the following options; neither is required):
+3. **Authenticate Request** (use one of the following options; none is mandatory):
    - **Option A - HTTP Message Signatures** (if supported):
      - Compute Content-Digest (SHA-256 of request body)
      - Construct signature base from HTTP components
@@ -340,6 +475,12 @@ The {{ linkvhlr }} SHALL:
      - Obtain access token using JWT client assertion
      - Include token in Authorization header
      - Reuse token for subsequent requests until expiration
+   - **Option C - Verifiable Credentials** (if supported):
+     - Compute Content-Digest (SHA-256 of request body)
+     - Construct VP containing VHLParticipantCredential with challenge set to Content-Digest hash value
+     - Sign VP using receiver's private key
+     - Base64url-encode VP and include as VP header
+     - Include Content-Digest header
 
 4. **Send Request**:
    - POST to `/List/_search` endpoint at VHL Sharer's base URL
@@ -358,17 +499,18 @@ The {{ linkvhlr }} SHALL:
 
 The {{ linkvhlr }} MAY:
 - Cache OAuth access tokens for reuse (OAuth with SSRAA Option)
+- Cache Verifiable Credentials for reuse until expiration (Verifiable Credentials Option)
 - Implement retry logic for transient failures
-- Support both HTTP Message Signatures and OAuth with SSRAA Option
+- Support any combination of HTTP Message Signatures, OAuth with SSRAA, and Verifiable Credentials options
 
-##### 2:3.YY5.4.1.6 Expected Actions - VHL Sharer
+##### 2:3.YY5.4.1.7 Expected Actions - VHL Sharer
 
 Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 
 1. **Parse Request**:
    - Extract FHIR search parameters from request body
    - Extract SHL parameters (recipient, passcode, embeddedLengthMax)
-   - Identify authentication method used (HTTP signatures or OAuth token)
+   - Identify authentication method used (HTTP signatures, OAuth token, or Verifiable Credentials)
 
 2. **Authenticate Receiver**:
    - **HTTP Message Signatures**:
@@ -385,6 +527,17 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Verify token expiration
      - Verify token scope authorizes access to the VHL
      - Reject if token invalid or expired (401 Unauthorized)
+   - **Verifiable Credentials Option**:
+     - Extract and base64url-decode VP from `VP` header
+     - Verify VC issuer is in the trust list (ITI-YY2)
+     - Verify VC proof signature using issuer's public key
+     - Verify VC validity period (`validFrom` / `validUntil`)
+     - Verify VC `credentialSubject.id` matches VP `holder`
+     - Verify VP proof signature using holder's public key from trust list
+     - Verify VP proof `challenge` matches Content-Digest header value
+     - Verify VP proof `domain` matches server authority
+     - Verify VP proof `created` timestamp is within acceptable range (±2 minutes)
+     - Reject if any verification fails (401 Unauthorized)
 
 3. **Authorize Request**:
    - Validate folder ID (_id parameter) corresponds to valid VHL
@@ -650,8 +803,8 @@ The {{ linkvhlr }} MAY:
 
 Secure transport is required for all communications in this transaction. Implementations SHALL comply with the **IHE ATNA Profile** (ITI TF-1: Section 9) for transport security requirements
 
-#### 2:3.YY5.5.2 HTTP Message Signatures 
-All implementations SHALL support HTTP Message Signatures per RFC 9421:
+#### 2:3.YY5.5.2 HTTP Message Signatures
+Implementations that support the Sign Manifest Request Option SHALL comply with HTTP Message Signatures per RFC 9421:
 - Signature MUST include `@method`, `@path`, `@authority`, `content-type`, `content-digest`
 - Content-Digest MUST be SHA-256 or stronger
 - Signature algorithm: ECDSA P-256 SHA-256 (recommended) or RSA 2048+ with PSS or PKCS#1 v1.5
@@ -661,7 +814,7 @@ All implementations SHALL support HTTP Message Signatures per RFC 9421:
 - Timestamp validation MUST enforce freshness (±2 minutes recommended)
 - Replay attacks prevented by timestamp validation
 
-#### 2:3.YY5.5.3 OAuth with SSRAA Option 
+#### 2:3.YY5.5.3 OAuth with SSRAA Option
 Implementations that support OAuth with SSRAA Option SHALL:
 - Use OAuth 2.0 Backend Services (client_credentials grant)
 - Use JWT client assertions (private_key_jwt) for client authentication
@@ -671,7 +824,21 @@ Implementations that support OAuth with SSRAA Option SHALL:
 - Check JWT `jti` claim to prevent replay attacks
 - Obtain receiver's public key from trust list for JWT signature validation
 
-#### 2:3.YY5.5.4 VHL Authorization
+#### 2:3.YY5.5.4 Verifiable Credentials Option
+Implementations that support the Verifiable Credentials Option SHALL:
+- Use W3C Verifiable Credentials Data Model 2.0 with JsonWebSignature2020 proof suite
+- Present credentials via a Verifiable Presentation (VP) with `challenge` and `domain`
+- Set VP `challenge` to the Content-Digest hash value to bind the presentation to the request body
+- Set VP `domain` to the VHL Sharer's authority to prevent cross-domain replay
+- Verify VC issuer is a Trust Anchor or recognized issuer in the trust network
+- Verify VC validity period (`validFrom` / `validUntil`)
+- Verify VP proof signature using the holder's public key from the trust list
+- Validate VP proof `created` timestamp for freshness (±2 minutes recommended)
+- Check VC revocation status if the trust network maintains a revocation list
+- Store private keys securely (Hardware Security Module recommended)
+- Obtain public keys from trust list (ITI-YY2) for signature verification
+
+#### 2:3.YY5.5.5 VHL Authorization
 {{ linkvhls }} MUST validate VHL before returning documents:
 - Verify folder ID (_id parameter) corresponds to valid VHL
 - Validate VHL signature (HCERT/CWT COSE signature from ITI-YY3)
@@ -682,33 +849,33 @@ Implementations that support OAuth with SSRAA Option SHALL:
   - Use strong hash function (bcrypt, Argon2, PBKDF2)
 - Confirm VHL scope authorizes requested documents
 
-#### 2:3.YY5.5.5 Trust Network Validation
+#### 2:3.YY5.5.6 Trust Network Validation
 Both {{ linkvhlr }} and {{ linkvhls }} SHALL:
 - Authenticate each other's participation in trust network
 - Obtain public keys from trust list (ITI-YY2 Retrieve Trust List with DID)
 - Validate certificates are not expired or revoked
-- Use `keyid` (HTTP signatures) or the client key (OAuth JWT) to identify the client's key
+- Use `keyid` (HTTP signatures), the client key (OAuth JWT), or the holder DID (Verifiable Credentials) to identify the client's key
 - Reject requests from participants not in trust list (401 Unauthorized)
 
-#### 2:3.YY5.5.6 Audit Logging
+#### 2:3.YY5.5.7 Audit Logging
 Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - All document access requests (successful and failed)
-- Authentication method used (HTTP signatures or OAuth)
-- Receiver identity (from keyid or OAuth token)
+- Authentication method used (HTTP signatures, OAuth, or Verifiable Credentials)
+- Receiver identity (from keyid, OAuth token, or VC holder DID)
 - VHL folder ID
 - Authorization decisions (approved/denied)
 - Timestamps
 - IP addresses
 - User identifiers (from recipient parameter)
 
-#### 2:3.YY5.5.7 Rate Limiting
+#### 2:3.YY5.5.8 Rate Limiting
 {{ linkvhls }} SHOULD implement rate limiting:
-- Per receiver (identified by keyid or OAuth client_id)
+- Per receiver (identified by keyid, OAuth client_id, or VC holder DID)
 - Per folder ID (to prevent brute force on VHL tokens)
 - Per IP address
 - Return 429 Too Many Requests when limits exceeded
 
-#### 2:3.YY5.5.8 Passcode Security
+#### 2:3.YY5.5.9 Passcode Security
 When VHL is passcode-protected (P flag):
 - Passcode MUST be validated using constant-time comparison
 - Failed passcode attempts SHOULD be rate limited

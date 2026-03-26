@@ -34,7 +34,7 @@ Usage: #definition
   * documentation = "VHL Sharer provides access to document manifests (List resources) and references (DocumentReference resources) authorized by Verified Health Links (VHLs). Authorization is based on validated VHL tokens containing manifest URLs with folder IDs."
   
   * security
-    * description = "Implementations SHALL support ATNA Authenticate Node [ITI-19] for mutual TLS authentication. VHL-based authorization is required (folder ID in _id parameter), optionally supplemented by OAuth 2.0 or other token-based authentication."
+    * description = "Implementations SHALL support ATNA Authenticate Node [ITI-19] for mutual TLS authentication. VHL-based authorization is required (folder ID in _id parameter), optionally supplemented by HTTP Message Signatures (RFC 9421), OAuth 2.0 with SSRAA, or Verifiable Credentials (W3C VC Data Model 2.0)."
   
   // List Resource
   * resource[0]
@@ -112,7 +112,7 @@ Usage: #definition
   * documentation = "VHL Receiver retrieves document manifests (List resources) and optionally DocumentReference resources from VHL Sharers using VHL-authorized manifest URLs. The client extracts the manifest URL from the VHL payload (obtained via ITI-YY4 Provide VHL) and performs a FHIR search with mandatory parameters."
   
   * security
-    * description = "Implementations SHALL support ATNA Authenticate Node [ITI-19] for mutual TLS authentication. The VHL Receiver SHALL provide the VHL authorization token (folder ID) and MAY provide additional authentication tokens (OAuth 2.0, JWS signatures)."
+    * description = "Implementations SHALL support ATNA Authenticate Node [ITI-19] for mutual TLS authentication. The VHL Receiver SHALL provide the VHL authorization token (folder ID) and MAY provide additional authentication via HTTP Message Signatures (RFC 9421), OAuth 2.0 with SSRAA, or Verifiable Credentials (W3C VC Data Model 2.0)."
   
   // List Resource
   * resource[0]

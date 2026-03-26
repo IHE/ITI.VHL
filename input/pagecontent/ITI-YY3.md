@@ -131,8 +131,8 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
    - `flag`: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term, 'U' for direct file access)
    - `label`: (optional) description string (max 80 characters)
    - `v`: version number (defaults to 1)
-   - `extension`: (conditional) object containing implementation-defined extensions. Required when the {{ linkvhls }} supports the OAuth with SSRAA Option, in which case it SHALL include:
-     - `fhirBaseUrl`: the FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`). This enables the {{ linkvhlr }} to perform UDAP Discovery (per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG) and Dynamic Client Registration (per Section 3) with the {{ linkvhls }} before making an authenticated manifest request via ITI-YY5.
+   - `extension`: (conditional) object containing implementation-defined extensions. Required when the {{ linkvhls }} supports the OAuth with SSRAA Option or the Verifiable Credentials Option, in which case it SHALL include:
+     - `fhirBaseUrl`: the FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`). For the OAuth with SSRAA Option, this enables the {{ linkvhlr }} to perform UDAP Discovery (per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG) and Dynamic Client Registration (per Section 3) with the {{ linkvhls }} before making an authenticated manifest request via ITI-YY5. For the Verifiable Credentials Option, this URL is used to determine the VP proof `domain` value.
 
 5. The JSON Payload is then:
     - Minified
@@ -281,10 +281,11 @@ The VHL Holder MAY:
 - The `_include` parameter SHOULD only be included if the VHL Sharer supports the Include DocumentReference Option
 - This ensures VHL Receivers can successfully retrieve the manifest using ITI-YY5
 
-#### 2:3.YY3.5.5 OAuth with SSRAA Option — FHIR Base URL Extension
-When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `extension.fhirBaseUrl` in the SHL payload:
+#### 2:3.YY3.5.5 OAuth with SSRAA Option and Verifiable Credentials Option — FHIR Base URL Extension
+When the {{ linkvhls }} supports the OAuth with SSRAA Option or the Verifiable Credentials Option, it SHALL include `extension.fhirBaseUrl` in the SHL payload:
 - The `fhirBaseUrl` value MUST be the canonical FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`)
-- This URL is used by the {{ linkvhlr }} to perform UDAP Discovery (`{fhirBaseUrl}/.well-known/udap`) and, if not already registered, Dynamic Client Registration with the {{ linkvhls }} before initiating ITI-YY5
+- For OAuth with SSRAA: This URL is used by the {{ linkvhlr }} to perform UDAP Discovery (`{fhirBaseUrl}/.well-known/udap`) and, if not already registered, Dynamic Client Registration with the {{ linkvhls }} before initiating ITI-YY5
+- For Verifiable Credentials: This URL is used by the {{ linkvhlr }} to determine the VP proof `domain` value for request binding in ITI-YY5
 - The `fhirBaseUrl` value is typically derivable from the `url` field (manifest URL) by stripping the path, but including it explicitly avoids ambiguity when the authorization server is hosted separately
-- The {{ linkvhlr }} SHOULD cache its UDAP registration per `fhirBaseUrl` to avoid re-registering on every VHL scan
-- The `fhirBaseUrl` field MUST NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily
+- The {{ linkvhlr }} SHOULD cache its UDAP registration per `fhirBaseUrl` to avoid re-registering on every VHL scan (OAuth with SSRAA Option)
+- The `fhirBaseUrl` field MUST NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option or the Verifiable Credentials Option, to avoid misleading {{ linkvhlr }}s into attempting discovery unnecessarily

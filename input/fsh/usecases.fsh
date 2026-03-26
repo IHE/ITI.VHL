@@ -183,4 +183,8 @@ TEFCA's trust model aligns with the VHL profile's trust network architecture. In
 **OAuth with SSRAA Option:**
 
 Organizations already using OAuth with UDAP (via the [HL7 SSRAA IG](http://hl7.org/fhir/us/udap-security/)) can leverage VHL for health record sharing without additional authentication infrastructure. TEFCA participants, for example, can use their existing TEFCA-issued X.509 certificates and UDAP Dynamic Client Registration to authenticate VHL exchanges, enabling seamless interoperability within established national-scale health information networks.
+
+**Verifiable Credentials Option:**
+
+Organizations participating in trust networks that use Decentralized Identifiers (DIDs) and W3C Verifiable Credentials can leverage the Verifiable Credentials Option for decentralized authentication. This is particularly relevant for cross-network federation scenarios where participants from different trust networks need to exchange health records without requiring a centralized authorization server.
 """

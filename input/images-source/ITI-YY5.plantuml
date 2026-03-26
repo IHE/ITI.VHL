@@ -7,10 +7,14 @@ participant "VHL Sharer" as Sharer
 
 Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]
 note right
-  POST signed request with:
+  POST authenticated request with:
   - VHL token
   - Search parameters
   - Passcode (if required)
+  Authentication options:
+  - HTTP Message Signatures (RFC 9421)
+  - OAuth with SSRAA
+  - Verifiable Credentials (W3C VC)
   Over ATNA secure channel (optional)
 end note
 

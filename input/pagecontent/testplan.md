@@ -33,15 +33,16 @@ The VHL Receiver must be tested for its ability to correctly perform the full VH
 
 #### Manifest Retrieval
 
-The VHL Receiver and VHL Sharer must be tested for the Retrieve Manifest transaction [ITI-YY5]. This includes the VHL Receiver's ability to construct and send a valid FHIR search request on the List resource with appropriate search parameters (_id, code, status, patient.identifier, _include) and SHL parameters (recipient, passcode). The VHL Sharer must be tested for returning a conformant searchset Bundle. Authentication via HTTP Message Signatures (RFC 9421) is required and must be validated.
+The VHL Receiver and VHL Sharer must be tested for the Retrieve Manifest transaction [ITI-YY5]. This includes the VHL Receiver's ability to construct and send a valid FHIR search request on the List resource with appropriate search parameters (_id, code, status, patient.identifier, _include) and SHL parameters (recipient, passcode). The VHL Sharer must be tested for returning a conformant searchset Bundle. Authentication via one of the supported options (HTTP Message Signatures, OAuth with SSRAA, or Verifiable Credentials) must be validated.
 
 #### Options Testing
 
 Testing of actor options includes:
-- **Sign Manifest Request Option** - VHL Receiver digitally signs manifest requests; VHL Sharer verifies the signature for mutual authentication and non-repudiation.
+- **Sign Manifest Request Option** - VHL Receiver digitally signs manifest requests using HTTP Message Signatures (RFC 9421); VHL Sharer verifies the signature for mutual authentication and non-repudiation.
 - **Include DocumentReference Option** - VHL Receiver requests and VHL Sharer returns DocumentReference resources in the manifest response using `_include=List:item`.
 - **Verify Document Signature Option** - VHL Receiver verifies digital signatures on retrieved documents using previously obtained PKI material.
-- **OAuth with FAST Option** - VHL Receiver and VHL Sharer use OAuth 2.0 access tokens as an alternative authentication mechanism for ITI-YY5.
+- **OAuth with SSRAA Option** - VHL Receiver and VHL Sharer use OAuth 2.0 access tokens as an alternative authentication mechanism for ITI-YY5.
+- **Verifiable Credentials Option** - VHL Receiver and VHL Sharer use W3C Verifiable Credentials with Verifiable Presentations for decentralized, attribute-rich authentication with cryptographic request binding for ITI-YY5.
 
 
 

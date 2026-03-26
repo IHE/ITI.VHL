@@ -104,6 +104,50 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Receiver Expected Actions
     When subsequent Retrieve Manifest requests are needed within that lifetime
     Then the VHL Receiver MAY reuse the access token until its "exp" claim is reached
 
+  # ─── Authentication: Verifiable Credentials (Option C) ─────────────────────
+
+  @initiator-actions @MAY
+  Scenario: VHL Receiver may authenticate using Verifiable Credentials per W3C VC Data Model 2.0
+    Given the VHL Receiver supports the Verifiable Credentials Option
+    When the request is assembled
+    Then the request MAY include Content-Digest and VP headers per W3C VC Data Model 2.0
+
+  @initiator-actions @SHALL
+  Scenario: VP challenge is derived from the Content-Digest when Verifiable Credentials are used
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP proof is constructed
+    Then the "challenge" SHALL be the base64-encoded SHA-256 hash value from the Content-Digest header
+
+  @initiator-actions @SHALL
+  Scenario: VP domain matches the VHL Sharer's authority when Verifiable Credentials are used
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP proof is constructed
+    Then the "domain" SHALL equal the VHL Sharer's authority from the manifest URL
+
+  @initiator-actions @SHALL
+  Scenario: VC is issued by a Trust Anchor or recognized issuer in the trust network
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP verifiableCredential is inspected
+    Then the VC issuer SHALL be a Trust Anchor or recognized issuer obtained via ITI-YY2
+
+  @initiator-actions @SHALL
+  Scenario: VP proof is signed with the receiver's private key corresponding to its DID
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP proof is constructed
+    Then the VP SHALL be signed using the receiver's private key corresponding to its DID in the trust list
+
+  @initiator-actions @SHALL
+  Scenario: VP proof created timestamp is set to the current time when Verifiable Credentials are used
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP proof "created" field is set
+    Then the value SHALL be the current ISO 8601 datetime at time of signing
+
+  @initiator-actions @MAY
+  Scenario: VHL Receiver may cache Verifiable Credentials for reuse until expiration
+    Given the VHL Receiver has obtained a VHLParticipantCredential with a validity period
+    When subsequent Retrieve Manifest requests are needed within that period
+    Then the VHL Receiver MAY reuse the VC until its "validUntil" datetime is reached
+
   # ─── §2:3.YY5.5.5 Trust Network Validation ────────────────────────────────
 
   @security @SHALL

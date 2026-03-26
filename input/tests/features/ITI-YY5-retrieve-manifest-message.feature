@@ -1,8 +1,9 @@
 Feature: ITI-YY5 Retrieve Manifest – Message Semantics
   Defines the format of the ITI-YY5 request and response messages.
   The request is an HTTP POST to /List/_search with FHIR search parameters
-  and SHL parameters. Authentication is via HTTP Message Signatures (RFC 9421)
-  or OAuth with SSRAA Option. The response is a FHIR searchset Bundle.
+  and SHL parameters. Authentication is via HTTP Message Signatures (RFC 9421),
+  OAuth with SSRAA Option, or Verifiable Credentials (W3C VC Data Model 2.0).
+  All three are equal alternatives; none is mandatory. The response is a FHIR searchset Bundle.
   Defined once here for both the VHL Receiver (initiator) and VHL Sharer (responder).
 
   Background:
@@ -127,6 +128,40 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
     Given the VHL Receiver is authenticating using OAuth with SSRAA Option
     When the authorization header is set
     Then the request SHALL include "Authorization: Bearer <access-token>"
+
+  # ─── Request: Verifiable Credentials Headers (when Option C is used) ────────
+
+  @message-semantics @SHALL
+  Scenario: Request includes Content-Digest header with SHA-256 hash of the body when Verifiable Credentials are used
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the Content-Digest header is computed
+    Then it SHALL be present in the format "Content-Digest: sha-256=<base64-encoded-hash>"
+    And the hash SHALL be the SHA-256 digest of the raw request body bytes
+
+  @message-semantics @SHALL
+  Scenario: Request includes a VP header with a base64url-encoded Verifiable Presentation when Verifiable Credentials are used
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP header is constructed
+    Then the request SHALL include a "VP" header containing a base64url-encoded Verifiable Presentation
+
+  @message-semantics @SHALL
+  Scenario: VP proof challenge matches the Content-Digest hash value
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP proof is constructed
+    Then the "challenge" field SHALL equal the base64-encoded SHA-256 hash value from the Content-Digest header
+
+  @message-semantics @SHALL
+  Scenario: VP proof domain matches the VHL Sharer authority
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP proof is constructed
+    Then the "domain" field SHALL equal the VHL Sharer's authority (hostname)
+
+  @message-semantics @SHALL
+  Scenario: VP contains a VHLParticipantCredential issued by a trusted issuer
+    Given the VHL Receiver is authenticating using Verifiable Credentials
+    When the VP verifiableCredential array is inspected
+    Then it SHALL contain a VC with type including "VHLParticipantCredential"
+    And the VC issuer SHALL be a Trust Anchor or recognized issuer in the trust network
 
   # ─── Response: Success Structure ─────────────────────────────────────────────
 

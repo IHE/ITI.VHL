@@ -93,6 +93,68 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the "jti" claim is evaluated
     Then the authorization server SHOULD check the "jti" claim to prevent replay attacks
 
+  # ─── Verifiable Credentials Verification (Option C) ───────────────────────
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer extracts and decodes the VP from the VP header when Verifiable Credentials are used
+    Given the request includes a "VP" header and the Verifiable Credentials Option is supported
+    When the VHL Sharer processes the authentication headers
+    Then the VHL Sharer SHALL base64url-decode the VP header and parse the Verifiable Presentation
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer verifies the VC issuer is in the trust list
+    Given the VP has been extracted
+    When the VC issuer is checked
+    Then the VHL Sharer SHALL verify the VC issuer is a Trust Anchor or recognized issuer in the trust list (ITI-YY2)
+    And SHALL return HTTP 401 Unauthorized if the issuer is not recognized
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer verifies the VC proof signature using the issuer's public key
+    Given the VC issuer has been validated
+    When the VC proof is verified
+    Then the VHL Sharer SHALL verify the VC proof signature using the issuer's public key from the trust list
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer verifies the VC is within its validity period
+    Given the VC has been extracted from the VP
+    When the VC validity period is checked
+    Then the VHL Sharer SHALL verify the current time is between "validFrom" and "validUntil"
+    And SHALL return HTTP 401 Unauthorized if the VC is expired or not yet valid
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer verifies the VP proof signature using the holder's public key
+    Given the VC credentialSubject.id matches the VP holder
+    When the VP proof is verified
+    Then the VHL Sharer SHALL verify the VP proof signature using the holder's public key from the trust list
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer verifies the VP challenge matches the Content-Digest
+    Given the VP proof has been extracted
+    When the challenge is validated
+    Then the VHL Sharer SHALL verify the VP proof "challenge" matches the Content-Digest header value
+    And SHALL return HTTP 401 Unauthorized if they do not match
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer verifies the VP domain matches the server authority
+    Given the VP proof has been extracted
+    When the domain is validated
+    Then the VHL Sharer SHALL verify the VP proof "domain" matches the server's authority
+    And SHALL return HTTP 401 Unauthorized if they do not match
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer enforces VP proof timestamp freshness when Verifiable Credentials are used
+    Given the VP proof "created" timestamp is more than the acceptable range in the past
+    When the timestamp is validated
+    Then the VHL Sharer SHALL reject the request as a potential replay
+    And the response SHALL be HTTP 401 Unauthorized
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer returns HTTP 401 for a request with an invalid Verifiable Presentation
+    Given the request carries a "VP" header that fails verification
+    When VP verification is performed
+    Then the VHL Sharer SHALL return HTTP 401 Unauthorized
+    And the response SHALL include a FHIR OperationOutcome with issue.code "security"
+
   # ─── §2:3.YY5.5.5 Trust Network Validation ────────────────────────────────
 
   @security @SHALL

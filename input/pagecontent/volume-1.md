@@ -243,9 +243,11 @@ Options that may be selected for each actor in this implementation guide are lis
 | ^              | Include DocumentReference            |
 | ^              | Verify Document Signature            |
 | ^              | OAuth with SSRAA                     |
+| ^              | Verifiable Credentials               |
 | {{ linkvhls }} | Include DocumentReference            |
 | ^              | Sign Manifest Request                |
 | ^              | OAuth with SSRAA                     |
+| ^              | Verifiable Credentials               |
 {: .grid}
 
 
@@ -293,6 +295,20 @@ The OAuth with SSRAA Option enables the {{ linkvhlr }} and {{ linkvhls }} to use
 **Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} must support this option for OAuth-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or other authentication mechanisms defined in ITI-YY5 SHALL be used instead.
 
 See ITI-YY5 Section 2:3.YY5.4.1.4 for detailed OAuth flow and examples.
+
+### XX.2.5 Verifiable Credentials Option
+
+The Verifiable Credentials Option enables the {{ linkvhlr }} and {{ linkvhls }} to use [W3C Verifiable Credentials Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/) for authentication during the ITI-YY5 Retrieve Manifest transaction, as an alternative to HTTP Message Signatures or OAuth with SSRAA. This option leverages the existing DID-based trust infrastructure (ITI-YY1, ITI-YY2) and the JsonWebSignature2020 proof suite already used in trust list proofs.
+
+This option provides:
+- Decentralized, attribute-rich authentication using W3C standards
+- Cryptographic request binding via Verifiable Presentations with challenge-response
+- Non-repudiation of manifest requests
+- Natural alignment with the VHL profile's DID and VC-based trust model
+
+**Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} must support this option for VC-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or OAuth with SSRAA SHALL be used instead.
+
+See ITI-YY5 Section 2:3.YY5.4.1.5 for detailed Verifiable Credentials flow and examples.
 
 <a name="required-groupings"> </a>
 
