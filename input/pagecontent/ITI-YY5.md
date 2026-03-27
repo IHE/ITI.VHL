@@ -16,9 +16,11 @@ This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL H
 
 **FHIR Search Transaction:** This transaction uses a standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists. The manifest URL from the VHL payload contains all necessary FHIR search parameters. No custom operation is required.
 
-**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)** or **OAuth with SSRAA** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
+**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)**, **OAuth with SSRAA**, or **Verifiable Credential (VC)** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request. Any one of the three mechanisms is sufficient; both parties need not support all three.
 
 **OAuth with SSRAA Option:** Implementations MAY support the **OAuth with SSRAA Option**, which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
+
+**Verifiable Credential Option:** Implementations MAY support the **Verifiable Credential Option**, in which the VHL Receiver self-issues a JWT-encoded VC (W3C VC Data Model 2.0, `application/vc+jwt` encoding) signed with its private key and presents it to the VHL Sharer as `Authorization: JWT-VC <token>`. The VHL Sharer verifies the VC against the receiver's DID registered in the trust network.
 
 **Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, it SHALL ignore the `_include` parameter, and the {{ linkvhlr }} SHALL retrieve each DocumentReference individually using separate read requests.
 
@@ -63,6 +65,12 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 - **SMART App Launch Backend Services**: [Backend Services](http://hl7.org/fhir/smart-app-launch/backend-services.html)
 - **HL7 Security for Scalable Registration, Authentication, and Authorization IG**: [SSRAA](http://hl7.org/fhir/us/udap-security/)
 - **ITI Internet User Authorization (IUA)**: [IUA Profile](https://profiles.ihe.net/ITI/IUA/)
+
+**Verifiable Credential Option (Optional):**
+- **W3C Verifiable Credentials Data Model 2.0**: [VC Data Model](https://www.w3.org/TR/vc-data-model-2.0/)
+- **W3C Decentralized Identifiers (DIDs) Core 1.0**: [DID Core](https://www.w3.org/TR/did-core/)
+- **RFC 7519**: JSON Web Token (JWT) - reused for `application/vc+jwt` encoding
+- **IANA Media Type `application/vc+jwt`**: JWT-encoded Verifiable Credential
 
 **SHL Specifications:**
 - **SHL Manifest Request**: [SHL Manifest Request](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-request)
@@ -313,7 +321,101 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 - Token lifetime SHOULD be limited (recommended: 1 hour maximum)
 - Authorization server MUST validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
 
-##### 2:3.YY5.4.1.5 Expected Actions - VHL Receiver
+##### 2:3.YY5.4.1.5 Authentication Option - Verifiable Credential Option
+
+Implementations that support the **Verifiable Credential Option** MAY use a self-issued JWT-encoded Verifiable Credential for authentication instead of HTTP Message Signatures or OAuth with SSRAA. The VHL Receiver acts as both issuer and subject of the VC, leveraging the DID it has registered in the trust network (via ITI-YY1).
+
+**Preconditions: Trust Network Enrollment**
+
+Before using this option, the {{ linkvhlr }} MUST have:
+- Registered its public key material and DID with the Trust Anchor (ITI-YY1 Submit PKI Material with DID)
+- Retrieved the {{ linkvhls }}'s DID or FHIR Base URL from the VHL payload (see ITI-YY3 Section 2:3.YY3.5.6 for the FHIR Base URL extension)
+
+The {{ linkvhls }} MUST have:
+- Retrieved the trust list from the Trust Anchor (ITI-YY2 Retrieve Trust List with DID) to obtain receiver DID-to-public-key mappings
+
+**VC JWT Structure**
+
+The VC is encoded as a compact JWT (`application/vc+jwt`) with the following structure:
+
+```
+Header:
+{
+  "alg": "ES256",
+  "typ": "JWT",
+  "kid": "<receiver-key-id>"
+}
+
+Payload:
+{
+  "iss": "did:web:vhl-receiver.example.org",
+  "sub": "did:web:vhl-receiver.example.org",
+  "aud": "https://vhl-sharer.example.org",
+  "iat": 1735689600,
+  "exp": 1735689900,
+  "jti": "urn:uuid:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "vc": {
+    "@context": [
+      "https://www.w3.org/ns/credentials/v2"
+    ],
+    "type": ["VerifiableCredential", "VHLReceiverIdentityCredential"],
+    "credentialSubject": {
+      "id": "did:web:vhl-receiver.example.org",
+      "type": "VHLReceiver"
+    }
+  }
+}
+```
+
+**JWT Field Requirements:**
+- `iss`: The receiver's DID as registered in the trust network (same as `sub` — self-issued)
+- `sub`: The receiver's DID (same as `iss`)
+- `aud`: The VHL Sharer's FHIR Base URL (from VHL payload extension, see ITI-YY3 Section 2:3.YY3.5.6) or DID
+- `iat`: Issued-at time (Unix epoch seconds)
+- `exp`: Expiry time — MUST be ≤5 minutes from `iat` (short-lived credential)
+- `jti`: Unique identifier for this VC (used to prevent replay attacks)
+- `vc.credentialSubject.id`: Receiver's DID (same as `iss`/`sub`)
+- Signature: signed with receiver's private key corresponding to the `kid` in the trust list
+
+**HTTP Request Example:**
+
+```http
+POST /List/_search HTTP/1.1
+Host: vhl-sharer.example.org
+Authorization: JWT-VC eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InJlY2VpdmVyLWtleS0xIn0.eyJpc3MiOiJkaWQ6d2ViOnZobC1yZWNlaXZlci5leGFtcGxlLm9yZyIsInN1YiI6ImRpZDp3ZWI6dmhsLXJlY2VpdmVyLmV4YW1wbGUub3JnIiwiYXVkIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIiwiaWF0IjoxNzM1Njg5NjAwLCJleHAiOjE3MzU2ODk5MDAsImp0aSI6InVybjp1dWlkOmExYjJjM2Q0LWU1ZjYtNzg5MC1hYmNkLWVmMTIzNDU2Nzg5MCIsInZjIjp7IkBjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy9ucy9jcmVkZW50aWFscy92MiJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiVkhMUmVjZWl2ZXJJZGVudGl0eUNyZWRlbnRpYWwiXSwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6d2ViOnZobC1yZWNlaXZlci5leGFtcGxlLm9yZyIsInR5cGUiOiJWSExSZWNlaXZlciJ9fX0.signature-here
+Content-Type: application/x-www-form-urlencoded
+Accept: application/fhir+json
+
+_id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.840.1.113883.2.4.6.3%7CPASSPORT123&_include=List%3Aitem&recipient=Dr.+Smith+Hospital&passcode=user-pin&embeddedLengthMax=10000
+```
+
+**VC Authentication Process:**
+
+1. {{ linkvhlr }} constructs the JWT header and payload with its DID as `iss`/`sub` and the VHL Sharer's base URL as `aud`
+2. {{ linkvhlr }} signs the JWT with its private key (ES256 or RS256) associated with the `kid` registered in the trust network
+3. {{ linkvhlr }} includes the JWT in the `Authorization: JWT-VC <token>` header of the manifest request
+4. {{ linkvhls }} extracts the JWT from the `Authorization` header
+5. {{ linkvhls }} decodes the JWT header to obtain `kid`, and the payload to obtain `iss` (receiver's DID)
+6. {{ linkvhls }} retrieves the receiver's public key from the trust list using the `iss` DID (ITI-YY2)
+7. {{ linkvhls }} verifies the JWT signature using the retrieved public key
+8. {{ linkvhls }} verifies `exp` is in the future, `aud` matches its own identity, and `jti` has not been seen before
+
+**VC Requirements:**
+
+- Algorithm: ES256 (ECDSA P-256 SHA-256) or RS256 (RSA 2048+ with PKCS#1 v1.5) — ES256 recommended
+- Token Lifetime: `exp` MUST be ≤5 minutes from `iat`
+- Token Reuse: VC MUST NOT be reused; a new VC SHALL be generated for each manifest request
+- The `jti` claim MUST be unique per VC and SHALL be checked by the {{ linkvhls }} to prevent replay attacks
+
+**Security Considerations for Verifiable Credential:**
+
+- JWTs MUST be signed with the receiver's private key registered in the trust network
+- `exp` MUST be short-lived (≤5 minutes) to minimize replay window
+- `jti` replay cache SHOULD cover at least the maximum `exp` window
+- The `aud` claim MUST match the VHL Sharer's base URL or DID; mismatches SHALL be rejected (401 Unauthorized)
+- Private keys MUST be stored securely (Hardware Security Module recommended)
+
+##### 2:3.YY5.4.1.6 Expected Actions - VHL Receiver
 
 The {{ linkvhlr }} SHALL:
 
@@ -330,7 +432,7 @@ The {{ linkvhlr }} SHALL:
      - embeddedLengthMax (optional) - size hint for embedded content
    - Encode parameters as `application/x-www-form-urlencoded`
 
-3. **Authenticate Request** (use one of the following options; neither is required):
+3. **Authenticate Request** (use one of the following options; at least one SHALL be used):
    - **Option A - HTTP Message Signatures** (if supported):
      - Compute Content-Digest (SHA-256 of request body)
      - Construct signature base from HTTP components
@@ -340,6 +442,12 @@ The {{ linkvhlr }} SHALL:
      - Obtain access token using JWT client assertion
      - Include token in Authorization header
      - Reuse token for subsequent requests until expiration
+   - **Option C - Verifiable Credential** (if supported):
+     - Construct JWT payload with `iss`/`sub` = receiver's DID, `aud` = VHL Sharer base URL, `exp` ≤5 minutes from `iat`, unique `jti`
+     - Include `vc` claim with `VHLReceiverIdentityCredential` type
+     - Sign JWT with receiver's private key (ES256 recommended)
+     - Include JWT in `Authorization: JWT-VC <token>` header
+     - Generate a new VC for each request (MUST NOT reuse)
 
 4. **Send Request**:
    - POST to `/List/_search` endpoint at VHL Sharer's base URL
@@ -359,16 +467,17 @@ The {{ linkvhlr }} SHALL:
 The {{ linkvhlr }} MAY:
 - Cache OAuth access tokens for reuse (OAuth with SSRAA Option)
 - Implement retry logic for transient failures
-- Support both HTTP Message Signatures and OAuth with SSRAA Option
+- Support more than one of the three authentication options
+- Pre-generate a VC JWT immediately before each request (Verifiable Credential Option)
 
-##### 2:3.YY5.4.1.6 Expected Actions - VHL Sharer
+##### 2:3.YY5.4.1.7 Expected Actions - VHL Sharer
 
 Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 
 1. **Parse Request**:
    - Extract FHIR search parameters from request body
    - Extract SHL parameters (recipient, passcode, embeddedLengthMax)
-   - Identify authentication method used (HTTP signatures or OAuth token)
+   - Identify authentication method used (HTTP Message Signatures, OAuth token, or Verifiable Credential JWT)
 
 2. **Authenticate Receiver**:
    - **HTTP Message Signatures**:
@@ -385,6 +494,15 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Verify token expiration
      - Verify token scope authorizes access to the VHL
      - Reject if token invalid or expired (401 Unauthorized)
+   - **Verifiable Credential Option**:
+     - Extract JWT from `Authorization: JWT-VC` header
+     - Decode JWT header to obtain `kid`; decode payload to obtain `iss` (receiver's DID)
+     - Retrieve receiver's public key from trust list using the `iss` DID (ITI-YY2)
+     - Verify JWT signature using the retrieved public key
+     - Verify `exp` is in the future (not expired)
+     - Verify `aud` matches this VHL Sharer's FHIR Base URL or DID
+     - Verify `jti` has not been previously used (replay prevention)
+     - Reject if any check fails (401 Unauthorized)
 
 3. **Authorize Request**:
    - Validate folder ID (_id parameter) corresponds to valid VHL
@@ -661,7 +779,18 @@ All implementations SHALL support HTTP Message Signatures per RFC 9421:
 - Timestamp validation MUST enforce freshness (±2 minutes recommended)
 - Replay attacks prevented by timestamp validation
 
-#### 2:3.YY5.5.3 OAuth with SSRAA Option 
+#### 2:3.YY5.5.3 Verifiable Credential Option
+Implementations that support the Verifiable Credential Option SHALL:
+- Use ES256 (ECDSA P-256 SHA-256) or RS256 (RSA 2048+) for JWT signing; ES256 is recommended
+- Set `exp` to ≤5 minutes from `iat` (short-lived credential to minimize replay window)
+- Include a unique `jti` claim in every VC JWT to prevent replay attacks
+- Store private keys securely (Hardware Security Module recommended)
+- Resolve the receiver's public key from the trust list using the `iss` DID (ITI-YY2) before verifying
+- Maintain a `jti` replay cache covering at least the maximum `exp` window
+- Reject VC JWTs where `aud` does not match the VHL Sharer's FHIR Base URL or DID (401 Unauthorized)
+- Never reuse a VC JWT; a new JWT SHALL be generated for each manifest request
+
+#### 2:3.YY5.5.4 OAuth with SSRAA Option
 Implementations that support OAuth with SSRAA Option SHALL:
 - Use OAuth 2.0 Backend Services (client_credentials grant)
 - Use JWT client assertions (private_key_jwt) for client authentication
@@ -671,7 +800,7 @@ Implementations that support OAuth with SSRAA Option SHALL:
 - Check JWT `jti` claim to prevent replay attacks
 - Obtain receiver's public key from trust list for JWT signature validation
 
-#### 2:3.YY5.5.4 VHL Authorization
+#### 2:3.YY5.5.5 VHL Authorization
 {{ linkvhls }} MUST validate VHL before returning documents:
 - Verify folder ID (_id parameter) corresponds to valid VHL
 - Validate VHL signature (HCERT/CWT COSE signature from ITI-YY3)
@@ -682,33 +811,33 @@ Implementations that support OAuth with SSRAA Option SHALL:
   - Use strong hash function (bcrypt, Argon2, PBKDF2)
 - Confirm VHL scope authorizes requested documents
 
-#### 2:3.YY5.5.5 Trust Network Validation
+#### 2:3.YY5.5.6 Trust Network Validation
 Both {{ linkvhlr }} and {{ linkvhls }} SHALL:
 - Authenticate each other's participation in trust network
 - Obtain public keys from trust list (ITI-YY2 Retrieve Trust List with DID)
 - Validate certificates are not expired or revoked
-- Use `keyid` (HTTP signatures) or the client key (OAuth JWT) to identify the client's key
+- Use `keyid` (HTTP Message Signatures), the client key (OAuth JWT), or the `iss` DID (Verifiable Credential) to identify the client's key
 - Reject requests from participants not in trust list (401 Unauthorized)
 
-#### 2:3.YY5.5.6 Audit Logging
+#### 2:3.YY5.5.7 Audit Logging
 Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - All document access requests (successful and failed)
-- Authentication method used (HTTP signatures or OAuth)
-- Receiver identity (from keyid or OAuth token)
+- Authentication method used (HTTP Message Signatures, OAuth with SSRAA, or Verifiable Credential)
+- Receiver identity (from `keyid`, OAuth token `sub`, or VC `iss` DID)
 - VHL folder ID
 - Authorization decisions (approved/denied)
 - Timestamps
 - IP addresses
 - User identifiers (from recipient parameter)
 
-#### 2:3.YY5.5.7 Rate Limiting
+#### 2:3.YY5.5.8 Rate Limiting
 {{ linkvhls }} SHOULD implement rate limiting:
-- Per receiver (identified by keyid or OAuth client_id)
+- Per receiver (identified by `keyid`, OAuth `client_id`, or VC `iss` DID)
 - Per folder ID (to prevent brute force on VHL tokens)
 - Per IP address
 - Return 429 Too Many Requests when limits exceeded
 
-#### 2:3.YY5.5.8 Passcode Security
+#### 2:3.YY5.5.9 Passcode Security
 When VHL is passcode-protected (P flag):
 - Passcode MUST be validated using constant-time comparison
 - Failed passcode attempts SHOULD be rate limited

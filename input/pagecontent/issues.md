@@ -16,11 +16,13 @@
 
 - ToDo_004: Some of the language has the QR code as synonymous with the VHL.  Should be careful in Vol 1 that QR is only an example of a type of a VHL that is used for low-bandwidth/contactless/access.  May be other access mechanisms - bluetooth or NFC modalities are used in the future for the providing of a VHL by a VHL Holder to a VHL Receiver.   
 
-- ToDo_006: ITI-YY5 Receiver Authentication for Sharer using Embedded JWS/VC as an option
 
 - ToDo_007: ITI-YY5 Retrieve Manifest Message Semantics alignment with SHL — The current message semantics in ITI-YY5 (Section 2:3.YY5.4.1.2) may diverge from the SMART Health Links retrieve manifest specification. Liaise with the SHL team to identify gaps and request updates to the [SHL Manifest logical model](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-file)
 
 ### Closed Issues
+
+- ToDo_006: ITI-YY5 Receiver Authentication for Sharer using Embedded JWS/VC as an option
+  - **Resolution:** Added the Verifiable Credential Option to ITI-YY5 (Section 2:3.YY5.4.1.5) and volume-1.md (Section XX.2.5). The VHL Receiver self-issues a JWT-encoded VC (`application/vc+jwt`) and presents it to the VHL Sharer via `Authorization: JWT-VC <token>`. ITI-YY3 updated to add Section 2:3.YY3.5.6 explaining that the `fhirBaseUrl` extension also serves the VC `aud` claim.
 
 - ToDo_002: Can we use the same transaction to retrieve a single doc VHL as well as retrieve the docs in a folder VHL?
   - **Resolution:** The specification defines a _include option in the ITI-YY5 transaction that supports both single document and folder-based VHL retrieval using the same transaction.

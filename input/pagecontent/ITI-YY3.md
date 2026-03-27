@@ -288,3 +288,11 @@ When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `
 - The `fhirBaseUrl` value is typically derivable from the `url` field (manifest URL) by stripping the path, but including it explicitly avoids ambiguity when the authorization server is hosted separately
 - The {{ linkvhlr }} SHOULD cache its UDAP registration per `fhirBaseUrl` to avoid re-registering on every VHL scan
 - The `fhirBaseUrl` field MUST NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily
+
+#### 2:3.YY3.5.6 Verifiable Credential Option — FHIR Base URL Extension
+When the {{ linkvhls }} supports the Verifiable Credential Option, it SHALL include `extension.fhirBaseUrl` in the SHL payload (the same `fhirBaseUrl` extension used by the OAuth with SSRAA Option):
+- The `fhirBaseUrl` value MUST be the canonical FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`)
+- This value is used by the {{ linkvhlr }} as the `aud` claim in the VC JWT, scoping the credential to this specific {{ linkvhls }}
+- This value is also used by the {{ linkvhls }} to validate that the `aud` claim in incoming VC JWTs matches its own identity
+- The `fhirBaseUrl` value is typically derivable from the `url` field (manifest URL) by stripping the path, but including it explicitly avoids ambiguity
+- If both the OAuth with SSRAA Option and the Verifiable Credential Option are supported, a single `fhirBaseUrl` value serves both purposes
