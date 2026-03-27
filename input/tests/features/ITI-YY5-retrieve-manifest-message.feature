@@ -1,9 +1,10 @@
 Feature: ITI-YY5 Retrieve Manifest – Message Semantics
   Defines the format of the ITI-YY5 request and response messages.
   The request is an HTTP POST to /List/_search with FHIR search parameters
-  and SHL parameters. Authentication is via HTTP Message Signatures (RFC 9421)
-  or OAuth with SSRAA Option. The response is a FHIR searchset Bundle.
-  Defined once here for both the VHL Receiver (initiator) and VHL Sharer (responder).
+  and SHL parameters. Authentication is via one of: HTTP Message Signatures (RFC 9421),
+  OAuth with SSRAA Option, or Verifiable Credential Option. The response is a FHIR
+  searchset Bundle. Defined once here for both the VHL Receiver (initiator) and
+  VHL Sharer (responder).
 
   Background:
     Given a Retrieve Manifest exchange between a VHL Receiver and a VHL Sharer
@@ -127,6 +128,70 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
     Given the VHL Receiver is authenticating using OAuth with SSRAA Option
     When the authorization header is set
     Then the request SHALL include "Authorization: Bearer <access-token>"
+
+  # ─── Request: Verifiable Credential Option Headers (when Option C is used) ──
+
+  @message-semantics @SHALL
+  Scenario: Request includes Authorization JWT-VC header when Verifiable Credential Option is used
+    Given the VHL Receiver is authenticating using the Verifiable Credential Option
+    When the authorization header is set
+    Then the request SHALL include "Authorization: JWT-VC <vc-jwt>"
+
+  @message-semantics @SHALL
+  Scenario: VC JWT header specifies alg and kid
+    Given the VHL Receiver is constructing a VC JWT for the Verifiable Credential Option
+    When the JWT header is assembled
+    Then the header SHALL include "alg" set to "ES256" or "RS256"
+    And the header SHALL include "kid" identifying the receiver's key in the trust list
+
+  @message-semantics @SHALL
+  Scenario: VC JWT payload includes iss equal to the receiver's DID
+    Given the VHL Receiver is constructing a VC JWT
+    When the payload is assembled
+    Then the "iss" claim SHALL be the receiver's DID as registered in the trust network
+
+  @message-semantics @SHALL
+  Scenario: VC JWT payload includes sub equal to iss (self-issued)
+    Given the VHL Receiver is constructing a VC JWT
+    When the payload is assembled
+    Then the "sub" claim SHALL equal the "iss" claim (self-issued credential)
+
+  @message-semantics @SHALL
+  Scenario: VC JWT payload includes aud set to the VHL Sharer's FHIR base URL
+    Given the SHL payload contains "extension.fhirBaseUrl" for the VHL Sharer
+    When the VC JWT payload is assembled
+    Then the "aud" claim SHALL be the VHL Sharer's FHIR base URL
+
+  @message-semantics @SHALL
+  Scenario: VC JWT exp is no more than five minutes from iat
+    Given the VHL Receiver is constructing a VC JWT
+    When the expiry claims are set
+    Then "exp" SHALL be set to at most 5 minutes after "iat"
+
+  @message-semantics @SHALL
+  Scenario: VC JWT includes a unique jti claim
+    Given the VHL Receiver is constructing a VC JWT
+    When the "jti" claim is set
+    Then the value SHALL be a unique identifier not reused across requests
+
+  @message-semantics @SHALL
+  Scenario: VC JWT payload includes the vc claim with VHLReceiverIdentityCredential type
+    Given the VHL Receiver is constructing a VC JWT
+    When the "vc" claim is assembled
+    Then it SHALL include "@context" with "https://www.w3.org/ns/credentials/v2"
+    And the "type" array SHALL include "VerifiableCredential" and "VHLReceiverIdentityCredential"
+    And "credentialSubject.id" SHALL equal the receiver's DID
+
+  @message-semantics @SHALL
+  Scenario Outline: VC JWT signing algorithm is one of the approved algorithms
+    Given the VHL Receiver is authenticating using the Verifiable Credential Option
+    When the VC JWT is signed with "<algorithm>"
+    Then the algorithm SHALL be accepted as valid for the Verifiable Credential Option
+
+    Examples:
+      | algorithm |
+      | ES256     |
+      | RS256     |
 
   # ─── Response: Success Structure ─────────────────────────────────────────────
 
