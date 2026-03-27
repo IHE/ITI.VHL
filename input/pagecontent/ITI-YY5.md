@@ -149,7 +149,7 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 1. **Content-Digest Header:**
    - SHA-256 hash of the request body
    - Format: `sha-256=<base64-encoded-hash>`
-   - MUST be included for POST requests with body
+   - SHALL be included for POST requests with body
 
 2. **Signature-Input Header:**
    - Metadata about the signature
@@ -209,11 +209,11 @@ The following signature algorithms SHALL be supported:
 
 **Security Considerations for HTTP Signatures:**
 
-- Private keys MUST be stored securely (Hardware Security Module recommended)
-- Public keys MUST be obtained from trust list (ITI-YY2)
-- `keyid` MUST uniquely identify receiver's public key in trust list
-- Signatures MUST include timestamp (`created`) to prevent replay attacks
-- Signature verification MUST enforce timestamp freshness (±2 minutes recommended)
+- Private keys SHALL be stored securely (Hardware Security Module recommended)
+- Public keys SHALL be obtained from trust list (ITI-YY2)
+- `keyid` SHALL uniquely identify receiver's public key in trust list
+- Signatures SHALL include timestamp (`created`) to prevent replay attacks
+- Signature verification SHALL enforce timestamp freshness (±2 minutes recommended)
 
 ##### 2:3.YY5.4.1.4 Authentication option - OAuth with SSRAA Option
 
@@ -221,7 +221,7 @@ Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 a
 
 **Preconditions: SSRAA Discovery and Registration**
 
-Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} MUST complete SSRAA Discovery and Registration. These steps MUST take place at least once per {{ linkvhlr }} and {{ linkvhls }} pair. They MAY take place in advance or just in time.
+Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} SHALL complete SSRAA Discovery and Registration. These steps SHALL take place at least once per {{ linkvhlr }} and {{ linkvhls }} pair. They MAY take place in advance or just in time.
 
 **Discovery (SSRAA Section 2):** Given the FHIR Base URL of the {{ linkvhls }} (included in the VHL payload), the {{ linkvhlr }} performs UDAP Discovery per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG. The {{ linkvhlr }} validates that the {{ linkvhls }} supports UDAP and determines the {{ linkvhls }}'s UDAP capabilities. If the {{ linkvhlr }} accepts the {{ linkvhls }}'s capabilities, it proceeds to Registration.
 
@@ -306,12 +306,12 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 
 **Security Considerations for OAuth:**
 
-- JWT client assertions MUST be signed with the receiver's private key associated with the receiver's X.509 certificate within the trust community
+- JWT client assertions SHALL be signed with the receiver's private key associated with the receiver's X.509 certificate within the trust community
 - JWT `jti` claim SHOULD be checked to prevent replay attacks
-- Access tokens MUST include appropriate FHIR scopes
-- Access tokens MUST be validated for signature, expiration, and scope
+- Access tokens SHALL include appropriate FHIR scopes
+- Access tokens SHALL be validated for signature, expiration, and scope
 - Token lifetime SHOULD be limited (recommended: 1 hour maximum)
-- Authorization server MUST validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
+- Authorization server SHALL validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
 
 ##### 2:3.YY5.4.1.5 Expected Actions - VHL Receiver
 
@@ -652,13 +652,13 @@ Secure transport is required for all communications in this transaction. Impleme
 
 #### 2:3.YY5.5.2 HTTP Message Signatures 
 All implementations SHALL support HTTP Message Signatures per RFC 9421:
-- Signature MUST include `@method`, `@path`, `@authority`, `content-type`, `content-digest`
-- Content-Digest MUST be SHA-256 or stronger
+- Signature SHALL include `@method`, `@path`, `@authority`, `content-type`, `content-digest`
+- Content-Digest SHALL be SHA-256 or stronger
 - Signature algorithm: ECDSA P-256 SHA-256 (recommended) or RSA 2048+ with PSS or PKCS#1 v1.5
-- Private keys MUST be stored securely (Hardware Security Module recommended)
-- Public keys MUST be obtained from trust network
-- `keyid` MUST uniquely identify receiver's public key in trust list
-- Timestamp validation MUST enforce freshness (±2 minutes recommended)
+- Private keys SHALL be stored securely (Hardware Security Module recommended)
+- Public keys SHALL be obtained from trust network
+- `keyid` SHALL uniquely identify receiver's public key in trust list
+- Timestamp validation SHALL enforce freshness (±2 minutes recommended)
 - Replay attacks prevented by timestamp validation
 
 #### 2:3.YY5.5.3 OAuth with SSRAA Option 
@@ -672,7 +672,7 @@ Implementations that support OAuth with SSRAA Option SHALL:
 - Obtain receiver's public key from trust list for JWT signature validation
 
 #### 2:3.YY5.5.4 VHL Authorization
-{{ linkvhls }} MUST validate VHL before returning documents:
+{{ linkvhls }} SHALL validate VHL before returning documents:
 - Verify folder ID (_id parameter) corresponds to valid VHL
 - Validate VHL signature (HCERT/CWT COSE signature from ITI-YY3)
 - Check VHL expiration (CWT exp claim)
@@ -710,7 +710,7 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 
 #### 2:3.YY5.5.8 Passcode Security
 When VHL is passcode-protected (P flag):
-- Passcode MUST be validated using constant-time comparison
+- Passcode SHALL be validated using constant-time comparison
 - Failed passcode attempts SHOULD be rate limited
 - Passcode SHOULD NOT be logged in audit trails
 - Consider lockout after repeated failed attempts

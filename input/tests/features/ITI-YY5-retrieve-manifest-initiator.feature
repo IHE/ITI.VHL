@@ -1,6 +1,6 @@
 Feature: ITI-YY5 Retrieve Manifest – VHL Receiver Expected Actions
   As a VHL Receiver (Initiator) retrieving the document manifest,
-  these scenarios verify the actions the VHL Receiver MUST take when constructing
+  these scenarios verify the actions the VHL Receiver SHALL take when constructing
   the authenticated request, handling OAuth (SSRAA Option), and processing the response.
   Message format is defined in ITI-YY5-retrieve-manifest-message.feature.
 

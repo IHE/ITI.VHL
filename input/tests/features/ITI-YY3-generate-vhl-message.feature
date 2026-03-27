@@ -68,7 +68,7 @@ Feature: ITI-YY3 Generate VHL – Message Semantics
     Then its cardinality SHALL be [0..1]
 
   @message-semantics @SHALL
-  Scenario: P flag must be present when a passcode parameter is included
+  Scenario: P flag SHALL be present when a passcode parameter is included
     Given the request includes a "passcode" parameter
     When the "flag" parameter is inspected
     Then "P" SHALL be present in the "flag" value

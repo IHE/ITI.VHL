@@ -85,11 +85,11 @@ Feature: ITI-YY2 Retrieve Trust List – Trust Anchor Expected Actions
 
   # ─── §2:3.YY2.5.1 Secure Retrieval ────────────────────────────────────────
 
-  @security @MUST
+  @security @SHALL
   Scenario: All Retrieve Trust List interactions occur over a secure connection
     Given a retrieval request is received
     When the Trust Anchor processes the request
-    Then the interaction MUST occur over a secure connection
+    Then the interaction SHALL occur over a secure connection
 
   @security @SHOULD
   Scenario: Trust Anchor authenticates requesting entities before serving trust material

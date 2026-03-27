@@ -55,7 +55,7 @@ This section defines the actors, transactions, and/or content modules in this pr
   </li>
 </ul>
 
-As a pre-condition to transactions ITI-YY4 and ITI-YY5, the {{ linkvhlr }} and {{ linkvhls }} must have established trust relationships enabling mutual authentication and VHL signature verification.
+As a pre-condition to transactions ITI-YY4 and ITI-YY5, the {{ linkvhlr }} and {{ linkvhls }} SHALL have established trust relationships enabling mutual authentication and VHL signature verification.
 
 This trust MAY be established through:
 - Implementation of the optional Submit PKI Material with DID [ITI-YY1] and Retrieve Trust List with DID [ITI-YY2] transactions, OR
@@ -130,7 +130,7 @@ This transaction is:
 
 **Alternative Implementations:**
 
-Actors that do not implement this transaction MUST establish trust relationships through jurisdiction-specific mechanisms that are out of scope for this profile.
+Actors that do not implement this transaction SHALL establish trust relationships through jurisdiction-specific mechanisms that are out of scope for this profile.
 
 For more details see the detailed [transaction description](ITI-YY1.html)
 
@@ -156,9 +156,9 @@ VHL Sharer and VHL Receiver actors SHALL implement this transaction when:
 
 **Alternative Implementations:**
 
-Actors that do not implement this transaction MUST retrieve trust material through jurisdiction-specific mechanisms that are out of scope for this profile. Such implementations:
+Actors that do not implement this transaction SHALL retrieve trust material through jurisdiction-specific mechanisms that are out of scope for this profile. Such implementations:
 - Cannot participate in IHE Connectathon testing for trust material retrieval
-- Must document their trust material retrieval mechanisms in their IHE Integration Statement
+- SHALL document their trust material retrieval mechanisms in their IHE Integration Statement
 - Are responsible for obtaining current PKI material for VHL signature verification
 
 For more details see the detailed [transaction description](ITI-YY2.html)
@@ -290,7 +290,7 @@ This option is captured in the following business requirement:
 The OAuth with SSRAA Option enables the {{ linkvhlr }} and {{ linkvhls }} to use OAuth 2.0 access tokens for authentication during the ITI-YY5 Retrieve Manifest transaction, as an alternative to HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA).
 
 
-**Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} must support this option for OAuth-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or other authentication mechanisms defined in ITI-YY5 SHALL be used instead.
+**Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} SHALL support this option for OAuth-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or other authentication mechanisms defined in ITI-YY5 SHALL be used instead.
 
 See ITI-YY5 Section 2:3.YY5.4.1.4 for detailed OAuth flow and examples.
 
@@ -382,8 +382,8 @@ Key security considerations include:
 
 ### XX.5.1 Trust Network Security
 
-- All participants ({{ linkvhlr }}, {{ linkvhls }}) must establish trust via the {{ linkta }} using ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions.
-- PKI material must be validated before use in signature verification or secure channel establishment.
+- All participants ({{ linkvhlr }}, {{ linkvhls }}) SHALL establish trust via the {{ linkta }} using ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions.
+- PKI material SHALL be validated before use in signature verification or secure channel establishment.
 - Certificates and keys should be regularly updated and revocation status checked.
 
 ### XX.5.2 Secure Channel Requirements
@@ -394,7 +394,7 @@ Key security considerations include:
 
 ### XX.5.3 VHL Integrity and Authorization
 
-- VHL signatures must be verified before trusting VHL content.
+- VHL signatures SHALL be verified before trusting VHL content.
 - VHL expiration timestamps should be enforced.
 - Passcodes (if used) should be communicated out-of-band and validated server-side.
 - VHL Sharers should implement rate limiting and account lockout for failed passcode attempts.

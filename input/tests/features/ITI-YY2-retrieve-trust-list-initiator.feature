@@ -1,6 +1,6 @@
 Feature: ITI-YY2 Retrieve Trust List – Initiator Expected Actions
   As a VHL Sharer or VHL Receiver (Initiator) retrieving the trust list,
-  these scenarios verify the actions the initiator MUST take when constructing
+  these scenarios verify the actions the initiator SHALL take when constructing
   requests, processing responses, caching key material, and handling errors.
   Message format is defined in ITI-YY2-retrieve-trust-list-message.feature.
 
@@ -18,11 +18,11 @@ Feature: ITI-YY2 Retrieve Trust List – Initiator Expected Actions
 
   # ─── Request Construction ────────────────────────────────────────────────────
 
-  @initiator-actions @MUST
+  @initiator-actions @SHALL
   Scenario: Requester sends the request over a secure connection
     Given the requester has constructed a valid Retrieve Trust List request
     When the requester sends the request
-    Then the connection MUST use a secure connection
+    Then the connection SHALL use a secure connection
     And the request SHALL NOT be sent over plain HTTP
 
   @initiator-actions @SHALL

@@ -2,7 +2,7 @@ Feature: Integration – Trust Establishment
   End-to-end scenarios testing multi-actor coordination across ITI-YY1
   (Submit PKI Material) and ITI-YY2 (Retrieve Trust List).
   These scenarios test state sequencing and cross-actor dependencies that
-  cannot be verified in unit tests (e.g., a DID submitted in YY1 must be
+  cannot be verified in unit tests (e.g., a DID submitted in YY1 SHALL be
   retrievable via YY2 in the same test session).
 
   Background:

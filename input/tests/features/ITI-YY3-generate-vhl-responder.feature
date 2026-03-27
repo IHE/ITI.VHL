@@ -88,11 +88,11 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     When the SHL payload is constructed
     Then the "extension" object SHALL include "fhirBaseUrl" set to the canonical FHIR base URL of the VHL Sharer
 
-  @responder-actions @MUST
+  @responder-actions @SHALL
   Scenario: VHL Sharer does not include extension.fhirBaseUrl when OAuth with SSRAA Option is not supported
     Given the VHL Sharer does NOT support the OAuth with SSRAA Option
     When the SHL payload is constructed
-    Then the "extension.fhirBaseUrl" field MUST NOT be present
+    Then the "extension.fhirBaseUrl" field SHALL NOT be present
 
   # ─── SHL Payload Encoding ──────────────────────────────────────────────────
 
@@ -166,10 +166,10 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
 
   # ─── Security ────────────────────────────────────────────────────────────────
 
-  @security @MUST
+  @security @SHALL
   Scenario: Encryption key is generated using a cryptographically secure random number generator
     When the 32-byte encryption key is generated
-    Then it MUST be generated using a cryptographically secure random number generator
+    Then it SHALL be generated using a cryptographically secure random number generator
 
   @security @SHALL
   Scenario: Passcode is never embedded in the QR code or VHL URL

@@ -1,6 +1,6 @@
 Feature: ITI-YY3 Generate VHL – VHL Holder Expected Actions
   As a VHL Holder (Initiator) requesting VHL generation,
-  these scenarios verify the actions the VHL Holder MUST take when
+  these scenarios verify the actions the VHL Holder SHALL take when
   constructing the request, handling the passcode, and processing the response.
   Message format is defined in ITI-YY3-generate-vhl-message.feature.
 

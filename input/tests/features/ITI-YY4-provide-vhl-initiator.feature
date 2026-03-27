@@ -1,6 +1,6 @@
 Feature: ITI-YY4 Provide VHL – VHL Holder Expected Actions
   As a VHL Holder (Initiator) presenting a VHL QR code to a VHL Receiver,
-  these scenarios verify the actions the VHL Holder MUST take before, during,
+  these scenarios verify the actions the VHL Holder SHALL take before, during,
   and after QR code presentation, including validity checks and passcode handling.
   Message format is defined in ITI-YY4-provide-vhl-message.feature.
 

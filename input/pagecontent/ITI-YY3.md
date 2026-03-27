@@ -197,7 +197,7 @@ HC1:NCF3R0KLBBA...V8N8W.CE8WY
 
 **Manifest URL Construction Notes:**
 
-The manifest URL constructed in step 3 MUST include all mandatory FHIR search parameters required by ITI-YY5:
+The manifest URL constructed in step 3 SHALL include all mandatory FHIR search parameters required by ITI-YY5:
 - `_id`: The unique folder ID (required)
 - `code`: The List type, typically "folder" (required)
 - `status`: The List status, typically "current" (required)
@@ -256,8 +256,8 @@ The VHL Holder MAY:
 ### 2:3.YY3.5 Security Considerations 
 
 #### 2:3.YY3.5.1 Encryption Key Security
-- The 32-byte encryption key MUST be generated using a cryptographically secure random number generator
-- The key is embedded in the SHL payload within the QR code and MUST be kept confidential
+- The 32-byte encryption key SHALL be generated using a cryptographically secure random number generator
+- The key is embedded in the SHL payload within the QR code and SHALL be kept confidential
 - Loss of the key means loss of access to encrypted documents
 - The encryption key is not directly visible in the QR code as it is embedded within the signed and compressed HCERT structure
 
@@ -269,22 +269,22 @@ The VHL Holder MAY:
 - Consider short expiration times (minutes to hours) for high-security scenarios
 
 #### 2:3.YY3.5.3 Passcode Security
-- If a passcode is provided, it MUST be securely hashed before storage using industry-standard algorithms (bcrypt, Argon2, PBKDF2)
-- The plaintext passcode MUST NOT be included in the VHL URL or QR code
-- The plaintext passcode MUST NOT be stored by the VHL Sharer
+- If a passcode is provided, it SHALL be securely hashed before storage using industry-standard algorithms (bcrypt, Argon2, PBKDF2)
+- The plaintext passcode SHALL NOT be included in the VHL URL or QR code
+- The plaintext passcode SHALL NOT be stored by the VHL Sharer
 - The VHL Holder SHOULD securely store the plaintext passcode for sharing with authorized VHL Receivers
 - During ITI-YY5 Retrieve Manifest, the VHL Receiver provides the passcode which the VHL Sharer validates against the stored hash
 - Use of passcode adds an additional authentication factor beyond VHL possession
 
 #### 2:3.YY3.5.4 Manifest URL Construction
-- The manifest URL MUST include all mandatory FHIR search parameters
+- The manifest URL SHALL include all mandatory FHIR search parameters
 - The `_include` parameter SHOULD only be included if the VHL Sharer supports the Include DocumentReference Option
 - This ensures VHL Receivers can successfully retrieve the manifest using ITI-YY5
 
 #### 2:3.YY3.5.5 OAuth with SSRAA Option — FHIR Base URL Extension
 When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `extension.fhirBaseUrl` in the SHL payload:
-- The `fhirBaseUrl` value MUST be the canonical FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`)
+- The `fhirBaseUrl` value SHALL be the canonical FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`)
 - This URL is used by the {{ linkvhlr }} to perform UDAP Discovery (`{fhirBaseUrl}/.well-known/udap`) and, if not already registered, Dynamic Client Registration with the {{ linkvhls }} before initiating ITI-YY5
 - The `fhirBaseUrl` value is typically derivable from the `url` field (manifest URL) by stripping the path, but including it explicitly avoids ambiguity when the authorization server is hosted separately
 - The {{ linkvhlr }} SHOULD cache its UDAP registration per `fhirBaseUrl` to avoid re-registering on every VHL scan
-- The `fhirBaseUrl` field MUST NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily
+- The `fhirBaseUrl` field SHALL NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily

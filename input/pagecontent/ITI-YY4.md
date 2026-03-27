@@ -294,7 +294,7 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 
 #### 2:3.YY4.5.1 VHL Integrity and Authenticity
 - Digital signature ensures VHL issued by trusted VHL Sharer
-- VHL Receivers MUST verify COSE signatures before trusting content
+- VHL Receivers SHALL verify COSE signatures before trusting content
 - CWT signature provides end-to-end trust verification
 
 #### 2:3.YY4.5.2 VHL Confidentiality
@@ -316,7 +316,7 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 - VHL Sharers SHOULD implement rate limiting on passcode attempts
 
 #### 2:3.YY4.5.5 Trust Network Validation
-VHL Receivers MUST:
+VHL Receivers SHALL:
 - Validate VHL Sharer is current participant in trust network
 - Retrieve DSC from trust list using kid from CWT protected header
 - Check certificate revocation status where applicable

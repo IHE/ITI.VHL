@@ -177,7 +177,7 @@ Before participating in any Verified Health Link (VHL) transactions, the [VHL Sh
 
 Trust is established by referencing and accepting public key material published and distributed in accordance with this specification ( via [Retrieve Trust List Response](Requirements-RetrieveTrustListResponse.html)).
 
-All participants MUST validate digital signatures using keys that are anchored in the agreed trust framework.
+All participants SHALL validate digital signatures using keys that are anchored in the agreed trust framework.
 """
 * actor[+] = Canonical(VHLSharer)
 * actor[+] = Canonical(VHLReceiver)

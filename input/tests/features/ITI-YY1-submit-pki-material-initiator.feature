@@ -1,6 +1,6 @@
 Feature: ITI-YY1 Submit PKI Material – Initiator Expected Actions
   As a VHL Sharer or VHL Receiver (Initiator) submitting PKI material to the Trust Anchor,
-  these scenarios verify the actions the initiator MUST take when generating keys,
+  these scenarios verify the actions the initiator SHALL take when generating keys,
   constructing and submitting the DID Document, handling responses, and retaining private keys.
   Message structure conformance is defined in ITI-YY1-submit-pki-material-message.feature.
 
@@ -78,9 +78,9 @@ Feature: ITI-YY1 Submit PKI Material – Initiator Expected Actions
     When the DID Document is finalised for submission
     Then the DID Document SHOULD be signed by the submitting entity using its verification method
 
-  @security @MUST
+  @security @SHALL
   Scenario: HTTP submission uses a secure connection
     Given a DID Document is being submitted via HTTP POST
     When the connection is established
-    Then the connection MUST use a secure connection
+    Then the connection SHALL use a secure connection
     And plain HTTP SHALL NOT be used

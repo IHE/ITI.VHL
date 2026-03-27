@@ -97,7 +97,7 @@ Feature: ITI-YY4 Provide VHL – Message Semantics
     Examples:
       | flag | meaning                                          |
       | L    | Long-term use — VHL intended for repeated access |
-      | P    | Passcode required — must obtain from VHL Holder  |
+      | P    | Passcode required — SHALL obtain from VHL Holder  |
       | U    | Direct file access                               |
 
   # ─── PHI Exclusion ───────────────────────────────────────────────────────────

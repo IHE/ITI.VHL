@@ -209,7 +209,7 @@ Upon receiving the Trust List response, the {{ linkvhlr }} or {{ linkvhls }} SHA
 
 #### 2:3.YY2.5.1 Secure Retrieval
 
-All Retrieve Trust List interactions MUST occur over a secure connection. The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
+All Retrieve Trust List interactions SHALL occur over a secure connection. The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
 
 #### 2:3.YY2.5.2 DID Document Validation
 

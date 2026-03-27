@@ -80,12 +80,12 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the token scope is validated
     Then the VHL Sharer SHALL return HTTP 401 Unauthorized
 
-  @responder-actions @MUST
+  @responder-actions @SHALL
   Scenario: Authorization server validates JWT signature and certificate chain to trust anchor
     Given a JWT client assertion is received
     When the authorization server processes the assertion
-    Then the authorization server MUST validate the JWT signature and the associated certificate validity
-    And MUST validate that the certificate chains to a trust anchor in the trust community
+    Then the authorization server SHALL validate the JWT signature and the associated certificate validity
+    And SHALL validate that the certificate chains to a trust anchor in the trust community
 
   @responder-actions @SHOULD
   Scenario: Authorization server checks JWT jti claim to prevent replay attacks
@@ -117,11 +117,11 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Then the VHL Sharer SHALL confirm a valid VHL with that folder ID exists
     And SHALL return HTTP 403 Forbidden if no matching VHL is found
 
-  @responder-actions @MUST
+  @responder-actions @SHALL
   Scenario: VHL Sharer validates the VHL COSE signature from HCERT
     Given the VHL Sharer is authorizing the request
     When VHL validation is performed
-    Then the VHL Sharer MUST validate the VHL signature (HCERT/CWT COSE signature from ITI-YY3)
+    Then the VHL Sharer SHALL validate the VHL signature (HCERT/CWT COSE signature from ITI-YY3)
 
   @responder-actions @SHALL
   Scenario: VHL Sharer rejects a request for an expired VHL with HTTP 403
@@ -135,11 +135,11 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the VHL Sharer checks revocation status
     Then the VHL Sharer SHALL return HTTP 403 Forbidden
 
-  @responder-actions @MUST
+  @responder-actions @SHALL
   Scenario: VHL Sharer validates passcode using constant-time comparison when P flag is set
     Given the VHL has a P flag and the request includes "passcode=user-pin"
     When the passcode is validated
-    Then the VHL Sharer MUST compare using constant-time comparison against the stored hash
+    Then the VHL Sharer SHALL compare using constant-time comparison against the stored hash
     And SHALL return HTTP 422 Unprocessable Entity if the passcode is incorrect
 
   @responder-actions @SHALL

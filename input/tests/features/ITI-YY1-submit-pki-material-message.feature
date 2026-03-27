@@ -1,7 +1,7 @@
 Feature: ITI-YY1 Submit PKI Material – Message Semantics
   The Submit PKI Material message is a DID Document conforming to W3C DID Core 1.0,
   submitted via HTTP POST to the Trust Anchor's /did endpoint.
-  These scenarios define what a conforming ITI-YY1 message MUST contain.
+  These scenarios define what a conforming ITI-YY1 message SHALL contain.
   They apply equally to submitters (who construct the message) and the Trust Anchor
   (which validates it) — without repeating the requirement in each actor's file.
 

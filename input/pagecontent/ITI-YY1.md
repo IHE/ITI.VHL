@@ -81,7 +81,7 @@ The DID Document SHALL be formatted as a JSON document containing:
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
-| @context | [1..*] | JSON-LD context, MUST include "https://www.w3.org/ns/did/v1" |
+| @context | [1..*] | JSON-LD context, SHALL include "https://www.w3.org/ns/did/v1" |
 | id | [1..1] | The DID for the submitting entity (e.g., "did:example:123456789abcdefghi") |
 | verificationMethod | [1..*] | Array of verification methods containing public key material |
 {: .grid}
@@ -218,17 +218,17 @@ The secure and verifiable exchange of PKI material via DID Documents is foundati
 
 - DID Documents SHOULD be signed by the submitting entity using a verification method
 - The {{ linkta }} SHALL verify the authenticity of submitted DID Documents
-- Submissions over HTTP MUST use secure connections
+- Submissions over HTTP SHALL use secure connections
 
 #### 2:3.YY1.5.2 Key Material Security
 
-- Private keys MUST never be included in DID Documents (only public keys)
-- Submitting entities MUST securely store private keys with appropriate access controls
+- Private keys SHALL never be included in DID Documents (only public keys)
+- Submitting entities SHALL securely store private keys with appropriate access controls
 - Key material SHOULD meet minimum cryptographic strength requirements (e.g., EC P-256 or stronger)
 
 #### 2:3.YY1.5.3 Identity Verification
 
-- The {{ linkta }} MUST authenticate the identity of submitting entities
+- The {{ linkta }} SHALL authenticate the identity of submitting entities
 - Authentication mechanisms MAY include:
   - Secure connection with pre-registered certificates
   - Signed proof-of-control over the DID
@@ -245,7 +245,7 @@ The {{ linkta }} SHALL validate that:
 #### 2:3.YY1.5.5 Revocation and Updates
 
 - The {{ linkta }} SHALL support mechanisms for updating or revoking DID Documents
-- Revoked or expired DID Documents MUST NOT be distributed to participants
+- Revoked or expired DID Documents SHALL NOT be distributed to participants
 - The {{ linkta }} MAY maintain a history of DID Document versions for audit purposes
 
 Jurisdictions MAY define additional security controls, such as specific cryptographic algorithm requirements, certificate chaining policies, offline verification workflows, or restrictions on submission endpoints.

@@ -214,37 +214,37 @@ Feature: ITI-YY4 Provide VHL – VHL Receiver Expected Actions
 
   # ─── §2:3.YY4.5.1 VHL Integrity and Authenticity ──────────────────────────
 
-  @security @MUST
+  @security @SHALL
   Scenario: VHL Receiver verifies COSE signatures before trusting content
     Given a VHL has been decoded
     When the VHL Receiver processes the CWT
-    Then the VHL Receiver MUST verify the COSE signature before trusting the content
+    Then the VHL Receiver SHALL verify the COSE signature before trusting the content
 
   # ─── §2:3.YY4.5.5 Trust Network Validation ────────────────────────────────
 
-  @security @MUST
+  @security @SHALL
   Scenario: VHL Receiver validates VHL Sharer is current participant in trust network
     Given the VHL Receiver has decoded the CWT
     When trust network validation is performed
-    Then the VHL Receiver MUST validate the VHL Sharer is a current participant in the trust network
+    Then the VHL Receiver SHALL validate the VHL Sharer is a current participant in the trust network
 
-  @security @MUST
+  @security @SHALL
   Scenario: VHL Receiver retrieves DSC from trust list using kid from CWT protected header
     Given the "kid" has been extracted from the CWT protected header
     When the VHL Receiver performs DSC lookup
-    Then the VHL Receiver MUST retrieve the DSC from the trust list using the kid
+    Then the VHL Receiver SHALL retrieve the DSC from the trust list using the kid
 
-  @security @MUST
+  @security @SHALL
   Scenario: VHL Receiver checks certificate revocation status where applicable
     Given the DSC has been retrieved from the trust list
     When revocation status is checked
-    Then the VHL Receiver MUST check certificate revocation status where applicable
+    Then the VHL Receiver SHALL check certificate revocation status where applicable
 
-  @security @MUST
+  @security @SHALL
   Scenario: VHL Receiver rejects VHLs from untrusted participants
     Given the VHL Sharer is not a trusted participant in the trust network
     When the VHL Receiver evaluates the trust status
-    Then the VHL Receiver MUST reject the VHL
+    Then the VHL Receiver SHALL reject the VHL
 
   # ─── Optional Acknowledgment ─────────────────────────────────────────────────
 
