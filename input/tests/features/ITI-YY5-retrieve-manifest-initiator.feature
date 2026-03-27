@@ -1,7 +1,8 @@
 Feature: ITI-YY5 Retrieve Manifest – VHL Receiver Expected Actions
   As a VHL Receiver (Initiator) retrieving the document manifest,
   these scenarios verify the actions the VHL Receiver MUST take when constructing
-  the authenticated request, handling OAuth (SSRAA Option), and processing the response.
+  the authenticated request, handling OAuth with SSRAA Option, Verifiable Credential
+  Option, or HTTP Message Signatures, and processing the response.
   Message format is defined in ITI-YY5-retrieve-manifest-message.feature.
 
   Background:
@@ -104,7 +105,42 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Receiver Expected Actions
     When subsequent Retrieve Manifest requests are needed within that lifetime
     Then the VHL Receiver MAY reuse the access token until its "exp" claim is reached
 
-  # ─── §2:3.YY5.5.5 Trust Network Validation ────────────────────────────────
+  # ─── Authentication: Verifiable Credential Option (Option C) ─────────────────
+
+  @initiator-actions @MAY
+  Scenario: VHL Receiver may authenticate using a self-issued Verifiable Credential JWT
+    Given both the VHL Receiver and VHL Sharer support the Verifiable Credential Option
+    When the VHL Receiver authenticates using the Verifiable Credential Option
+    Then the VHL Receiver SHALL construct a VC JWT with its DID as "iss" and "sub"
+    And SHALL sign the JWT with its private key registered in the trust network
+    And SHALL include the JWT in "Authorization: JWT-VC <vc-jwt>"
+
+  @initiator-actions @SHALL
+  Scenario: VC JWT aud claim is set to the VHL Sharer's FHIR base URL from the VHL payload
+    Given the SHL payload contains "extension.fhirBaseUrl" for the VHL Sharer
+    When the VHL Receiver constructs the VC JWT
+    Then the "aud" claim SHALL be set to the value of "extension.fhirBaseUrl"
+
+  @initiator-actions @SHALL
+  Scenario: VC JWT exp is set to at most five minutes from iat
+    Given the VHL Receiver is constructing a VC JWT
+    When the expiry is set
+    Then "exp" SHALL NOT exceed 5 minutes after "iat"
+
+  @initiator-actions @SHALL
+  Scenario: VHL Receiver generates a new VC JWT for each manifest request
+    Given the VHL Receiver supports the Verifiable Credential Option
+    When two consecutive Retrieve Manifest requests are sent
+    Then a distinct VC JWT with a unique "jti" SHALL be generated for each request
+    And the same VC JWT SHALL NOT be reused across requests
+
+  @initiator-actions @SHALL
+  Scenario: VC JWT jti claim is unique per credential
+    Given the VHL Receiver is constructing a VC JWT
+    When the "jti" claim is set
+    Then the value SHALL be a UUID or equivalent unique identifier not previously used
+
+  # ─── §2:3.YY5.5.6 Trust Network Validation ────────────────────────────────
 
   @security @SHALL
   Scenario: VHL Receiver authenticates the VHL Sharer's participation in the trust network

@@ -93,7 +93,53 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the "jti" claim is evaluated
     Then the authorization server SHOULD check the "jti" claim to prevent replay attacks
 
-  # ─── §2:3.YY5.5.5 Trust Network Validation ────────────────────────────────
+  # ─── Verifiable Credential Option Verification (Option C) ──────────────────
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer extracts JWT from Authorization JWT-VC header when VC Option is used
+    Given the request includes "Authorization: JWT-VC <vc-jwt>" and the Verifiable Credential Option is supported
+    When the VHL Sharer processes the authorization header
+    Then the VHL Sharer SHALL extract the JWT from the "Authorization: JWT-VC" header
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer retrieves the receiver's public key from the trust list using the iss DID
+    Given the VC JWT has been extracted and decoded
+    When the VHL Sharer looks up the key
+    Then the VHL Sharer SHALL retrieve the receiver's public key from the trust list using the "iss" DID (ITI-YY2)
+    And SHALL return HTTP 401 Unauthorized if no key matches the "iss" DID
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer verifies the VC JWT signature using the retrieved public key
+    Given the receiver's public key has been retrieved via the "iss" DID
+    When VC JWT signature verification is performed
+    Then the VHL Sharer SHALL verify the JWT signature using the receiver's public key
+    And SHALL return HTTP 401 Unauthorized if the signature is invalid
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer rejects a VC JWT whose exp claim has passed
+    Given the VC JWT "exp" claim has passed
+    When the VC JWT is validated
+    Then the VHL Sharer SHALL return HTTP 401 Unauthorized
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer rejects a VC JWT whose aud does not match its own identity
+    Given the VC JWT "aud" claim does not match the VHL Sharer's FHIR base URL or DID
+    When the VC JWT is validated
+    Then the VHL Sharer SHALL return HTTP 401 Unauthorized
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer rejects a replayed VC JWT whose jti has already been used
+    Given a VC JWT with "jti" equal to a previously accepted value is received
+    When the jti is checked against the replay cache
+    Then the VHL Sharer SHALL return HTTP 401 Unauthorized
+
+  @responder-actions @SHOULD
+  Scenario: VHL Sharer maintains a jti replay cache covering at least the maximum exp window
+    Given the Verifiable Credential Option is supported
+    When VC JWTs are received
+    Then the VHL Sharer SHOULD maintain a "jti" replay cache covering at least the maximum "exp" window
+
+  # ─── §2:3.YY5.5.6 Trust Network Validation ────────────────────────────────
 
   @security @SHALL
   Scenario: VHL Sharer authenticates the VHL Receiver's participation in the trust network
@@ -186,7 +232,7 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When transport security is evaluated
     Then the implementation SHALL comply with the IHE ATNA Profile (ITI TF-1: Section 9) for transport security requirements
 
-  # ─── §2:3.YY5.5.7 Rate Limiting ───────────────────────────────────────────
+  # ─── §2:3.YY5.5.8 Rate Limiting ───────────────────────────────────────────
 
   @responder-actions @SHOULD
   Scenario: VHL Sharer implements rate limiting per receiver and per folder ID
@@ -201,15 +247,15 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Then the VHL Sharer SHALL return HTTP 429 Too Many Requests
     And the response SHALL include a FHIR OperationOutcome with issue.code "throttled"
 
-  # ─── §2:3.YY5.5.6 Audit Logging ───────────────────────────────────────────
+  # ─── §2:3.YY5.5.7 Audit Logging ───────────────────────────────────────────
 
   @responder-actions @SHOULD
   Scenario: VHL Sharer logs all manifest access requests including failed ones
     Given a Retrieve Manifest request has been processed
     When the audit event is recorded
-    Then the VHL Sharer SHOULD log receiver identity, folder ID, authentication method, authorization decision, and timestamp
+    Then the VHL Sharer SHOULD log receiver identity, folder ID, authentication method (HTTP Message Signatures / OAuth with SSRAA / Verifiable Credential), authorization decision, and timestamp
 
-  # ─── §2:3.YY5.5.8 Passcode Security ───────────────────────────────────────
+  # ─── §2:3.YY5.5.9 Passcode Security ───────────────────────────────────────
 
   @security @SHOULD
   Scenario: VHL Sharer rate limits failed passcode attempts

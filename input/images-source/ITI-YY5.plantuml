@@ -7,18 +7,23 @@ participant "VHL Sharer" as Sharer
 
 Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]
 note right
-  POST signed request with:
-  - VHL token
-  - Search parameters
-  - Passcode (if required)
-  Over ATNA secure channel (optional)
+  POST /List/_search with:
+  - VHL search parameters (_id, code, status, patient.identifier)
+  - SHL parameters (recipient, passcode if P flag)
+  - Authentication (one of):
+    Option A: HTTP Message Signatures (RFC 9421)
+              Content-Digest + Signature-Input + Signature headers
+    Option B: OAuth with SSRAA — Authorization: Bearer <token>
+    Option C: Verifiable Credential — Authorization: JWT-VC <vc-jwt>
+  Over ATNA secure channel
 end note
 
 Sharer --> Receiver: Retrieve Manifest Response
 note left
   FHIR Bundle (searchset)
-  with DocumentReference
-  resources
+  - List resource (search.mode=match)
+  - DocumentReference resources (search.mode=include)
+    if Include DocumentReference Option supported
 end note
 
 @enduml

@@ -21,6 +21,10 @@ Trust in the GDHCN is established through a Public Key Infrastructure (PKI). Eac
 
 The GDHCN distributes trust lists using [Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/). Each participating jurisdiction's key material is represented as a DID Document containing verification methods with the jurisdiction's public keys. These DID Documents are published as endpoints by the Trust Anchor, analogous to how the [IHE mCSD Profile](https://profiles.ihe.net/ITI/mCSD/) distributes service endpoints for Organizations. This enables participants to discover and retrieve the PKI material needed for signature verification through a standardized, cacheable, and federated mechanism.
 
+**Verifiable Credential Option:**
+
+Because GDHCN participants are already registered in the trust network with DID Documents, they are well-positioned to use the Verifiable Credential Option for ITI-YY5 Retrieve Manifest authentication. A VHL Receiver acting within the GDHCN can self-issue a JWT-encoded Verifiable Credential (`application/vc+jwt`) using its registered DID and present it to the VHL Sharer via `Authorization: JWT-VC <token>`, without requiring any additional authorization server infrastructure.
+
 **Trust Network Gateway:**
 
 The GDHCN Trust Network Gateway (TNG) provides a federated architecture that enables multiple trust anchors and cross-gateway trust propagation. The TNG supports both an API gateway method and DID-based resolution for trust list distribution, ensuring interoperability across diverse jurisdictional implementations.
@@ -68,7 +72,7 @@ Key Features:
 
 Some of the challenges faced during the pilot implementation, though not necessarily to be taken up in this profile, include:
 
-- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods)
+- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods). The Verifiable Credential Option for ITI-YY5 provides one such improvement: KSA healthcare system VHL Receivers can self-issue a JWT-encoded VC using their DID registered in the GDHCN trust network, presenting it to the VHL Sharer without requiring a PIN or separate authorization server.
 - in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit
 - how to scale and automate some of the health checks (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS).
 
@@ -183,4 +187,8 @@ TEFCA's trust model aligns with the VHL profile's trust network architecture. In
 **OAuth with SSRAA Option:**
 
 Organizations already using OAuth with UDAP (via the [HL7 SSRAA IG](http://hl7.org/fhir/us/udap-security/)) can leverage VHL for health record sharing without additional authentication infrastructure. TEFCA participants, for example, can use their existing TEFCA-issued X.509 certificates and UDAP Dynamic Client Registration to authenticate VHL exchanges, enabling seamless interoperability within established national-scale health information networks.
+
+**Verifiable Credential Option:**
+
+TEFCA participants that have registered DID Documents in the trust network can alternatively use the Verifiable Credential Option for ITI-YY5 Retrieve Manifest authentication. A VHL Receiver acting within TEFCA self-issues a JWT-encoded Verifiable Credential (`application/vc+jwt`) using its registered DID, and presents it to the VHL Sharer via `Authorization: JWT-VC <token>`. This eliminates the need for a separate OAuth authorization server, making it well-suited for direct peer-to-peer exchanges between QHINs and participants who are already enrolled in a DID-based trust network.
 """

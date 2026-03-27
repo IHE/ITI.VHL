@@ -88,9 +88,26 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     When the SHL payload is constructed
     Then the "extension" object SHALL include "fhirBaseUrl" set to the canonical FHIR base URL of the VHL Sharer
 
+  # ─── Verifiable Credential Option ─────────────────────────────────────────
+
+  @responder-actions @SHALL
+  Scenario: VHL Sharer includes extension.fhirBaseUrl when Verifiable Credential Option is supported
+    Given the VHL Sharer supports the Verifiable Credential Option
+    When the SHL payload is constructed
+    Then the "extension" object SHALL include "fhirBaseUrl" set to the canonical FHIR base URL of the VHL Sharer
+    And the VHL Receiver SHALL use this value as the "aud" claim in the VC JWT
+
+  @responder-actions @SHALL
+  Scenario: A single fhirBaseUrl serves both OAuth with SSRAA and Verifiable Credential when both are supported
+    Given the VHL Sharer supports both the OAuth with SSRAA Option and the Verifiable Credential Option
+    When the SHL payload is constructed
+    Then only one "extension.fhirBaseUrl" field SHALL be present
+    And its value SHALL serve both the OAuth UDAP discovery base URL and the VC JWT "aud" claim
+
   @responder-actions @MUST
-  Scenario: VHL Sharer does not include extension.fhirBaseUrl when OAuth with SSRAA Option is not supported
+  Scenario: VHL Sharer does not include extension.fhirBaseUrl when neither OAuth with SSRAA nor Verifiable Credential is supported
     Given the VHL Sharer does NOT support the OAuth with SSRAA Option
+    And the VHL Sharer does NOT support the Verifiable Credential Option
     When the SHL payload is constructed
     Then the "extension.fhirBaseUrl" field MUST NOT be present
 

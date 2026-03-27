@@ -243,9 +243,11 @@ Options that may be selected for each actor in this implementation guide are lis
 | ^              | Include DocumentReference            |
 | ^              | Verify Document Signature            |
 | ^              | OAuth with SSRAA                     |
+| ^              | Verifiable Credential                |
 | {{ linkvhls }} | Include DocumentReference            |
 | ^              | Sign Manifest Request                |
 | ^              | OAuth with SSRAA                     |
+| ^              | Verifiable Credential                |
 {: .grid}
 
 
@@ -293,6 +295,21 @@ The OAuth with SSRAA Option enables the {{ linkvhlr }} and {{ linkvhls }} to use
 **Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} must support this option for OAuth-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or other authentication mechanisms defined in ITI-YY5 SHALL be used instead.
 
 See ITI-YY5 Section 2:3.YY5.4.1.4 for detailed OAuth flow and examples.
+
+### XX.2.5 Verifiable Credential Option
+
+The Verifiable Credential Option enables the {{ linkvhlr }} and {{ linkvhls }} to use JWT-encoded Verifiable Credentials (W3C VC Data Model 2.0, `application/vc+jwt` encoding) for authentication during the ITI-YY5 Retrieve Manifest transaction, as an alternative to HTTP Message Signatures or OAuth with SSRAA.
+
+The {{ linkvhlr }} self-issues a VC (acting as both issuer and subject, using the DID registered in the trust network via ITI-YY1), signs it as a compact JWT, and presents it to the {{ linkvhls }} in the `Authorization: JWT-VC <token>` header. The {{ linkvhls }} verifies the VC against the receiver's DID in the trust list (ITI-YY2).
+
+This option provides:
+- Mutual authentication grounded in the VHL trust network PKI
+- Interoperability with the W3C Verifiable Credentials and Decentralized Identifiers ecosystems
+- A self-sovereign identity pattern — no separate authorization server required
+
+**Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} must support this option for VC-based authentication to be used. If only one actor supports this option, HTTP Message Signatures or OAuth with SSRAA SHALL be used instead.
+
+See ITI-YY5 Section 2:3.YY5.4.1.5 for detailed VC format, JWT structure, and flow examples.
 
 <a name="required-groupings"> </a>
 
