@@ -16,7 +16,6 @@
 
 - ToDo_004: Some of the language has the QR code as synonymous with the VHL.  Should be careful in Vol 1 that QR is only an example of a type of a VHL that is used for low-bandwidth/contactless/access.  May be other access mechanisms - bluetooth or NFC modalities are used in the future for the providing of a VHL by a VHL Holder to a VHL Receiver.   
 
-- ToDo_006: ITI-YY5 Receiver Authentication for Sharer using Embedded JWS/VC as an option
 
 - ToDo_007: ITI-YY5 Retrieve Manifest Message Semantics alignment with SHL — The current message semantics in ITI-YY5 (Section 2:3.YY5.4.1.2) may diverge from the SMART Health Links retrieve manifest specification. Liaise with the SHL team to identify gaps and request updates to the [SHL Manifest logical model](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-file)
 
@@ -30,3 +29,6 @@
 
 - ToDo_005: Should we specify an API mechanism for the Publish PKI Material transaction?  It may be enough to treat them as Content Creator/Consumer pairs where the content is the location of a trustlist (as a DID).
   - **Resolution:** The specification treats the Publish PKI Material transaction as a Content Creator/Consumer interaction where the published content is a DID-referenced trustlist, rather than defining a separate API mechanism. This approach leverages existing IHE content sharing patterns and avoids introducing unnecessary complexity for PKI material distribution.
+
+- ToDo_006: ITI-YY5 Receiver Authentication for Sharer using Embedded JWS/VC as an option.
+  - **Resolution:** Addressed by the addition of the **Verifiable Credential Option** in ITI-YY5 (Section 2:3.YY5.4.1.5). In this option the VHL Receiver self-issues a JSON-LD LDP-VC (W3C Verifiable Credentials Data Model v2) whose `credentialSubject` contains the manifest decoded from the QR code. An embedded `DataIntegrityProof` is computed with the VHL Receiver's key from the trust network. The signed VC is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`) with FHIR search parameters in the URL. The VHL Sharer verifies `proof.proofValue` using the receiver's public key retrieved from the trust network. The option is also reflected in the Actor Options table (Volume 1 Section XX.2.5), the sequence diagram (ITI-YY5.plantuml), and the test plan (testplan.md).

@@ -16,9 +16,12 @@ This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL H
 
 **FHIR Search Transaction:** This transaction uses a standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists. The manifest URL from the VHL payload contains all necessary FHIR search parameters. No custom operation is required.
 
-**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)** or **OAuth with SSRAA** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
+**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)**, **OAuth with SSRAA**, or the **Verifiable Credential Option** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
+
+**Verifiable Credential Option:** Implementations MAY support the **Verifiable Credential Option**, in which the {{ linkvhlr }} self-issues a JSON-LD Verifiable Credential (LDP-VC) whose subject is the manifest decoded from the QR code. The VC contains an embedded **DataIntegrityProof** signed with the {{ linkvhlr }}'s key from the trust network, and is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`). No additional HTTP-level signing is needed; the embedded proof is sufficient.
 
 **OAuth with SSRAA Option:** Implementations MAY support the **OAuth with SSRAA Option**, which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
+
 
 **Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, it SHALL ignore the `_include` parameter, and the {{ linkvhlr }} SHALL retrieve each DocumentReference individually using separate read requests.
 
@@ -43,6 +46,9 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 - **RFC 9110**: HTTP Semantics
 - **RFC 9421**: HTTP Message Signatures
 - **RFC 6234**: SHA-256 Hash Function
+- **W3C VC Data Model v2**: [Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) - for Verifiable Credential Option
+- **W3C Data Integrity**: [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) - DataIntegrityProof for Verifiable Credential Option
+- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/) - for Verifiable Credential Option proof
 
 **FHIR Specifications:**
 - **FHIR R4**: [HL7 FHIR Release 4](http://hl7.org/fhir/R4/)
@@ -313,7 +319,152 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 - Token lifetime SHOULD be limited (recommended: 1 hour maximum)
 - Authorization server SHALL validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
 
-##### 2:3.YY5.4.1.5 Expected Actions - VHL Receiver
+##### 2:3.YY5.4.1.5 Authentication Option - Verifiable Credential Option
+
+Implementations that support the **Verifiable Credential Option** MAY use a self-issued JSON-LD Verifiable Credential (LDP-VC) for authentication. In this option the {{ linkvhlr }} constructs a VC whose `credentialSubject` is the manifest decoded from the QR code, and whose embedded **DataIntegrityProof** is signed with the {{ linkvhlr }}'s key from the trust network. The VC is sent directly as the HTTP POST body with `Content-Type: application/vc+ld+json`. No additional HTTP-level signing is required; the DataIntegrityProof inside the VC document is the cryptographic proof of the receiver's identity and QR possession.
+
+**Preconditions:**
+
+Before using the Verifiable Credential Option, the {{ linkvhlr }} SHALL:
+- Hold a key pair registered in the trust network (obtained via ITI-YY2 Retrieve Trust List with DID)
+- Have decoded the QR code and extracted the SHL payload (manifest URL, flags, label, etc.) via ITI-YY4
+
+**Self-Issued VC Construction:**
+
+The {{ linkvhlr }} SHALL construct the VC as a JSON-LD document per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) specification:
+
+```json
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2"
+  ],
+  "type": ["VerifiableCredential", "VHLManifestCredential"],
+  "issuer": "did:web:vhl-receiver.example.org",
+  "issuanceDate": "2024-01-15T10:00:00Z",
+  "expirationDate": "2024-01-15T10:05:00Z",
+  "credentialSubject": {
+    "id": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+    "manifest": {
+      "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+      "exp": 1735689600,
+      "flag": "LP",
+      "label": "Patient Health Summary",
+      "v": 1
+    },
+    "recipient": "Dr. Smith Hospital",
+    "passcode": "user-pin",
+    "embeddedLengthMax": 10000
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "ecdsa-2019",
+    "created": "2024-01-15T10:00:00Z",
+    "verificationMethod": "did:web:vhl-receiver.example.org#receiver-key-123",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3FD9sJ8kL2m9pQ7rT4vW5xY6zAb3cD4eF5gH6iJ7kL8mN9oP0qR1sT2uV3wX4yZ"
+  }
+}
+```
+
+**VC Fields:**
+
+| Field | Description |
+|-------|-------------|
+| `issuer` | The {{ linkvhlr }}'s DID or identifier corresponding to its trust network key |
+| `issuanceDate` | Timestamp when the VC was created |
+| `expirationDate` | Expiration (SHALL be short-lived; recommended: 5 minutes from `issuanceDate`) |
+| `credentialSubject.id` | The manifest URL — binds the VC to the specific manifest decoded from the QR code |
+| `credentialSubject.manifest` | SHL payload fields from the QR code: MUST include `url`; SHOULD include `exp`, `flag`, `label`, `v`; SHALL NOT include the encryption `key` |
+| `credentialSubject.recipient` | Identifier of the requesting organization or person (replaces SHL `recipient` body parameter) |
+| `credentialSubject.passcode` | User-provided passcode if the VHL is passcode-protected (replaces SHL `passcode` body parameter) |
+| `credentialSubject.embeddedLengthMax` | Optional size hint for embedded content (replaces SHL `embeddedLengthMax` body parameter) |
+| **`proof`** | **Embedded DataIntegrityProof — the cryptographic proof of the {{ linkvhlr }}'s identity** |
+| `proof.type` | `DataIntegrityProof` — W3C Data Integrity proof |
+| `proof.cryptosuite` | Cryptosuite used: `ecdsa-2019` (ECDSA P-256 or P-384) or `eddsa-2022` (Ed25519) |
+| `proof.created` | Timestamp when the proof was created (SHALL match `issuanceDate`) |
+| `proof.verificationMethod` | DID URL resolving to the {{ linkvhlr }}'s public key in the trust network (e.g., `did:web:receiver.example.org#key-id`) |
+| `proof.proofPurpose` | `assertionMethod` — the {{ linkvhlr }} is asserting this credential |
+| `proof.proofValue` | Multibase-encoded cryptographic signature over the VC document (computed with the {{ linkvhlr }}'s private key from the trust network) |
+{: .grid}
+
+> **Note:** The `proof.proofValue` is the sole cryptographic proof of the {{ linkvhlr }}'s identity. No outer JWT or HTTP Message Signature is needed. The `verificationMethod` resolves to the receiver's public key in the trust network (obtainable via ITI-YY2). The {{ linkvhls }} MUST verify this proof. The SHL encryption key (`key` field from the SHL payload) SHALL NOT appear anywhere in the VC.
+
+**Request Structure:**
+
+The {{ linkvhlr }} sends the VC as the POST body. FHIR search parameters are placed in the URL query string (since the body is `application/vc+ld+json`). The SHL parameters (`recipient`, `passcode`, `embeddedLengthMax`) are included in `credentialSubject`:
+
+```http
+POST /List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.840.1.113883.2.4.6.3%7CPASSPORT123&_include=List%3Aitem HTTP/1.1
+Host: vhl-sharer.example.org
+Content-Type: application/vc+ld+json
+Accept: application/fhir+json
+
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": ["VerifiableCredential", "VHLManifestCredential"],
+  "issuer": "did:web:vhl-receiver.example.org",
+  "issuanceDate": "2024-01-15T10:00:00Z",
+  "expirationDate": "2024-01-15T10:05:00Z",
+  "credentialSubject": {
+    "id": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+    "manifest": { "url": "...", "exp": 1735689600, "flag": "LP", "label": "Patient Health Summary", "v": 1 },
+    "recipient": "Dr. Smith Hospital",
+    "passcode": "user-pin",
+    "embeddedLengthMax": 10000
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "ecdsa-2019",
+    "created": "2024-01-15T10:00:00Z",
+    "verificationMethod": "did:web:vhl-receiver.example.org#receiver-key-123",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3FD9sJ8kL2m9pQ7rT4vW5xY6zA..."
+  }
+}
+```
+
+**VC Issuance Process (VHL Receiver):**
+
+1. {{ linkvhlr }} decodes the QR code via ITI-YY4 and extracts the SHL payload (manifest URL, flags, label, expiration)
+2. {{ linkvhlr }} constructs `credentialSubject`:
+   - `id` = manifest URL from the SHL payload
+   - `manifest` = SHL payload fields excluding the encryption key
+   - `recipient` = identifier of the requesting organization/person
+   - `passcode` = user-provided passcode (if P flag in VHL)
+   - `embeddedLengthMax` = optional size hint
+3. {{ linkvhlr }} sets `issuer` to its DID corresponding to its trust network key
+4. {{ linkvhlr }} sets `issuanceDate` and `expirationDate` (short-lived; recommended 5 minutes)
+5. {{ linkvhlr }} constructs the **`proof`** element:
+   - `type`: `DataIntegrityProof`
+   - `cryptosuite`: `ecdsa-2019` or `eddsa-2022` per trust network key type
+   - `created`: current timestamp
+   - `verificationMethod`: DID URL of the trust network key
+   - `proofPurpose`: `assertionMethod`
+   - `proofValue`: multibase-encoded signature over the VC document, computed with the trust network private key per the W3C Data Integrity specification
+6. {{ linkvhlr }} POSTs the complete VC (with `proof`) as `Content-Type: application/vc+ld+json` body, with FHIR search parameters in the URL query string
+
+**VC Verification Process (VHL Sharer):**
+
+1. {{ linkvhls }} parses the `application/vc+ld+json` request body as a JSON-LD VC document
+2. {{ linkvhls }} extracts `proof.verificationMethod` and resolves the DID URL to retrieve the {{ linkvhlr }}'s public key from the trust network
+3. {{ linkvhls }} verifies the **`proof.proofValue`** (DataIntegrityProof) over the VC document using the retrieved public key — this is the primary proof of the {{ linkvhlr }}'s identity
+4. {{ linkvhls }} verifies `proof.proofPurpose` is `assertionMethod`
+5. {{ linkvhls }} verifies the VC is not expired (`expirationDate` not in the past)
+6. {{ linkvhls }} verifies `proof.created` / `issuanceDate` freshness (±2 minutes recommended)
+7. {{ linkvhls }} verifies `credentialSubject.id` matches the `_id` URL query parameter
+8. {{ linkvhls }} extracts SHL parameters from `credentialSubject` (`recipient`, `passcode`, `embeddedLengthMax`)
+9. If all checks pass, {{ linkvhls }} processes the FHIR search (using URL query parameters) and returns the Bundle
+10. If any check fails, {{ linkvhls }} returns 401 Unauthorized
+
+**Security Considerations for Verifiable Credential Option:**
+
+- The `proof.proofValue` SHALL be computed over the complete VC document per the W3C Data Integrity specification using the {{ linkvhlr }}'s private key from the trust network
+- `proof.verificationMethod` SHALL resolve to a key registered in the trust network (retrievable via ITI-YY2); VCs whose `verificationMethod` cannot be resolved SHALL be rejected
+- The VC SHALL be short-lived (`expirationDate`; recommended: 5 minutes maximum)
+- The SHL encryption key (`key` field from SHL payload) SHALL NOT appear in `credentialSubject.manifest`
+- Private keys SHALL be stored securely (Hardware Security Module recommended)
+
+##### 2:3.YY5.4.1.6 Expected Actions - VHL Receiver
 
 The {{ linkvhlr }} SHALL:
 
@@ -330,7 +481,7 @@ The {{ linkvhlr }} SHALL:
      - embeddedLengthMax (optional) - size hint for embedded content
    - Encode parameters as `application/x-www-form-urlencoded`
 
-3. **Authenticate Request** (use one of the following options; neither is required):
+3. **Authenticate Request** (use one of the following options; none is required):
    - **Option A - HTTP Message Signatures** (if supported):
      - Compute Content-Digest (SHA-256 of request body)
      - Construct signature base from HTTP components
@@ -340,6 +491,12 @@ The {{ linkvhlr }} SHALL:
      - Obtain access token using JWT client assertion
      - Include token in Authorization header
      - Reuse token for subsequent requests until expiration
+   - **Option C - Verifiable Credential Option** (if supported):
+     - Extract SHL payload fields from the decoded QR code (manifest URL, flags, label, expiration)
+     - Construct LDP-VC with `credentialSubject.id` = manifest URL, `credentialSubject.manifest` = SHL fields (excluding encryption key), SHL params (`recipient`, `passcode`, `embeddedLengthMax`) in `credentialSubject`
+     - Compute `proof.proofValue` (DataIntegrityProof) over the VC document using trust network private key
+     - Set `proof.verificationMethod` to the DID URL of the receiver's trust network key
+     - POST the complete VC as `Content-Type: application/vc+ld+json` body; place FHIR search parameters in URL query string
 
 4. **Send Request**:
    - POST to `/List/_search` endpoint at VHL Sharer's base URL
@@ -359,9 +516,9 @@ The {{ linkvhlr }} SHALL:
 The {{ linkvhlr }} MAY:
 - Cache OAuth access tokens for reuse (OAuth with SSRAA Option)
 - Implement retry logic for transient failures
-- Support both HTTP Message Signatures and OAuth with SSRAA Option
+- Support multiple authentication options
 
-##### 2:3.YY5.4.1.6 Expected Actions - VHL Sharer
+##### 2:3.YY5.4.1.7 Expected Actions - VHL Sharer
 
 Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 
@@ -385,6 +542,15 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Verify token expiration
      - Verify token scope authorizes access to the VHL
      - Reject if token invalid or expired (401 Unauthorized)
+   - **Verifiable Credential Option**:
+     - Parse `application/vc+ld+json` request body as JSON-LD VC document
+     - Resolve `proof.verificationMethod` DID URL to retrieve {{ linkvhlr }}'s public key from the trust network
+     - Verify the **`proof.proofValue`** (DataIntegrityProof) over the VC document using the retrieved trust network key
+     - Verify `proof.proofPurpose` is `assertionMethod`
+     - Verify VC `expirationDate` has not passed; verify `proof.created` freshness (±2 minutes recommended)
+     - Verify `credentialSubject.id` matches the `_id` URL query parameter
+     - Extract SHL params from `credentialSubject` (`recipient`, `passcode`, `embeddedLengthMax`)
+     - Reject if any verification fails (401 Unauthorized)
 
 3. **Authorize Request**:
    - Validate folder ID (_id parameter) corresponds to valid VHL
@@ -693,7 +859,7 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHALL:
 #### 2:3.YY5.5.6 Audit Logging
 Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - All document access requests (successful and failed)
-- Authentication method used (HTTP signatures or OAuth)
+- Authentication method used (HTTP signatures, OAuth, or Verifiable Credential)
 - Receiver identity (from keyid or OAuth token)
 - VHL folder ID
 - Authorization decisions (approved/denied)
@@ -714,4 +880,15 @@ When VHL is passcode-protected (P flag):
 - Failed passcode attempts SHOULD be rate limited
 - Passcode SHOULD NOT be logged in audit trails
 - Consider lockout after repeated failed attempts
+
+#### 2:3.YY5.5.9 Verifiable Credential Option
+Implementations that support the Verifiable Credential Option SHALL:
+- Include a `proof` element of type `DataIntegrityProof` in the VC with `proofPurpose` = `assertionMethod`, a `verificationMethod` DID URL resolving to the {{ linkvhlr }}'s trust network key, and a `proofValue` computed over the VC document using the {{ linkvhlr }}'s private key per the W3C Data Integrity specification
+- Verify `proof.proofValue` before trusting any VC claim; reject the request if proof verification fails
+- Resolve `proof.verificationMethod` against the trust network (ITI-YY2); reject VCs whose `verificationMethod` cannot be resolved to a trusted key
+- Issue short-lived VCs (`expirationDate`; recommended: 5 minutes maximum)
+- Bind the VC to the specific manifest via `credentialSubject.id` (set to the manifest URL matching the `_id` URL query parameter)
+- Exclude the SHL payload encryption key from `credentialSubject.manifest`
+- Store private keys securely (Hardware Security Module recommended)
+- Reject VCs whose `credentialSubject.id` does not match the `_id` URL query parameter
 
