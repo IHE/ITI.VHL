@@ -106,7 +106,7 @@ If the `passcode` parameter is provided:
 
 **VHL Payload Construction**
 
-The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#construct-a-smart-health-link-payload). The VHL Sharer SHALL:
+The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html). The VHL Sharer SHALL:
 
 1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier
 

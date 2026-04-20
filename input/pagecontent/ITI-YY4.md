@@ -37,7 +37,7 @@ The VHL is transmitted as a QR code containing an HCERT-encoded payload with the
 - **RFC 1950**: ZLIB Compressed Data Format
 - **RFC 1951**: DEFLATE Compressed Data Format
 - **ISO/IEC 18004:2015**: QR Code specification
-- **SMART Health Links Specification**: [VHL Payload Structure](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html)
+- **SMART Health Links Specification**: [VHL Payload Structure](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)
 - **WHO SMART Trust HCERT Specification**: [HCERT Structure](https://smart.who.int/trust/hcert_spec.html)
 
 ### 2:3.YY4.4 Messages

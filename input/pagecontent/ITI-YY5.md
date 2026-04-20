@@ -73,7 +73,7 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 
 **SHL Specifications:**
 - **SHL Manifest Request**: [SHL Manifest Request](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-request)
-- **SHL Encrypting and Decrypting Files**: [SHL Encryption](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) - JWE `dir` + `A256GCM` convention used to encrypt document binaries
+- **SHL Encrypting and Decrypting Files**: [SHL Encryption](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) - JWE `dir` + `A256GCM` convention used to encrypt document binaries
 
 **Encryption Standards:**
 - **RFC 7516**: JSON Web Encryption (JWE) - compact serialization used for document encryption
@@ -913,7 +913,7 @@ The five dot-separated segments are the JWE Compact Serialization (RFC 7516): pr
 
 ##### 2:3.YY5.4.2.5 Document Encryption
 
-VHL document binaries are encrypted following the [SMART Health Links — Encrypting and Decrypting Files](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) convention.
+VHL document binaries are encrypted following the [SMART Health Links — Encrypting and Decrypting Files](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) convention.
 
 **Algorithm:**
 - **Serialization:** JWE Compact Serialization per RFC 7516.
@@ -941,7 +941,7 @@ XFBoMYUZodetZdvTiFvSkQ
 
 The protected header decodes to `{"alg":"dir","enc":"A256GCM"}`. The empty second segment reflects `alg=dir` (no encrypted key).
 
-**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached SHL `key` and the protected header as Additional Authenticated Data (per RFC 7516 §5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
+**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached SHL `key` and the protected header as Additional Authenticated Data (per RFC 7516 §5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
 
 ### 2:3.YY5.5 Security Considerations
 
