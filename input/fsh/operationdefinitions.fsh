@@ -3,7 +3,7 @@ InstanceOf: OperationDefinition
 Usage: #definition
 * url = "http://example.org/fhir/OperationDefinition/generate-vhl"
 * title = "Generate VHL"
-* description = "This operation generates a QR code containing a Verifiable Health Link (VHL) for transmission or display.\n\nInput Parameters:\n- sourceIdentifier: Patient identifier (required)\n- exp: Expiration time in Epoch seconds (optional)\n- flag: Single-character flags in alphabetical order - L (long-term use), P (Passcode required), U (direct file access) (optional)\n- label: Short description up to 80 characters (optional)\n- passcode: User-supplied passcode for passcode-protected VHLs (optional)\n\nOutput Generation:\n- Returns a Binary resource containing the QR code image (PNG or SVG format) that encodes the VHL as an HCERT/CWT structure.\n- The QR code embeds the full SHL payload including the manifest URL and decryption key for secure access to health documents."
+* description = "This operation generates a QR code containing a Verifiable Health Link (VHL) for transmission or display.\n\nInput Parameters:\n- sourceIdentifier: Patient identifier (required)\n- exp: Expiration time in Epoch seconds (optional)\n- flag: Single-character flags in alphabetical order - L (long-term use), P (Passcode required), U (direct file access) (optional)\n- label: Short description up to 80 characters (optional)\n- passcode: User-supplied passcode for passcode-protected VHLs (optional)\n- purposeOfUse: Purpose(s) of use the VHL Holder is authorizing for this share, bound to the HL7 v3 PurposeOfUse value set (optional). Populates Consent.provision.purpose when an IHE PCF Consent is bound to the generated folder.\n\nOutput Generation:\n- Returns a Binary resource containing the QR code image (PNG or SVG format) that encodes the VHL as an HCERT/CWT structure.\n- The QR code embeds the full SHL payload including the manifest URL and decryption key for secure access to health documents."
 * name = "GenerateVHL"
 * status = #active
 * kind = #operation
@@ -46,6 +46,15 @@ Usage: #definition
   * max = "1"
   * type = #string
   * documentation = "Optional. User-supplied passcode for passcode-protected VHLs. If provided, the VHL Sharer SHALL securely hash and store this passcode for validation during manifest retrieval (ITI-YY5). The 'P' flag SHALL be included in the flag parameter when a passcode is set."
+* parameter[+]
+  * name = #purposeOfUse
+  * use = #in
+  * min = 0
+  * max = "*"
+  * type = #CodeableConcept
+  * binding.strength = #extensible
+  * binding.valueSet = "http://terminology.hl7.org/ValueSet/v3-PurposeOfUse"
+  * documentation = "Optional. Purpose(s) of use the VHL Holder is authorizing for this share (e.g., TREAT, HPAYMT, HRESCH). The VHL Sharer SHALL persist these value(s) against the generated folder ID. When the VHL Sharer is grouped with an IHE PCF Consent Creator or Consent Recipient, these values SHALL populate Consent.provision.purpose on any Consent created for or bound to this folder. At ITI-YY5 the VHL Sharer MAY use the recorded purpose to enforce consistency with the VHL Receiver's declared purpose claim (e.g., the OAuth access token's purposeOfUse claim, the UDAP sub_purpose extension, or an equivalent claim carried in a Verifiable Credential)."
 * parameter[+]
   * name = #qrcode
   * use = #out

@@ -70,8 +70,10 @@ Where **[base]** is the URL of VHL Sharer Service provider.
 The Generate VHL message is performed by an HTTP GET command shown below:
 
 ```
-GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[integer]}{&flag=[string]}{&label=[string]}{&passcode=[string]}
+GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[integer]}{&flag=[string]}{&label=[string]}{&passcode=[string]}{&purposeOfUse=[token]}
 ```
+
+Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g., `http://terminology.hl7.org/CodeSystem/v3-ActReason|TREAT`) and MAY repeat.
 
 **Note:** The `goal` parameter has been removed. The operation always generates a QR code containing the VHL encoded as an HCERT/CWT structure.
 
@@ -84,6 +86,7 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[integer]}{&flag=
 | flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
 | label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink. |
 | passcode |  [0..1]  | string        | Optional. User-supplied passcode for passcode-protected VHLs. If provided, the VHL Sharer SHALL securely hash and store this passcode for validation during manifest retrieval (ITI-YY5). The 'P' flag SHALL be included in the flag parameter when a passcode is set. |
+| purposeOfUse | [0..*] | token (CodeableConcept) | Optional. Purpose(s) of use the VHL Holder is authorizing for this share, bound (extensible) to [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) (e.g., `TREAT`, `HPAYMT`, `HRESCH`). Serialized as FHIR `system\|code`. See [Purpose of Use Handling](#purpose-of-use-handling). |
 
 
 ##### 2:3.YY3.4.1.3 Expected Actions
@@ -94,6 +97,20 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[integer]}{&flag=
 The {{linkvhls}} generates a QR code containing the VHL. The QR code is encoded as an HCERT/CWT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html) and contains the SHL payload embedded at claim key 5 within the hcert claim (claim key -260).
 
 The generation process is as follows:
+
+<a name="purpose-of-use-handling"></a>
+
+**Purpose of Use Handling (if provided)**
+
+If one or more `purposeOfUse` values are provided, the VHL Sharer SHALL:
+
+1. Validate each value against the [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) value set (extensible binding — jurisdiction- or use-case-specific codes are permitted).
+2. Persist the value(s) against the generated folder ID so that they remain discoverable for downstream enforcement at ITI-YY5.
+3. When grouped with an IHE PCF [Consent Creator](https://profiles.ihe.net/ITI/PCF/) or [Consent Recipient](https://profiles.ihe.net/ITI/PCF/), populate `Consent.provision.purpose` on any Consent created for or bound to this folder from the persisted value(s).
+
+At [ITI-YY5](ITI-YY5.html) the {{ linkvhls }} MAY use the recorded purpose to enforce consistency with the {{ linkvhlr }}'s declared purpose claim — for example, the `purposeOfUse` claim of an OAuth access token under the OAuth with SSRAA Option, the `sub_purpose` extension of a UDAP assertion, or an equivalent claim carried in a Verifiable Credential under the Verifiable Credential Option. Inconsistent purposes MAY be rejected with HTTP `403 Forbidden`.
+
+The `purposeOfUse` value(s) SHALL NOT be embedded in the QR code or the SHL payload; they are metadata about the share held by the {{ linkvhls }}, not content consumed by the {{ linkvhlr }}.
 
 **Passcode Handling (if provided)**
 
