@@ -140,7 +140,7 @@ Upon receiving a VHL via QR code, the VHL Receiver SHALL perform the following 9
    - Within the `hcert` claim (claim key -260), locate claim key 5
    - Claim key 5 contains the SHL payload object with:
      - `url`: manifest URL (required) - includes all mandatory FHIR search parameters
-     - `key`: base64url-encoded decryption key, 43 characters (required)
+     - `key`: base64url-encoded decryption key, 43 characters (required). The {{ linkvhlr }} caches this key for the VHL session and uses it as the symmetric key for JWE `dir`/`A256GCM` decryption of document binaries retrieved via [ITI-68](https://profiles.ihe.net/ITI/MHD/ITI-68.html); see [ITI-YY5 Document Encryption](ITI-YY5.html#23yy5425-document-encryption).
      - `flag`: flags such as "L" for long-term, "P" for passcode (optional)
      - `label`: human-readable description (optional)
      - `exp`: expiration timestamp in seconds since epoch (optional)

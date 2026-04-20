@@ -60,6 +60,7 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 
 **IHE Profiles:**
 - **ITI TF-2: Mobile Health Document Sharing (MHD)**: [ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html)
+- **ITI TF-2: Mobile Health Document Sharing (MHD)**: [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html) - used to retrieve the binary content referenced from `DocumentReference.content.attachment.url`
 - **ITI TF-1: Section 9**: ATNA Profile
 - **ITI TF-2: 3.19**: Authenticate Node transaction
 
@@ -72,6 +73,11 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 
 **SHL Specifications:**
 - **SHL Manifest Request**: [SHL Manifest Request](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-request)
+- **SHL Encrypting and Decrypting Files**: [SHL Encryption](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) - JWE `dir` + `A256GCM` convention used to encrypt document binaries
+
+**Encryption Standards:**
+- **RFC 7516**: JSON Web Encryption (JWE) - compact serialization used for document encryption
+- **RFC 7518**: JSON Web Algorithms (JWA) - `dir` key management and `A256GCM` content encryption
 
 ### 2:3.YY5.4 Messages
 
@@ -651,11 +657,70 @@ This message is sent when the {{ linkvhls }} has successfully authenticated the 
 
 ##### 2:3.YY5.4.2.2 Message Semantics
 
-The response is a FHIR Bundle of type "searchset" containing:
-- List resource(s) matching the search criteria (search.mode="match")
-- DocumentReference resources if `_include=List:item` was used and supported (search.mode="include")
+The response is a FHIR Bundle of type "searchset". The shape of the Bundle depends on whether the {{ linkvhls }} supports the **Include DocumentReference Option** AND the {{ linkvhlr }} included `_include=List:item` in the request:
 
-**Bundle Structure:**
+| Case | Bundle contents | Receiver follow-up |
+|------|-----------------|--------------------|
+| **A. Include DocumentReference Option NOT used** (option unsupported, or `_include` not requested) | Only `List` resource(s) with `search.mode="match"`. `List.entry[].item.reference` points to a DocumentReference on the {{ linkvhls }}. | Receiver SHALL FHIR-read each referenced DocumentReference (`GET /DocumentReference/<id>`) before retrieving binaries. |
+| **B. Include DocumentReference Option used** | `List` resource(s) with `search.mode="match"` PLUS the referenced `DocumentReference` resources with `search.mode="include"`. | Receiver proceeds directly to binary retrieval; no extra metadata round-trip. |
+{: .grid}
+
+In both cases the Receiver subsequently retrieves each binary via [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval) and decrypts it as described in [Document Encryption](#23yy5425-document-encryption).
+
+**Example A — Bundle without Include DocumentReference Option**
+
+The response contains only the List resource. Each `List.entry[].item.reference` is a relative reference the Receiver SHALL resolve via a separate FHIR read on the {{ linkvhls }}.
+
+```json
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123"
+    }
+  ],
+  "entry": [
+    {
+      "fullUrl": "https://vhl-sharer.example.org/List/abc123def456",
+      "resource": {
+        "resourceType": "List",
+        "id": "abc123def456",
+        "status": "current",
+        "mode": "working",
+        "code": {
+          "coding": [
+            {
+              "system": "https://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes",
+              "code": "folder"
+            }
+          ]
+        },
+        "subject": {
+          "identifier": {
+            "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
+            "value": "PASSPORT123"
+          }
+        },
+        "date": "2024-01-15T10:30:00Z",
+        "entry": [
+          { "item": { "reference": "DocumentReference/doc001" } },
+          { "item": { "reference": "DocumentReference/doc002" } },
+          { "item": { "reference": "DocumentReference/doc003" } },
+          { "item": { "reference": "DocumentReference/doc004" } }
+        ]
+      },
+      "search": { "mode": "match" }
+    }
+  ]
+}
+```
+
+**Example B — Bundle with Include DocumentReference Option**
+
+The response contains the List resource AND each referenced DocumentReference resource (`search.mode="include"`). The Receiver can move directly to binary retrieval.
 
 ```json
 {
@@ -794,21 +859,89 @@ The response is a FHIR Bundle of type "searchset" containing:
 - `Bundle.entry[].search.mode`:
   - "match" for List resource(s) matching search criteria
   - "include" for DocumentReference resources included via `_include` parameter
-- List.entry[].item: References to DocumentReference resources
-- If Include DocumentReference Option not supported: Bundle contains only List resource
+- `List.entry[].item`: References to DocumentReference resources on the {{ linkvhls }}
+- `DocumentReference.content.attachment.url`: Absolute URL the {{ linkvhlr }} dereferences via [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval) to obtain the (encrypted) binary
+- `DocumentReference.content.attachment.contentType`: The **decrypted** content type (e.g. `application/fhir+json`, `application/pdf`). The transport content type observed during ITI-68 retrieval is `application/jose` whenever the binary is encrypted (see [Document Encryption](#23yy5425-document-encryption))
 
 ##### 2:3.YY5.4.2.3 Expected Actions
 
 The {{ linkvhlr }} SHALL:
-- Parse Bundle to identify List and DocumentReference resources
-- Distinguish between resources based on search.mode
-- Extract document metadata from DocumentReference resources
-- Use DocumentReference.content.attachment.url to retrieve document content (separate transaction)
+- Parse the Bundle and distinguish List vs. DocumentReference resources by `search.mode`.
+- **If the Bundle does NOT contain DocumentReference resources** (Example A): for each `List.entry[].item.reference`, perform a FHIR read against the {{ linkvhls }} to obtain the DocumentReference metadata.
+- For each DocumentReference, retrieve the binary by dereferencing `content.attachment.url` per [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval), reusing the same authentication option chosen for this ITI-YY5 session.
+- Decrypt the retrieved binary using the SHL `key` cached from ITI-YY4, per [Document Encryption](#23yy5425-document-encryption).
+- Verify that the decrypted payload's media type matches `DocumentReference.content.attachment.contentType`.
 
 The {{ linkvhlr }} MAY:
-- Display document list to user
-- Filter or sort documents based on metadata
-- Retrieve document content on demand
+- Display the document list to the user.
+- Filter or sort documents based on metadata.
+- Retrieve and decrypt document content on demand rather than eagerly.
+
+##### 2:3.YY5.4.2.4 Document Content Retrieval
+
+The {{ linkvhls }} returns FHIR `DocumentReference` metadata as part of (or referenced from) the manifest Bundle. The actual document binary is retrieved separately by dereferencing `DocumentReference.content.attachment.url`.
+
+The binary retrieval SHALL conform to the IHE MHD **[Retrieve Document [ITI-68]](https://profiles.ihe.net/ITI/MHD/ITI-68.html)** transaction:
+
+- **Method:** HTTP `GET` against `DocumentReference.content.attachment.url`.
+- **Transport:** Same ATNA secure channel used for ITI-YY5.
+- **Authentication:** The {{ linkvhlr }} SHALL reuse the same authentication option chosen for the originating ITI-YY5 request (HTTP Message Signatures, OAuth with SSRAA, or Verifiable Credential). A {{ linkvhlr }} SHALL NOT mix options across the manifest and binary retrievals of a single VHL session.
+- **Response Content-Type:**
+  - `application/jose` when the binary is encrypted per [Document Encryption](#23yy5425-document-encryption) (the default for VHL flows where the SHL payload carries a `key`).
+  - The `DocumentReference.content.attachment.contentType` value when the binary is not encrypted.
+
+A {{ linkvhls }} that supports ITI-YY5 SHALL be grouped with an MHD **Document Responder** so that ITI-68 GETs against `attachment.url` succeed. A {{ linkvhlr }} SHALL be grouped with an MHD **Document Consumer**.
+
+**Example — ITI-68 retrieval of an encrypted document (HTTP Message Signatures option):**
+
+```http
+GET /Binary/doc001-content HTTP/1.1
+Host: vhl-sharer.example.org
+Accept: application/jose
+Signature-Input: sig1=("@method" "@path" "@authority");created=1705315800;keyid="receiver-key-123";alg="ecdsa-p256-sha256"
+Signature: sig1=:MEUCIQD...:
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/jose
+
+eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..<base64url-iv>.<base64url-ciphertext>.<base64url-tag>
+```
+
+The five dot-separated segments are the JWE Compact Serialization (RFC 7516): protected header, empty encrypted key (because `alg=dir`), IV, ciphertext, and authentication tag.
+
+##### 2:3.YY5.4.2.5 Document Encryption
+
+VHL document binaries are encrypted following the [SMART Health Links — Encrypting and Decrypting Files](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) convention.
+
+**Algorithm:**
+- **Serialization:** JWE Compact Serialization per RFC 7516.
+- **Key management (`alg`):** `dir` — direct use of a shared symmetric key (no key wrapping).
+- **Content encryption (`enc`):** `A256GCM` — AES-256 in Galois/Counter Mode with a 96-bit IV and 128-bit authentication tag.
+- **Symmetric key:** The 32-byte (256-bit) value carried as `key` in the SHL payload generated by [ITI-YY3](ITI-YY3.html) and decoded by the {{ linkvhlr }} in [ITI-YY4](ITI-YY4.html). The receiver caches this key for the duration of the VHL session.
+
+**Scope:**
+- Encryption SHALL be applied to the document binary at `DocumentReference.content.attachment.url`. It is independent of the **Include DocumentReference Option** — the option only controls whether DocumentReference *metadata* is bundled into the manifest response.
+- `DocumentReference.content.attachment.contentType` SHALL describe the **decrypted** payload (e.g. `application/fhir+json`, `application/pdf`). The encrypted transport representation is signalled by the `application/jose` Content-Type on the ITI-68 response.
+- An unencrypted variant is permitted only when the originating SHL payload was generated without a `key` (matching SHL semantics). VHL flows generated per ITI-YY3 always include a `key` and therefore always encrypt.
+
+**Example — JWE Compact Serialization (illustrative, truncated):**
+
+```
+eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0
+.
+.
+48V1_ALb6US04U3b
+.
+5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A
+.
+XFBoMYUZodetZdvTiFvSkQ
+```
+
+The protected header decodes to `{"alg":"dir","enc":"A256GCM"}`. The empty second segment reflects `alg=dir` (no encrypted key).
+
+**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached SHL `key` and the protected header as Additional Authenticated Data (per RFC 7516 §5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://build.fhir.org/ig/HL7/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
 
 ### 2:3.YY5.5 Security Considerations
 

@@ -110,7 +110,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 
 1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier
 
-2. Generate a 32-byte (256-bit) random encryption key, base64url-encode it (resulting in 43 characters) - this is the 'key' parameter
+2. Generate a 32-byte (256-bit) random encryption key, base64url-encode it (resulting in 43 characters) - this is the 'key' parameter. The {{ linkvhlr }} uses this key to decrypt document binaries retrieved via [ITI-68](https://profiles.ihe.net/ITI/MHD/ITI-68.html); see [ITI-YY5 Document Encryption](ITI-YY5.html#23yy5425-document-encryption).
 
 3. Construct the manifest URL as a query on the base List resource:
    - **If VHL Sharer supports the Include DocumentReference Option:**
@@ -126,7 +126,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 
 4. Create the SHL payload as a JSON object with:
    - `url`: the manifest URL from step 3
-   - `key`: the base64url-encoded encryption key from step 2 (43 characters)
+   - `key`: the base64url-encoded encryption key from step 2 (43 characters). Used by the {{ linkvhlr }} as the symmetric key for JWE `dir`/`A256GCM` decryption of document binaries; see [ITI-YY5 Document Encryption](ITI-YY5.html#23yy5425-document-encryption).
    - `exp`: (optional) expiration time in Epoch seconds
    - `flag`: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term, 'U' for direct file access)
    - `label`: (optional) description string (max 80 characters)
