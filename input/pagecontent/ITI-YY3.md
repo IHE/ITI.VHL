@@ -1,6 +1,6 @@
 {% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
-
+{% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
  {% assign reqGenerateVHLRequest = site.data.Requirements-InitiateVHLGenerationRequest %}
  {% assign reqGenerateVHLResponse = site.data.Requirements-RespondtoGenerateVHLRequest %}
@@ -139,7 +139,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
      [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[patient-id]
      ```
    
-   Note: The manifest URL includes all mandatory FHIR search parameters (_id, code, status) and the patient identifier via FHIR chained search on the patient parameter (patient.identifier=system|value). It optionally includes `_include=List:item` if the VHL Sharer supports the Include DocumentReference Option.
+   Note: The manifest URL includes all mandatory FHIR search parameters (_id, code, status) and the patient identifier via FHIR chained search on the patient parameter (patient.identifier=system\|value). It optionally includes `_include=List:item` if the VHL Sharer supports the Include DocumentReference Option.
 
 4. Create the SHL payload as a JSON object with:
    - `url`: the manifest URL from step 3
