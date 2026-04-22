@@ -7,7 +7,7 @@ CI build available at [ITI VHL](https://build.fhir.org/ig/IHE/ITI.VHL/branches/m
 First draft of Volume 1 is [in a google document](https://docs.google.com/document/d/1yidC89m90LsoYU89dkodLU2Wd8BBNAzjAchrRbO51uE/edit?tab=t.0)
 
 Below is a table summarizing the provided Verified Health Link (VHL) requirements, with columns for Requirement Name, Purpose, Actor(s), Key Actions, and Derived From.
-
+ 
 | Requirement Name | Purpose | Actor(s) | Key Actions | Derived From | Related Transaction |
 |------------------|---------|----------|-------------|--------------|--------------------|
 | InitiateVHLGenerationRequest | Request VHL generation with optional constraints. | VHL Holder | Initiate VHL generation request with parameters (e.g., expiration, scope). | - | YY1-GenerateVHL |
