@@ -17,7 +17,7 @@ Usage: #definition
   * min = 1
   * max = "1"
   * type = #Identifier
-  * documentation = "An identifier for the patient."
+  * documentation = "A FHIR Identifier (business identifier such as MRN, passport number, or national ID) that the VHL Sharer uses to locate the Patient record and that Patient's documents."
 * parameter[+]
   * name = #exp
   * use = #in

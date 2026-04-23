@@ -86,7 +86,7 @@ Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g.,
 
 | Query parameter Name | Cardinality | Type | Description |
 | -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| sourceIdentifier     | [1..1]    | token       | The Patient Identifier that will be used to find documents associated with the Patient |
+| sourceIdentifier     | [1..1]    | token  | A FHIR [Identifier](http://hl7.org/fhir/R4/datatypes.html#Identifier) (business identifier — e.g., MRN, passport number, national ID) that the VHL Sharer uses to locate the Patient record and that Patient's documents.|
 | exp      |  [0..1]  | integer        | Optional. Number representing expiration time in Epoch seconds, as a hint to help the SHL Receiving Application determine if this QR is stale. |
 | flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
 | label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the SHLink. |
@@ -103,6 +103,14 @@ Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g.,
 The {{linkvhls}} generates a QR code containing the VHL. The QR code is encoded as an HCERT/CWT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html) and contains the SHL payload embedded at claim key 5 within the hcert claim (claim key -260).
 
 The generation process is as follows:
+
+**sourceIdentifier Validation**
+
+Before generating the VHL, the {{ linkvhls }} SHALL:
+
+- Parse `sourceIdentifier` as a FHIR `Identifier` in `system|value` form, resolve it to a known Patient, and authorize the caller for that Patient — rejecting with an `OperationOutcome` (`400`, `404`, or `403` respectively) on failure.
+- In patient-constrained contexts (e.g., patient-facing app, SMART `launch/patient` scope), verify the `sourceIdentifier` resolves to the patient-in-context; reject mismatches with `403`.
+- Echo this exact `system|value` into the manifest URL as `patient.identifier` (see [VHL Payload Construction](#vhl-payload-construction) below) — never substitute a `Patient.id`.
 
 <a name="purpose-of-use-handling"></a>
 
@@ -127,6 +135,8 @@ If the `passcode` parameter is provided:
 4. The passcode itself SHALL NOT be included in the VHL URL or QR code
 5. The VHL Holder SHALL securely store the plaintext passcode for future use by the VHL Receiver during manifest retrieval
 
+<a name="vhl-payload-construction"></a>
+
 **VHL Payload Construction**
 
 The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html). The VHL Sharer SHALL:
@@ -138,14 +148,14 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 3. Construct the manifest URL as a query on the base List resource:
    - **If VHL Sharer supports the Include DocumentReference Option:**
      ```
-     [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[patient-id]&_include=List:item
+     [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[sourceIdentifier-system|value]&_include=List:item
      ```
    - **If VHL Sharer does NOT support the Include DocumentReference Option:**
      ```
-     [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[patient-id]
+     [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[sourceIdentifier-system|value]
      ```
    
-   Note: The manifest URL includes all mandatory FHIR search parameters (_id, code, status) and the patient identifier via FHIR chained search on the patient parameter (patient.identifier=system\|value). It optionally includes `_include=List:item` if the VHL Sharer supports the Include DocumentReference Option.
+   Note: The manifest URL includes all mandatory FHIR search parameters (_id, code, status) and the patient identifier via FHIR chained search on the patient reference parameter (`patient.identifier=system|value`). It optionally includes `_include=List:item` if the VHL Sharer supports the Include DocumentReference Option.
 
 4. Create the SHL payload as a JSON object with:
    - `url`: the manifest URL from step 3
@@ -224,7 +234,7 @@ The manifest URL constructed in step 3 SHALL include all mandatory FHIR search p
 - `_id`: The unique folder ID (required)
 - `code`: The List type, typically "folder" (required)
 - `status`: The List status, typically "current" (required)
-- `patient.identifier`: The patient identifier using FHIR chained search on the patient reference parameter, in system|value format (required)
+- `patient.identifier`: The patient identifier using FHIR chained search on the patient reference parameter, in `system|value` format (required). 
 - `_include=List:item`: Include DocumentReferences (optional - only if VHL Sharer supports Include DocumentReference Option)
 
 The VHL Receiver will use this exact manifest URL when performing the ITI-YY5 Retrieve Manifest transaction, adding the SHL manifest parameters (recipient, passcode, embeddedLengthMax) separately in Part 2 of the multipart request.

@@ -192,7 +192,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
      - `_id`: The folder ID
      - `code`: Typically "folder"
      - `status`: Typically "current"
-     - `patient.identifier`: Patient identifier via FHIR chained search on the patient reference parameter, in system|value format
+     - `patient.identifier`: Patient business identifier via FHIR chained search on the patient reference parameter, in `system|value` format. This is the same identifier the VHL Holder supplied as `sourceIdentifier` at [ITI-YY3](ITI-YY3.html).
      - `_include=List:item`: (if VHL Sharer supports Include DocumentReference Option)
    - Example: `https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item`
 

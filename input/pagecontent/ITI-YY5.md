@@ -120,8 +120,7 @@ The following FHIR search parameters are extracted from the manifest URL:
 | _id | token | [1..1] | The folder ID (with 256-bit entropy) from the VHL - primary authorization mechanism | `_id=abc123def456` |
 | code | token | [1..1] | The type of List (typically "folder") | `code=folder` |
 | status | token | [1..1] | The status of the List (typically "current") | `status=current` |
-| patient | reference | [0..1] | The patient whose documents are referenced; either patient or patient.identifier SHALL be included | `patient=Patient/9876` |
-| patient.identifier | token (chained) | [0..1] | FHIR chained search on the patient reference parameter; resolves the patient by identifier (system\|value) without requiring a direct Patient resource reference; either patient or patient.identifier SHALL be included | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
+| patient.identifier | token (chained) | [1..1] | FHIR chained search on the patient reference parameter; resolves the patient by business identifier (`system\|value`) without requiring a direct Patient resource reference. | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
 | identifier | token | [0..1] | Business identifier for the List | `identifier=folder-2024-001` |
 | _include | special | [0..1] | Include referenced DocumentReference resources; SHALL be "List:item" if used. Only processed if VHL Sharer supports Include DocumentReference Option | `_include=List:item` |
 {: .grid}
@@ -613,7 +612,7 @@ Per the [VHL Sharer Server Capability Statement](CapabilityStatement-VHLSharerCa
 - `_id` (token) - Required
 - `code` (token) - Required
 - `status` (token) - Required
-- `patient` (reference) OR `patient.identifier` (chained search on the patient reference parameter, token) - At least one required
+- `patient.identifier` (chained search on the patient reference parameter, token — `system|value`) - required. This is the same business identifier the VHL Holder supplied as `sourceIdentifier` at ITI-YY3. The direct `patient` reference parameter is not used in VHL manifest URLs.
 
 The {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL additionally support:
 - `_include=List:item` (special)
