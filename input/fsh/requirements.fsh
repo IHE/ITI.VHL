@@ -204,7 +204,7 @@ The submission MAY include metadata to support categorization of key usage (e.g.
 * statement[=].requirement = """
 Generate one or more private-public key pairs for use within the VHL trust network. Key pairs SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or secure channels) and MAY be categorized by business domain or participant role.
 """
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "prepare-submission-metadata"
 * statement[=].label = "Prepare Submission Metadata"
 * statement[=].requirement = """
@@ -214,18 +214,19 @@ Include relevant metadata to support validation and categorization. This MAY inc
 * Certificate validity period
 * Trust path information (e.g., issuing CA)
 """
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "submit-to-trust-anchor"
 * statement[=].label = "Submit to Trust Anchor"
 * statement[=].requirement = """
 Submit the public key material and associated metadata to the [Trust Anchor](ActorDefinition-TrustAnchor.html) using the designated secure channel for validation and trust list inclusion.
 """
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "support-future-distribution"
 * statement[=].label = "Support Future Distribution"
 * statement[=].requirement = """
 Ensure that the submitted PKI material can be validated, signed, and distributed by the Trust Anchor to other trust network participants through [Distribute PKI Material](Requirements-DistributePKIMaterial.html).
 """
+* statement[=].conformance = #SHALL
 
 Instance:   RespondtoSubmitPKIMaterialRequest
 InstanceOf: Requirements
