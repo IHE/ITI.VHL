@@ -27,9 +27,15 @@ Jurisdictions may also impose specific regulatory requirements on the privacy an
 
 As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} are expected to submit and retrieve PKI material—typically as signed **Trust Lists**—from the {{ linkta }}. The precise onboarding and credential issuance processes used to establish trust with the {{ linkta }} are implementation-specific and beyond the scope of this profile.
 
-> **Note on SMART Health Links (SHL):**
-
-> VHLs and SMART® Health Links (SHLs) are conceptually related but rely on fundamentally different trust assumptions. In the VHL model, a **pre-established trust relationship** exists between the {{ linkvhls }} and the {{ linkvhlr }}, verified via PKI material exchanged through Trust Lists. In contrast, SHL assumes **no prior trust** between the SHL Receiver and SHL Sharer. Instead, trust is conveyed at the time the SHL is presented, often using embedded JWS signatures and keys controlled by the SHL Sharer. See [Appendix A](vhl_vs_shl.html) for a more detailed comparison.
+> **Relationship to SMART® Health Links (SHL):**
+>
+> A VHL **adopts the SMART Health Links payload format** — the `url`, `key`, `flag`, `label`, `exp`, `v`, and `extension` fields defined in the [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html) — and reuses the SHL-defined manifest-request parameters (`recipient`, `passcode`, `embeddedLengthMax`). The **fundamental difference is the trust model**: VHL assumes a **pre-established trust relationship** between the {{ linkvhls }} and the {{ linkvhlr }}, verified via PKI material exchanged through Trust Lists, whereas SHL assumes **no prior trust** and conveys trust at presentation time via keys controlled by the SHL Sharer. See [Appendix A](vhl_vs_shl.html) for a side-by-side comparison.
+>
+> **Terminology used in this IG:**
+> - **VHL payload** — a concrete instance populated by the {{ linkvhls }} and carried by a VHL (inside an HCERT/CWT QR code, or inside a signed Verifiable Credential under the VC Envelope Option). Instance-level references in this IG say "VHL payload".
+> - **SHL payload format** / **SHL payload structure** — the schema (field names and shapes) that the VHL payload conforms to. Where this IG refers to the inherited schema itself, it uses "SHL payload format".
+> - **SHL-defined manifest parameters** — `recipient`, `passcode`, `embeddedLengthMax`, etc., as defined by the SHL specification and reused here.
+> - Actors in this IG are always the {{ linkvhlh }}, {{ linkvhls }}, and {{ linkvhlr }} — never "SHL Receiver" or "SHL Sharer" (those terms only appear in the comparison at Appendix A).
 
 
 <a name="actors-and-transactions"> </a>
@@ -308,8 +314,8 @@ This option provides:
 
 **How It Works:**
 
-When the {{ linkvhlr }} decodes the QR code (ITI-YY4), it extracts the SHL payload containing the manifest URL and metadata. The {{ linkvhlr }} constructs a self-issued LDP-VC in which:
-- The `credentialSubject` contains the manifest metadata from the SHL payload (excluding the encryption key), with `id` set to the manifest URL; SHL parameters (`recipient`, `passcode`, `embeddedLengthMax`) are also included in `credentialSubject`
+When the {{ linkvhlr }} decodes the QR code (ITI-YY4), it extracts the VHL payload containing the manifest URL and metadata. The {{ linkvhlr }} constructs a self-issued LDP-VC in which:
+- The `credentialSubject` contains the manifest metadata from the VHL payload (excluding the encryption key), with `id` set to the manifest URL; the SHL-defined manifest parameters (`recipient`, `passcode`, `embeddedLengthMax`) are also included in `credentialSubject`
 - An embedded **`proof`** element of type `DataIntegrityProof` is included with a `verificationMethod` resolving to the {{ linkvhlr }}'s key in the trust network, `proofPurpose` = `assertionMethod`, and a `proofValue` signature over the VC document — this is the cryptographic proof of the receiver's identity
 
 The VC (with embedded proof) is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`), with FHIR search parameters in the URL query string. No additional HTTP-level signing is required. The {{ linkvhls }} verifies the `proof.proofValue` using the {{ linkvhlr }}'s public key from the trust network before processing the request.
@@ -338,7 +344,7 @@ The following actor groupings are required for secure operations within the VHL 
 
 Note: The {{ linkvhlr }} and {{ linkvhls }} SHALL be grouped with ATNA Secure Node or Secure Application to support the secure channel requirements of the ITI-YY5 Retrieve Manifest transaction.
 
-Note: The {{ linkvhls }} SHALL be grouped with an MHD Document Responder so that the binary referenced from `DocumentReference.content.attachment.url` can be retrieved via [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). The {{ linkvhlr }} SHALL be grouped with an MHD Document Consumer to perform that retrieval. Document binaries are encrypted as JWE (`alg=dir`, `enc=A256GCM`) using the SHL `key` decoded by the {{ linkvhlr }} in ITI-YY4.
+Note: The {{ linkvhls }} SHALL be grouped with an MHD Document Responder so that the binary referenced from `DocumentReference.content.attachment.url` can be retrieved via [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). The {{ linkvhlr }} SHALL be grouped with an MHD Document Consumer to perform that retrieval. Document binaries are encrypted as JWE (`alg=dir`, `enc=A256GCM`) using the `key` from the VHL payload decoded by the {{ linkvhlr }} in ITI-YY4.
 
 <a name="overview"> </a>
 

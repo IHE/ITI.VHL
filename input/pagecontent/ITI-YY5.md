@@ -127,7 +127,7 @@ The following FHIR search parameters are extracted from the manifest URL:
 
 **SHL Manifest Request Parameters**
 
-In addition to the FHIR search parameters in the URL, the following SHL-specific parameters SHALL be included in the request body:
+In addition to the FHIR search parameters in the URL, the following SHL-defined manifest parameters (per the [SMART Health Links specification](http://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)) SHALL be included in the request body:
 
 | Parameter | Type | Cardinality | Description |
 |-----------|------|-------------|-------------|
@@ -332,7 +332,7 @@ Implementations that support the **Verifiable Credential Option** MAY use a self
 
 Before using the Verifiable Credential Option, the {{ linkvhlr }} SHALL:
 - Hold a key pair registered in the trust network (obtained via ITI-YY2 Retrieve Trust List with DID)
-- Have decoded the VHL (from QR code or from a Verifiable Credential per the VC Envelope Option) and extracted the SHL payload (manifest URL, flags, label, etc.) via ITI-YY4
+- Have decoded the VHL (from QR code or from a Verifiable Credential per the VC Envelope Option) and extracted the VHL payload (manifest URL, flags, label, etc.) via ITI-YY4
 
 **Self-Issued VC Construction:**
 
@@ -379,7 +379,7 @@ The {{ linkvhlr }} SHALL construct the VC as a JSON-LD document per the [W3C Ver
 | `issuanceDate` | Timestamp when the VC was created |
 | `expirationDate` | Expiration (SHALL be short-lived; recommended: 5 minutes from `issuanceDate`) |
 | `credentialSubject.id` | The manifest URL — binds the VC to the specific manifest decoded from the QR code |
-| `credentialSubject.manifest` | SHL payload fields from the QR code: MUST include `url`; SHOULD include `exp`, `flag`, `label`, `v`; SHALL NOT include the encryption `key` |
+| `credentialSubject.manifest` | VHL payload fields from the QR code: MUST include `url`; SHOULD include `exp`, `flag`, `label`, `v`; SHALL NOT include the encryption `key` |
 | `credentialSubject.recipient` | Identifier of the requesting organization or person (replaces SHL `recipient` body parameter) |
 | `credentialSubject.passcode` | User-provided passcode if the VHL is passcode-protected (replaces SHL `passcode` body parameter) |
 | `credentialSubject.embeddedLengthMax` | Optional size hint for embedded content (replaces SHL `embeddedLengthMax` body parameter) |
@@ -392,7 +392,7 @@ The {{ linkvhlr }} SHALL construct the VC as a JSON-LD document per the [W3C Ver
 | `proof.proofValue` | Multibase-encoded cryptographic signature over the VC document (computed with the {{ linkvhlr }}'s private key from the trust network) |
 {: .grid}
 
-> **Note:** The `proof.proofValue` is the sole cryptographic proof of the {{ linkvhlr }}'s identity. No outer JWT or HTTP Message Signature is needed. The `verificationMethod` resolves to the receiver's public key in the trust network (obtainable via ITI-YY2). The {{ linkvhls }} MUST verify this proof. The SHL encryption key (`key` field from the SHL payload) SHALL NOT appear anywhere in the VC.
+> **Note:** The `proof.proofValue` is the sole cryptographic proof of the {{ linkvhlr }}'s identity. No outer JWT or HTTP Message Signature is needed. The `verificationMethod` resolves to the receiver's public key in the trust network (obtainable via ITI-YY2). The {{ linkvhls }} MUST verify this proof. The VHL payload encryption key (`key` field from the VHL payload) SHALL NOT appear anywhere in the VC.
 
 **Request Structure:**
 
@@ -430,10 +430,10 @@ Accept: application/fhir+json
 
 **VC Issuance Process (VHL Receiver):**
 
-1. {{ linkvhlr }} decodes the QR code via ITI-YY4 and extracts the SHL payload (manifest URL, flags, label, expiration)
+1. {{ linkvhlr }} decodes the QR code via ITI-YY4 and extracts the VHL payload (manifest URL, flags, label, expiration)
 2. {{ linkvhlr }} constructs `credentialSubject`:
-   - `id` = manifest URL from the SHL payload
-   - `manifest` = SHL payload fields excluding the encryption key
+   - `id` = manifest URL from the VHL payload
+   - `manifest` = VHL payload fields excluding the encryption key
    - `recipient` = identifier of the requesting organization/person
    - `passcode` = user-provided passcode (if P flag in VHL)
    - `embeddedLengthMax` = optional size hint
@@ -466,7 +466,7 @@ Accept: application/fhir+json
 - The `proof.proofValue` SHALL be computed over the complete VC document per the W3C Data Integrity specification using the {{ linkvhlr }}'s private key from the trust network
 - `proof.verificationMethod` SHALL resolve to a key registered in the trust network (retrievable via ITI-YY2); VCs whose `verificationMethod` cannot be resolved SHALL be rejected
 - The VC SHALL be short-lived (`expirationDate`; recommended: 5 minutes maximum)
-- The SHL encryption key (`key` field from SHL payload) SHALL NOT appear in `credentialSubject.manifest`
+- The VHL payload encryption key (`key` field from the VHL payload) SHALL NOT appear in `credentialSubject.manifest`
 - Private keys SHALL be stored securely (Hardware Security Module recommended)
 
 ##### 2:3.YY5.4.1.6 Expected Actions - VHL Receiver
@@ -497,8 +497,8 @@ The {{ linkvhlr }} SHALL:
      - Include token in Authorization header
      - Reuse token for subsequent requests until expiration
    - **Option C - Verifiable Credential Option** (if supported):
-     - Extract SHL payload fields from the decoded QR code (manifest URL, flags, label, expiration)
-     - Construct LDP-VC with `credentialSubject.id` = manifest URL, `credentialSubject.manifest` = SHL fields (excluding encryption key), SHL params (`recipient`, `passcode`, `embeddedLengthMax`) in `credentialSubject`
+     - Extract VHL payload fields from the decoded QR code (manifest URL, flags, label, expiration)
+     - Construct LDP-VC with `credentialSubject.id` = manifest URL, `credentialSubject.manifest` = VHL payload fields (excluding encryption key), SHL manifest parameters (`recipient`, `passcode`, `embeddedLengthMax`) in `credentialSubject`
      - Compute `proof.proofValue` (DataIntegrityProof) over the VC document using trust network private key
      - Set `proof.verificationMethod` to the DID URL of the receiver's trust network key
      - POST the complete VC as `Content-Type: application/vc+ld+json` body; place FHIR search parameters in URL query string
@@ -868,7 +868,7 @@ The {{ linkvhlr }} SHALL:
 - Parse the Bundle and distinguish List vs. DocumentReference resources by `search.mode`.
 - **If the Bundle does NOT contain DocumentReference resources** (Example A): for each `List.entry[].item.reference`, perform a FHIR read against the {{ linkvhls }} to obtain the DocumentReference metadata.
 - For each DocumentReference, retrieve the binary by dereferencing `content.attachment.url` per [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval), reusing the same authentication option chosen for this ITI-YY5 session.
-- Decrypt the retrieved binary using the SHL `key` cached from ITI-YY4, per [Document Encryption](#23yy5425-document-encryption).
+- Decrypt the retrieved binary using the `key` from the VHL payload cached from ITI-YY4, per [Document Encryption](#23yy5425-document-encryption).
 - Verify that the decrypted payload's media type matches `DocumentReference.content.attachment.contentType`.
 
 The {{ linkvhlr }} MAY:
@@ -886,7 +886,7 @@ The binary retrieval SHALL conform to the IHE MHD **[Retrieve Document [ITI-68]]
 - **Transport:** Same ATNA secure channel used for ITI-YY5.
 - **Authentication:** The {{ linkvhlr }} SHALL reuse the same authentication option chosen for the originating ITI-YY5 request (HTTP Message Signatures, OAuth with SSRAA, or Verifiable Credential). A {{ linkvhlr }} SHALL NOT mix options across the manifest and binary retrievals of a single VHL session.
 - **Response Content-Type:**
-  - `application/jose` when the binary is encrypted per [Document Encryption](#23yy5425-document-encryption) (the default for VHL flows where the SHL payload carries a `key`).
+  - `application/jose` when the binary is encrypted per [Document Encryption](#23yy5425-document-encryption) (the default for VHL flows where the VHL payload carries a `key`).
   - The `DocumentReference.content.attachment.contentType` value when the binary is not encrypted.
 
 A {{ linkvhls }} that supports ITI-YY5 SHALL be grouped with an MHD **Document Responder** so that ITI-68 GETs against `attachment.url` succeed. A {{ linkvhlr }} SHALL be grouped with an MHD **Document Consumer**.
@@ -918,12 +918,12 @@ VHL document binaries are encrypted following the [SMART Health Links — Encryp
 - **Serialization:** JWE Compact Serialization per RFC 7516.
 - **Key management (`alg`):** `dir` — direct use of a shared symmetric key (no key wrapping).
 - **Content encryption (`enc`):** `A256GCM` — AES-256 in Galois/Counter Mode with a 96-bit IV and 128-bit authentication tag.
-- **Symmetric key:** The 32-byte (256-bit) value carried as `key` in the SHL payload generated by [ITI-YY3](ITI-YY3.html) and decoded by the {{ linkvhlr }} in [ITI-YY4](ITI-YY4.html). The receiver caches this key for the duration of the VHL session.
+- **Symmetric key:** The 32-byte (256-bit) value carried as `key` in the VHL payload generated by [ITI-YY3](ITI-YY3.html) and decoded by the {{ linkvhlr }} in [ITI-YY4](ITI-YY4.html). The receiver caches this key for the duration of the VHL session.
 
 **Scope:**
 - Encryption SHALL be applied to the document binary at `DocumentReference.content.attachment.url`. It is independent of the **Include DocumentReference Option** — the option only controls whether DocumentReference *metadata* is bundled into the manifest response.
 - `DocumentReference.content.attachment.contentType` SHALL describe the **decrypted** payload (e.g. `application/fhir+json`, `application/pdf`). The encrypted transport representation is signalled by the `application/jose` Content-Type on the ITI-68 response.
-- An unencrypted variant is permitted only when the originating SHL payload was generated without a `key` (matching SHL semantics). VHL flows generated per ITI-YY3 always include a `key` and therefore always encrypt.
+- An unencrypted variant is permitted only when the originating VHL payload was generated without a `key` (matching SHL payload format semantics). VHL flows generated per ITI-YY3 always include a `key` and therefore always encrypt.
 
 **Example — JWE Compact Serialization (illustrative, truncated):**
 
@@ -940,7 +940,7 @@ XFBoMYUZodetZdvTiFvSkQ
 
 The protected header decodes to `{"alg":"dir","enc":"A256GCM"}`. The empty second segment reflects `alg=dir` (no encrypted key).
 
-**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached SHL `key` and the protected header as Additional Authenticated Data (per RFC 7516 §5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
+**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached VHL payload `key` and the protected header as Additional Authenticated Data (per RFC 7516 §5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
 
 ### 2:3.YY5.5 Security Considerations
 
@@ -1020,7 +1020,7 @@ Implementations that support the Verifiable Credential Option SHALL:
 - Resolve `proof.verificationMethod` against the trust network (ITI-YY2); reject VCs whose `verificationMethod` cannot be resolved to a trusted key
 - Issue short-lived VCs (`expirationDate`; recommended: 5 minutes maximum)
 - Bind the VC to the specific manifest via `credentialSubject.id` (set to the manifest URL matching the `_id` URL query parameter)
-- Exclude the SHL payload encryption key from `credentialSubject.manifest`
+- Exclude the VHL payload encryption key from `credentialSubject.manifest`
 - Store private keys securely (Hardware Security Module recommended)
 - Reject VCs whose `credentialSubject.id` does not match the `_id` URL query parameter
 

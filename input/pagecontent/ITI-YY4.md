@@ -17,7 +17,7 @@
 
 The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
-The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Envelope Option](ITI-YY3.html#23yy343-vc-envelope-option) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc+ld+json`). VHL Receivers scan the QR code or parse the VC to extract the SHL payload for subsequent document retrieval.
+The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Envelope Option](ITI-YY3.html#23yy343-vc-envelope-option) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc+ld+json`). VHL Receivers scan the QR code or parse the VC to extract the VHL payload for subsequent document retrieval.
 
 ### 2:3.YY4.2 Actor Roles
 
@@ -68,7 +68,7 @@ The VHL payload structure is defined in [ITI-YY3](ITI-YY3.html) and aligns with 
 The VHL is transmitted via QR code with the following characteristics:
 - VHL encoded as HCERT QR code with `HC1:` prefix
 - Suitable for in-person encounters, walk-in clinics, emergency departments
-- QR code contains HCERT/CWT structure with embedded SHL payload
+- QR code contains HCERT/CWT structure with embedded VHL payload
 - Can be displayed on screen or printed on paper
 - Minimum recommended diagonal size: 35-60mm
 
@@ -77,7 +77,7 @@ The VHL is transmitted via QR code with the following characteristics:
 When the VHL Sharer supports the [VC Envelope Option](ITI-YY3.html#23yy343-vc-envelope-option), the VHL MAY alternatively be transmitted as a signed JSON-LD Verifiable Credential:
 - Conveyed as `application/vc+ld+json` via any channel that preserves JSON (HTTPS, email attachment, file transfer, NFC with a capable reader)
 - Not imaged/scanned — conveyed as a file or blob
-- The VC carries the SHL payload under `credentialSubject` and is signed by the VHL Sharer with a `DataIntegrityProof` (`ecdsa-2019`)
+- The VC carries the VHL payload under `credentialSubject` and is signed by the VHL Sharer with a `DataIntegrityProof` (`ecdsa-2019`)
 - Suitable for machine-to-machine transfer and asynchronous delivery scenarios where QR presentation is impractical
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
@@ -144,21 +144,21 @@ Upon receiving a VHL via QR code, the VHL Receiver SHALL perform the following 9
    - Validate `exp` - reject if current time > expiration
    - Validate `iat` is not in the future
 
-8. **Extract SHL Payload from HCERT**:
+8. **Extract VHL Payload from HCERT**:
    - Within the `hcert` claim (claim key -260), locate claim key 5
-   - Claim key 5 contains the SHL payload object with:
+   - Claim key 5 contains the VHL payload (conforming to the SHL payload format) with:
      - `url`: manifest URL (required) - includes all mandatory FHIR search parameters
      - `key`: base64url-encoded decryption key, 43 characters (required). The {{ linkvhlr }} caches this key for the VHL session and uses it as the symmetric key for JWE `dir`/`A256GCM` decryption of document binaries retrieved via [ITI-68](https://profiles.ihe.net/ITI/MHD/ITI-68.html); see [ITI-YY5 Document Encryption](ITI-YY5.html#23yy5425-document-encryption).
      - `flag`: flags such as "L" for long-term, "P" for passcode (optional)
      - `label`: human-readable description (optional)
      - `exp`: expiration timestamp in seconds since epoch (optional)
      - `v`: version number (optional)
-   - Validate SHL payload structure conforms to SMART Health Links specification
+   - Validate VHL payload structure conforms to the SHL payload format (per the SMART Health Links specification)
 
-9. **Validate SHL Payload**:
+9. **Validate VHL Payload**:
    - Verify `url` field is present and is a valid HTTPS URL
    - Verify `key` field is present and is 43 characters (base64url-encoded 32 bytes)
-   - Check SHL `exp` (if present) - reject if current time > expiration
+   - Check the payload's `exp` (if present) - reject if current time > expiration
    - Note `flag` value:
      - "L" indicates long-term use
      - "P" indicates passcode required (obtain from VHL Holder)
@@ -172,8 +172,8 @@ When the VHL is received as a Verifiable Credential instead of a QR code, the VH
 1. **Parse VC**: Parse the received bytes as a JSON-LD document per [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/). Reject if the media type is not `application/vc+ld+json` or parsing fails.
 2. **Verify DataIntegrityProof**: Resolve the `proof.verificationMethod` to the VHL Sharer's key via the trust list (same DSC/trust framework used for CWT verification), then verify the `DataIntegrityProof` per [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/). Reject if the proof is invalid or the issuer is untrusted.
 3. **Validate Dates**: Reject if `expirationDate` has passed or `issuanceDate` is in the future.
-4. **Extract SHL Payload**: Read the SHL payload fields (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`) directly from `credentialSubject` — these are the same fields otherwise embedded at HCERT claim key 5.
-5. **Validate SHL Payload**: Apply the same validation as step 9 above (valid HTTPS `url`, 43-character `key`, `exp` not passed, flag handling).
+4. **Extract VHL Payload**: Read the VHL payload fields (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`) directly from `credentialSubject` — these are the same fields otherwise embedded at HCERT claim key 5.
+5. **Validate VHL Payload**: Apply the same validation as step 9 above (valid HTTPS `url`, 43-character `key`, `exp` not passed, flag handling).
 
 The VHL Receiver then continues with Post-Decoding Actions below as in the QR code path.
 
@@ -182,12 +182,12 @@ The VHL Receiver then continues with Post-Decoding Actions below as in the QR co
 After successfully decoding the VHL payload (from either QR code or VC), the VHL Receiver SHALL:
 
 1. **Store Decryption Key Securely**:
-   - The `key` parameter from the SHL payload is required to decrypt documents
+   - The `key` parameter from the VHL payload is required to decrypt documents
    - Store the key securely in memory for the session
    - The key will be used during document retrieval (ITI-YY6) to decrypt document contents
 
 2. **Parse Manifest URL**:
-   - Extract the manifest URL from the SHL payload
+   - Extract the manifest URL from the VHL payload
    - The URL format from ITI-YY3 includes mandatory FHIR search parameters:
      - `_id`: The folder ID
      - `code`: Typically "folder"
@@ -201,7 +201,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
      - **Part 1 (fhir-parameters):** FHIR search parameters from the manifest URL
      - **Part 2 (shl-parameters):** JSON object with `recipient`, `passcode` (if P flag), `embeddedLengthMax`
      - **Part 3 (signature):** Optional digital signature over Parts 1 and 2
-   - Store manifest URL and prepare SHL parameters for ITI-YY5 request
+   - Store manifest URL and prepare the SHL-defined manifest parameters (per the SMART Health Links spec) for the ITI-YY5 request
 
 The VHL Receiver MAY:
 - Prompt user for passcode if "P" flag is present (required for ITI-YY5)
@@ -225,7 +225,7 @@ Step 6: Extract CWT claims:
   - iat (claim 6): 1704067200
   - exp (claim 4): 1735689600
   - hcert (claim -260): {...}
-Step 7: Within hcert (claim -260), extract claim key 5 (SHL payload):
+Step 7: Within hcert (claim -260), extract claim key 5 (VHL payload):
   {
     "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
     "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
@@ -234,14 +234,14 @@ Step 7: Within hcert (claim -260), extract claim key 5 (SHL payload):
     "label": "Patient Health Summary",
     "v": 1
   }
-Step 8: Validate SHL payload fields
+Step 8: Validate VHL payload fields
 Step 9: Parse manifest URL to extract FHIR search parameters
 Step 10: Prepare for ITI-YY5 Retrieve Manifest with 3-part multipart request
 ```
 
 **Manifest URL Parsing:**
 
-The manifest URL from the SHL payload contains all parameters needed for ITI-YY5 Part 1 (fhir-parameters):
+The manifest URL from the VHL payload contains all parameters needed for ITI-YY5 Part 1 (fhir-parameters):
 
 ```
 URL: https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
@@ -278,7 +278,7 @@ If signature verification fails:
 - VHL Receiver SHOULD inform user/operator
 - VHL Receiver MAY log failed verification
 
-If VHL expired (either exp in CWT or SHL payload):
+If VHL expired (either exp in CWT or VHL payload):
 - VHL Receiver SHALL reject the VHL
 - VHL Receiver SHOULD inform user/operator
 - User may request new VHL from VHL Holder
@@ -324,7 +324,7 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 - Encryption key in VHL enables document decryption (ITI-YY6)
 
 #### 2:3.YY4.5.3 Replay Attacks
-- VHL Sharers SHOULD include expiration timestamps in both CWT and SHL payload
+- VHL Sharers SHOULD include expiration timestamps in both CWT and VHL payload
 - VHL Receivers SHOULD enforce expiration validation
 - VHL Sharers MAY implement single-use VHLs
 - Short expiration times reduce replay attack window
@@ -360,7 +360,7 @@ VHL Receivers SHALL:
 #### 2:3.YY4.5.7 VC Envelope Option Security
 When the VHL is carried as a Verifiable Credential:
 - The `DataIntegrityProof` SHALL chain to a trust anchor in the trust list (same framework used for CWT/HCERT verification)
-- The VC `expirationDate` and SHL `exp` SHALL both be honored — VHL Receivers SHALL reject if either has passed
+- The VC `expirationDate` and the VHL payload's `exp` SHALL both be honored — VHL Receivers SHALL reject if either has passed
 - Confidentiality is equivalent to the QR form: the VC carries the decryption `key` and MUST be treated as sensitive
 - VHL Sharers SHOULD issue VCs with short lifetimes; single-use VCs are RECOMMENDED for high-security scenarios
 

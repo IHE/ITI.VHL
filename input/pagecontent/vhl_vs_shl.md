@@ -6,6 +6,8 @@ SMART Health Links are designed for lightweight, ad hoc scenarios where patients
 
 Verified Health Links, in contrast, are built for regulated environments—such as national health systems or cross-jurisdictional exchanges—where trust must be pre-established. VHL relies on X.509-based PKI, mutual TLS (mTLS), and digital signatures anchored to a formal Trust Anchor. Access is gated by participant authorization, and consent and audit logging are supported options, not afterthoughts.
 
+**Shared payload format.** It is important to note that **VHL reuses the SMART Health Links payload format** (the `url`, `key`, `flag`, `label`, `exp`, `v`, and `extension` fields) and the SHL-defined manifest-request parameters (`recipient`, `passcode`, `embeddedLengthMax`). The comparison below is therefore not a comparison of payload shapes — it is a comparison of the **trust, security, and governance model** layered on top of that shared payload. Elsewhere in this IG, a concrete populated instance is called a **VHL payload**; the schema it conforms to is called the **SHL payload format**.
+
 ## How to Read This Table
 
 Each row in the table compares the two frameworks along a specific technical or policy dimension (e.g., “Transmission Method”, “Audit Logging”). Each column contains:

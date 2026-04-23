@@ -253,7 +253,7 @@ Source: sections 2:3.YY2.4.1 (Request Message) and 2:3.YY2.4.2.3 (Initiator Expe
 * testCase[=].testRun[+].narrative = """
 **ITI-YY3 VHL Sharer Responder Expected Actions** – Verifies the complete VHL generation
 pipeline: passcode hashing (bcrypt/Argon2/PBKDF2), folder ID (256-bit entropy) and 32-byte
-encryption key generation, SHL payload construction (url/key/flag/v), mandatory manifest URL
+encryption key generation, VHL payload construction (url/key/flag/v), mandatory manifest URL
 parameters, HCERT/CWT encoding (COSE signing → ZLIB → Base45 → HC1: prefix), QR code
 generation (ISO/IEC 18004:2015 Alphanumeric mode Q), and error OperationOutcome responses.
 Source: sections 2:3.YY3.4.1.3 (Responder Expected Actions) and 2:3.YY3.4.2 (Response Message).
@@ -426,7 +426,7 @@ Source: sections 2:3.YY2.4.1, 2:3.YY2.4.2.3, and 2:3.YY2.5.
 * testCase[=].testRun[+].narrative = """
 **ITI-YY4 Message Semantics** – Verifies the VHL QR code message format: ISO/IEC 18004:2015
 Alphanumeric mode, HC1: prefix, Base45 encoding, ZLIB/DEFLATE compression, CWT structure
-(protected header: alg/kid, claims: exp/iat/hcert), and SHL payload fields (url/key/flag/exp).
+(protected header: alg/kid, claims: exp/iat/hcert), and VHL payload fields (url/key/flag/exp).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
@@ -439,7 +439,7 @@ Alphanumeric mode, HC1: prefix, Base45 encoding, ZLIB/DEFLATE compression, CWT s
 **ITI-YY4 VHL Receiver Responder Expected Actions** – Verifies the complete nine-step decode
 pipeline: QR scanning (ISO/IEC 18004:2015), HC1: verification, Base45 decoding, ZLIB
 decompression, CWT parsing (RFC 8392), COSE signature verification (RFC 8152) using the
-trust list, CWT claims validation (exp/iat), hcert extraction (claim key -260 / 5), and SHL
+trust list, CWT claims validation (exp/iat), hcert extraction (claim key -260 / 5), and VHL
 payload validation (url/key/flag/exp). Also covers post-decoding actions, all decode failure
 rejections, and optional acknowledgment.
 Source: sections 2:3.YY4.4.1.4 (Receiver Expected Actions) and 2:3.YY4.5 (Security).
@@ -582,7 +582,7 @@ Verifiable Health Links (VHL) profile.
 
 Scope: validates multi-actor, cross-transaction scenarios that span ITI-YY3 (Generate VHL),
 ITI-YY4 (Provide VHL), and ITI-YY5 (Retrieve Manifest). Tests verify that the QR code
-generated in YY3 can be decoded in YY4, that the decoded SHL payload's manifest URL is used
+generated in YY3 can be decoded in YY4, that the decoded VHL payload's manifest URL is used
 correctly in YY5, and that the full end-to-end pipeline including passcode handling, signature
 verification, and VHL authorization succeeds.
 
@@ -602,7 +602,7 @@ Execute all scenarios in the Gherkin integration feature file
 
 Scenario groups:
 - **Group A – VHL Generation (YY3):** VHL Holder requests VHL; VHL Sharer generates a valid
-  HCERT-signed QR code; SHL payload URL is verifiable; passcode is retained by VHL Holder.
+  HCERT-signed QR code; VHL payload URL is verifiable; passcode is retained by VHL Holder.
 - **Group B – QR Presentation and Decoding (YY4):** VHL Receiver decodes the QR code
   generated in Group A using the trust list; COSE signature verified; decoded manifest URL
   matches the YY5 endpoint; passcode is obtained from VHL Holder when P flag is present.

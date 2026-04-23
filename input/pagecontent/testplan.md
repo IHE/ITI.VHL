@@ -29,7 +29,7 @@ The VHL Sharer SHALL be tested for its ability to process `$generate-vhl` operat
 
 #### VHL Decoding and Verification
 
-The VHL Receiver SHALL be tested for its ability to correctly perform the full VHL decoding process [ITI-YY4]: scanning the QR code, verifying the HC1: prefix, Base45 decoding, ZLIB/DEFLATE decompression, CBOR Web Token (CWT) parsing, COSE digital signature verification, CWT claims validation, SHL payload extraction, and SHL payload validation.
+The VHL Receiver SHALL be tested for its ability to correctly perform the full VHL decoding process [ITI-YY4]: scanning the QR code, verifying the HC1: prefix, Base45 decoding, ZLIB/DEFLATE decompression, CBOR Web Token (CWT) parsing, COSE digital signature verification, CWT claims validation, VHL payload extraction, and VHL payload validation.
 
 #### Manifest Retrieval
 
@@ -45,7 +45,7 @@ Testing of actor options includes:
 - **Verifiable Credential Option** - VHL Receiver self-issues a JSON-LD LDP-VC (W3C VC Data Model v2) whose `credentialSubject` is the manifest decoded from the QR code, with an embedded `DataIntegrityProof` signed with its trust network key. The VC is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`) with FHIR search parameters in the URL. VHL Sharer verifies the `proof.proofValue` using the receiver's public key from the trust network and confirms that `credentialSubject.id` matches the `_id` URL parameter. Testing SHALL include:
   - Correct LDP-VC construction: `@context` = `https://www.w3.org/ns/credentials/v2`, required `type`, `issuer`, `issuanceDate`, `expirationDate`, `credentialSubject`, and `proof` fields
   - Correct `proof` element: `type` = `DataIntegrityProof`, valid `cryptosuite` (`ecdsa-2019` or `eddsa-2022`), `proofPurpose` = `assertionMethod`, `verificationMethod` DID URL, and correct `proofValue` computed over the VC document
-  - Correct `credentialSubject` binding: `id` = manifest URL, `manifest` = SHL payload fields (excluding encryption key), `recipient`, `passcode` (if applicable), `embeddedLengthMax`
+  - Correct `credentialSubject` binding: `id` = manifest URL, `manifest` = VHL payload fields (excluding encryption key), `recipient`, `passcode` (if applicable), `embeddedLengthMax`
   - Correct request format: FHIR search parameters in URL query string; VC as `application/vc+ld+json` body
   - VHL Sharer acceptance of a valid VC with valid `proof.proofValue` from a receiver whose key is in the trust network
   - VHL Sharer rejection of VCs with: invalid `proof.proofValue`, unresolvable `proof.verificationMethod`, expired `expirationDate`, `credentialSubject.id` mismatch with URL `_id`
