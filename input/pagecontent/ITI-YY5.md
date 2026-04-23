@@ -228,7 +228,7 @@ The following signature algorithms SHALL be supported:
 
 ##### 2:3.YY5.4.1.4 Authentication option - OAuth with SSRAA Option
 
-Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 access tokens for authentication instead of HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA).
+Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 access tokens for authentication instead of HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). The following workflow description is informative only, and does not take precedence over underlying requirements from the HL7 Security for Scalable Registration, Authentication, and Authorization IG.
 
 **Preconditions: SSRAA Discovery and Registration**
 
@@ -254,9 +254,11 @@ Host: authorization-server.example.org
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=client_credentials
-&scope=system/List.r system/DocumentReference.r system/Binary.r
+&scope=system/List.s system/DocumentReference.r system/Binary.r
 &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
-&client_assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InJlY2VpdmVyLWtleS0xMjMifQ.eyJpc3MiOiJodHRwczovL3ZobC1yZWNlaXZlci5leGFtcGxlLm9yZyIsInN1YiI6Imh0dHBzOi8vdmhsLXJlY2VpdmVyLmV4YW1wbGUub3JnIiwiYXVkIjoiaHR0cHM6Ly9hdXRob3JpemF0aW9uLXNlcnZlci5leGFtcGxlLm9yZyIsImV4cCI6MTczNTY4OTkwMCwiaWF0IjoxNzM1Njg5NjAwLCJqdGkiOiJyYW5kb20tdW5pcXVlLWlkIn0.signature-here
+&client_assertion=eyJhbGciOiJSUzI1NiIsIng1YyI6WyJNSUkuLi4iLCJNSUkuLi4iXX0.eyJpc3MiOiI2QjlFRkQ3NDg4MkM0RTZDQjVFNTYxOUU4MjFDNTBGQSIsInN1YiI6IjZCOUVGRDc0ODgyQzRFNkNCNUU1NjE5RTgyMUM1MEZBIiwiYXVkIjoiaHR0cHM6Ly9hdXRob3JpemF0aW9uLXNlcnZlci5leGFtcGxlLm9yZy90b2tlbiIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoxNzM1Njg5OTAwLCJqdGkiOiJyYW5kb20tdW5pcXVlLWlkIiwiZXh0ZW5zaW9ucyI6eyJobDctYjJiIjp7InZlcnNpb24iOiIxIiwib3JnYW5pemF0aW9uX2lkIjoiaHR0cHM6Ly9kaXJlY3RvcnkuZXhhbXBsZS5vcmcvT3JnYW5pemF0aW9uL3ZobC1yZWNlaXZlci1pZCIsInB1cnBvc2Vfb2ZfdXNlIjoidXJuOm9pZDoyLjE2Ljg0MC4xLjExMzg4My4zLjE4LjcuMSNTWVNERVYifX19.signature-here
+
+
 ```
 
 **JWT Client Assertion:**
@@ -279,7 +281,7 @@ grant_type=client_credentials
   "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2F1dGhvcml6YXRpb24tc2VydmVyLmV4YW1wbGUub3JnIiwic3ViIjoiaHR0cHM6Ly92aGwtcmVjZWl2ZXIuZXhhbXBsZS5vcmciLCJleHAiOjE3MzU2OTMyMDAsImlhdCI6MTczNTY4OTYwMCwic2NvcGUiOiJzeXN0ZW0vTGlzdC5yZWFkIHN5c3RlbS9Eb2N1bWVudFJlZmVyZW5jZS5yZWFkIHN5c3RlbS9CaW5hcnkucmVhZCJ9.token-signature-here",
   "token_type": "Bearer",
   "expires_in": 3600,
-  "scope": "system/List.r system/DocumentReference.r system/Binary.r"
+  "scope": "system/List.s system/DocumentReference.r system/Binary.r"
 }
 ```
 
@@ -308,18 +310,17 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 
 - Grant Type: `client_credentials`
 - Client Authentication: `private_key_jwt` (JWT client assertion)
-- Required Scopes (SMART v2 vocabulary; specific scope requirements are determined by trust community policies per the HL7 Security for Scalable Registration, Authentication, and Authorization IG):
-  - `system/List.r` - Read List resources
+- Required Scopes (SMART v2 vocabulary use is illustrative; specific scope requirements are determined by trust community policies per the HL7 Security for Scalable Registration, Authentication, and Authorization IG):
+  - `system/List.s` - Search for List resources
   - `system/DocumentReference.r` - Read DocumentReference resources
   - `system/Binary.r` - Read Binary resources (document content)
 - Token Lifetime: Typically 1 hour (3600 seconds)
-- Token Reuse: Access token MAY be reused for multiple requests until expiration
+- Token Reuse: Access token MAY be reused for multiple requests until expiration, consistent with underlying requirements from the HL7 Security for Scalable Registration, Authentication, and Authorization IG.
 
 **Security Considerations for OAuth:**
 
 - JWT client assertions SHALL be signed with the receiver's private key associated with the receiver's X.509 certificate within the trust community
 - JWT `jti` claim SHOULD be checked to prevent replay attacks
-- Access tokens SHALL include appropriate FHIR scopes
 - Access tokens SHALL be validated for signature, expiration, and scope
 - Token lifetime SHOULD be limited (recommended: 1 hour maximum)
 - Authorization server SHALL validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
