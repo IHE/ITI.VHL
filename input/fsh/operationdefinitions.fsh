@@ -16,13 +16,15 @@ Usage: #definition
   * use = #in
   * min = 1
   * max = "1"
-  * type = #Identifier
-  * documentation = "A FHIR Identifier (business identifier such as MRN, passport number, or national ID) that the VHL Sharer uses to locate the Patient record and that Patient's documents."
+  * type = #string
+  * searchType = #token
+  * documentation = "A FHIR Identifier (business identifier such as MRN, passport number, or national ID) that the VHL Sharer uses to locate the Patient record and that Patient's documents. Serialized as a FHIR token search parameter (`system|code`, e.g., `urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123`)."
 * parameter[+]
   * name = #exp
   * use = #in
   * min = 0
   * max = "1"
+  * searchType = #number
   * type = #integer
   * documentation = "Optional. Number representing expiration time in Epoch seconds, as a hint to help the VHL Receiver determine if this QR is stale."
 * parameter[+]
@@ -30,6 +32,7 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "1"
+  * searchType = #string
   * type = #string
   * documentation = "Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required)"
 * parameter[+]
@@ -37,6 +40,7 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "1"
+  * searchType = #string
   * type = #string
   * documentation = "Optional. String no longer than 80 characters that provides a short description of the data behind the VHL."
 * parameter[+]
@@ -44,6 +48,7 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "1"
+  * searchType = #string
   * type = #string
   * documentation = "Optional. User-supplied passcode for passcode-protected VHLs. If provided, the VHL Sharer SHALL securely hash and store this passcode for validation during manifest retrieval (ITI-YY5). The 'P' flag SHALL be included in the flag parameter when a passcode is set."
 * parameter[+]
@@ -51,6 +56,7 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "*"
+  * searchType = #token
   * type = #CodeableConcept
   * binding.strength = #extensible
   * binding.valueSet = "http://terminology.hl7.org/ValueSet/v3-PurposeOfUse"
@@ -60,6 +66,7 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "1"
+  * searchType = #string
   * type = #code
   * documentation = "Optional. Requested carrier for the returned VHL. Allowed values: 'qrcode' (default - HCERT/CWT QR code) or 'vc' (W3C Verifiable Credential). The 'vc' value requires the VHL Sharer to support the VC Enveloped VHL Option; if unsupported, the VHL Sharer SHALL return an OperationOutcome error. If omitted, the VHL Sharer SHALL default to 'qrcode'."
 * parameter[+]
