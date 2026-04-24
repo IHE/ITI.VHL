@@ -61,7 +61,7 @@ Usage: #definition
   * min = 0
   * max = "1"
   * type = #code
-  * documentation = "Optional. Requested carrier for the returned VHL. Allowed values: 'qrcode' (default - HCERT/CWT QR code) or 'vc' (W3C Verifiable Credential). The 'vc' value requires the VHL Sharer to support the VC Envelope Option; if unsupported, the VHL Sharer SHALL return an OperationOutcome error. If omitted, the VHL Sharer SHALL default to 'qrcode'."
+  * documentation = "Optional. Requested carrier for the returned VHL. Allowed values: 'qrcode' (default - HCERT/CWT QR code) or 'vc' (W3C Verifiable Credential). The 'vc' value requires the VHL Sharer to support the VC Enveloped VHL Option; if unsupported, the VHL Sharer SHALL return an OperationOutcome error. If omitted, the VHL Sharer SHALL default to 'qrcode'."
 * parameter[+]
   * name = #qrcode
   * use = #out
@@ -75,6 +75,6 @@ Usage: #definition
   * min = 0
   * max = "1"
   * type = #Binary
-  * documentation = "A Binary resource (contentType application/vc+ld+json) containing a W3C Verifiable Credential that carries the VHL. Populated only when format='vc' and the VHL Sharer supports the VC Envelope Option.\n\nThe VC is a JSON-LD document per the W3C Verifiable Credentials Data Model v2 with an embedded proof of type DataIntegrityProof (cryptosuite ecdsa-2019) per W3C Verifiable Credential Data Integrity 1.0. The VC is issued and signed by the VHL Sharer using its trust-network key (same DSC/key material used for HCERT/CWT signing), so the VHL Receiver validates the VC proof against the trust list via the existing trust framework (no new trust mechanism introduced).\n\nThe credentialSubject carries the VHL payload (conforming to the SHL payload format) with the same fields that are otherwise embedded at HCERT claim key 5 (url, key, flag, label, exp, v, extension). Exactly one of qrcode or verifiableCredential SHALL be populated.\n\nFor details see ITI-YY3 VC Envelope Option."
+  * documentation = "A Binary resource (contentType application/vc+ld+json) containing a W3C Verifiable Credential that carries the VHL. Populated only when format='vc' and the VHL Sharer supports the VC Enveloped VHL.\n\nThe VC is a JSON-LD document per the W3C Verifiable Credentials Data Model v2 with an embedded proof of type DataIntegrityProof (cryptosuite ecdsa-2019) per W3C Verifiable Credential Data Integrity 1.0. The VC is issued and signed by the VHL Sharer using its trust-network key (same DSC/key material used for HCERT/CWT signing), so the VHL Receiver validates the VC proof against the trust list via the existing trust framework (no new trust mechanism introduced).\n\nThe credentialSubject carries the VHL payload (conforming to the SHL payload format) with the same fields that are otherwise embedded at HCERT claim key 5 (url, key, flag, label, exp, v, extension). Exactly one of qrcode or verifiableCredential SHALL be populated.\n\nFor details see ITI-YY3 VC Enveloped VHL."
 
 

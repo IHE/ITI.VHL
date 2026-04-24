@@ -17,7 +17,7 @@
 
 The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
-The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Envelope Option](ITI-YY3.html#23yy343-vc-envelope-option) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc+ld+json`). VHL Receivers scan the QR code or parse the VC to extract the VHL payload for subsequent document retrieval.
+The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#23yy343-vc-enveloped-vhl-option) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc+ld+json`). VHL Receivers scan the QR code or parse the VC to extract the VHL payload for subsequent document retrieval.
 
 ### 2:3.YY4.2 Actor Roles
 
@@ -72,9 +72,9 @@ The VHL is transmitted via QR code with the following characteristics:
 - Can be displayed on screen or printed on paper
 - Minimum recommended diagonal size: 35-60mm
 
-**Verifiable Credential Transmission (VC Envelope Option)**
+**Verifiable Credential Transmission (VC Enveloped VHL)**
 
-When the VHL Sharer supports the [VC Envelope Option](ITI-YY3.html#23yy343-vc-envelope-option), the VHL MAY alternatively be transmitted as a signed JSON-LD Verifiable Credential:
+When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#23yy343-vc-enveloped-vhl-option), the VHL MAY alternatively be transmitted as a signed JSON-LD Verifiable Credential:
 - Conveyed as `application/vc+ld+json` via any channel that preserves JSON (HTTPS, email attachment, file transfer, NFC with a capable reader)
 - Not imaged/scanned — conveyed as a file or blob
 - The VC carries the VHL payload under `credentialSubject` and is signed by the VHL Sharer with a `DataIntegrityProof` (`ecdsa-2019`)
@@ -165,7 +165,7 @@ Upon receiving a VHL via QR code, the VHL Receiver SHALL perform the following 9
      - "LP" indicates both long-term and passcode-protected
    - Validate `url` contains expected manifest endpoint format with mandatory parameters
 
-**Verifiable Credential Decoding (VC Envelope Option):**
+**Verifiable Credential Decoding (VC Enveloped VHL Option):**
 
 When the VHL is received as a Verifiable Credential instead of a QR code, the VHL Receiver SHALL instead:
 
@@ -357,7 +357,7 @@ VHL Receivers SHALL:
 - Avoid printing QR codes for long-term use unless necessary
 - Implement single-use VHLs where appropriate
 
-#### 2:3.YY4.5.7 VC Envelope Option Security
+#### 2:3.YY4.5.7 VC Enveloped VHL Option Security
 When the VHL is carried as a Verifiable Credential:
 - The `DataIntegrityProof` SHALL chain to a trust anchor in the trust list (same framework used for CWT/HCERT verification)
 - The VC `expirationDate` and the VHL payload's `exp` SHALL both be honored — VHL Receivers SHALL reject if either has passed

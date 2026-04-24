@@ -36,7 +36,7 @@
 - **RFC 7519**: JSON Web Token (JWT)
 - **HL7 Security for Scalable Registration, Authentication, and Authorization IG**: [SSRAA](http://hl7.org/fhir/us/udap-security/) — used by the VHL Receiver to perform UDAP Discovery and Dynamic Client Registration with the VHL Sharer prior to making authenticated manifest requests
 
-**VC Envelope Option (Optional):**
+**VC Enveloped VHL Option(Optional):**
 - **W3C VC Data Model v2**: [Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)
 - **W3C Data Integrity**: [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) — `DataIntegrityProof`
 - **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/) — proof cryptosuite
@@ -80,7 +80,7 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[integer]}{&flag=
 
 Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g., `http://terminology.hl7.org/CodeSystem/v3-ActReason|TREAT`) and MAY repeat.
 
-**Note:** By default the operation generates a QR code containing the VHL encoded as an HCERT/CWT structure. When the VHL Sharer supports the **VC Envelope Option** (see [2:3.YY3.4.3](#23yy343-vc-envelope-option)) the caller MAY set `format=vc` to request the VHL as a signed Verifiable Credential instead.
+**Note:** By default the operation generates a QR code containing the VHL encoded as an HCERT/CWT structure. When the VHL Sharer supports the **VC Enveloped VHL Option** (see [2:3.YY3.4.3](#23yy343-vc-enveloped-vhl)) the caller MAY set `format=vc` to request the VHL as a signed Verifiable Credential instead.
 
 **Table 2:3.YY3.4.1.2-1: $generate-vhl Message HTTP query Parameters**
 
@@ -92,7 +92,7 @@ Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g.,
 | label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the VHL. |
 | passcode |  [0..1]  | string        | Optional. User-supplied passcode for passcode-protected VHLs. If provided, the VHL Sharer SHALL securely hash and store this passcode for validation during manifest retrieval (ITI-YY5). The 'P' flag SHALL be included in the flag parameter when a passcode is set. |
 | purposeOfUse | [0..*] | token (CodeableConcept) | Optional. Purpose(s) of use the VHL Holder is authorizing for this share, bound (extensible) to [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) (e.g., `TREAT`, `HPAYMT`, `HRESCH`). Serialized as FHIR `system\|code`. See [Purpose of Use Handling](#purpose-of-use-handling). |
-| format | [0..1] | code | Optional. Requested carrier for the returned VHL. Allowed values: `qrcode` (default) or `vc`. `vc` requires the VHL Sharer to support the [VC Envelope Option](#23yy343-vc-envelope-option); if unsupported, the VHL Sharer SHALL return an OperationOutcome error. |
+| format | [0..1] | code | Optional. Requested carrier for the returned VHL. Allowed values: `qrcode` (default) or `vc`. `vc` requires the VHL Sharer to support the [VC Enveloped VHL Option](#23yy343-vc-enveloped-vhl-option); if unsupported, the VHL Sharer SHALL return an OperationOutcome error. |
 
 
 ##### 2:3.YY3.4.1.3 Expected Actions
@@ -263,7 +263,7 @@ The response SHALL include exactly one of the following output parameters, selec
 | Parameter | Type | Cardinality | Description |
 |-----------|------|-------------|-------------|
 | qrcode | Binary | [0..1] | QR code image containing HCERT-encoded VHL. Populated when `format=qrcode` (default). |
-| verifiableCredential | Binary | [0..1] | A Verifiable Credential (`application/vc+ld+json`) carrying the VHL. Populated when `format=vc` and the VHL Sharer supports the [VC Envelope Option](#23yy343-vc-envelope-option). |
+| verifiableCredential | Binary | [0..1] | A Verifiable Credential (`application/vc+ld+json`) carrying the VHL. Populated when `format=vc` and the VHL Sharer supports the [VC Enveloped VHL Option](#23yy343-vc-enveloped-vhl-option). |
 {: .grid}
 
 **QR Code Output:**
@@ -272,7 +272,7 @@ The response SHALL include exactly one of the following output parameters, selec
 - SHALL be suitable for camera scanning
 - SHALL be in PNG or SVG format
 
-**Verifiable Credential Output (VC Envelope Option only):**
+**Verifiable Credential Output (VC Enveloped VHL Option only):**
 - SHALL be a JSON-LD document per W3C VC Data Model v2 with `Content-Type: application/vc+ld+json`
 - SHALL carry the VHL payload under `credentialSubject` (same fields otherwise embedded at HCERT claim key 5)
 - SHALL be signed by the VHL Sharer using a `DataIntegrityProof` (cryptosuite `ecdsa-2019`) with its trust-network key
@@ -292,9 +292,9 @@ The VHL Holder MAY:
 - Revoke VHL access if supported by VHL Sharer
 
 
-#### 2:3.YY3.4.3 VC Envelope Option
+#### 2:3.YY3.4.3 VC Enveloped VHL Option
 
-VHL Sharers MAY support the **VC Envelope Option**, in which the VHL payload is returned as a signed W3C Verifiable Credential instead of a QR code. This is selected at request time via `format=vc` and returned in the `verifiableCredential` output parameter. It is an alternative carrier for the same VHL payload — the manifest URL, decryption key, flags, label, expiration, and optional extension are identical to those otherwise embedded at HCERT claim key 5.
+VHL Sharers MAY support the **VC Enveloped VHL Option**, in which the VHL payload is returned as a signed W3C Verifiable Credential instead of a QR code. This is selected at request time via `format=vc` and returned in the `verifiableCredential` output parameter. It is an alternative carrier for the same VHL payload — the manifest URL, decryption key, flags, label, expiration, and optional extension are identical to those otherwise embedded at HCERT claim key 5.
 
 The {{ linkvhls }} SHALL construct the VC as a JSON-LD document per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` (cryptosuite `ecdsa-2019`) per the [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification. The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures (no new trust framework is introduced — the {{ linkvhlr }} verifies the VC proof against the trust list via the existing trust framework).
 
@@ -331,7 +331,7 @@ The {{ linkvhls }} SHALL construct the VC as a JSON-LD document per the [W3C Ver
 
 The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the VHL Receiver per [ITI-YY4 Provide VHL](ITI-YY4.html) using any channel capable of conveying JSON (HTTPS, email attachment, file transfer, etc.).
 
-> **Naming note:** This "VC Envelope Option" at ITI-YY3/YY4 carries the VHL itself. It is distinct from the "Verifiable Credential Option" at [ITI-YY5](ITI-YY5.html#23yy5415-authentication-option---verifiable-credential-option), which is a separate option for VHL Receiver authentication where the Receiver self-issues a VC as the manifest request body.
+> **Naming note:** This "VC Enveloped VHL Option" at ITI-YY3/YY4 carries the VHL itself. It is distinct from the "Verifiable Credential Option" at [ITI-YY5](ITI-YY5.html#23yy5415-authentication-option---verifiable-credential-option), which is a separate option for VHL Receiver authentication where the Receiver self-issues a VC as the manifest request body.
 
 ### 2:3.YY3.5 Security Considerations 
 
@@ -369,7 +369,7 @@ When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `
 - The {{ linkvhlr }} SHOULD cache its UDAP registration per `fhirBaseUrl` to avoid re-registering on every VHL scan
 - The `fhirBaseUrl` field SHALL NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily
 
-#### 2:3.YY3.5.6 VC Envelope Option
+#### 2:3.YY3.5.6 VC Enveloped VHL Option
 - The VC's `DataIntegrityProof` SHALL chain to a trust anchor in the trust list (same framework used for HCERT/CWT verification).
 - The VC `expirationDate` SHOULD be consistent with the VHL payload `exp`; the VHL Receiver SHALL reject the VHL if either has passed.
 - Confidentiality considerations are equivalent to the QR form: the VC carries the `key` and MUST be treated as sensitive.
