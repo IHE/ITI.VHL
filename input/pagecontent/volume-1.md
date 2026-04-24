@@ -362,7 +362,7 @@ The following actor groupings are required for secure operations within the VHL 
 
 Note: The {{ linkvhlr }} and {{ linkvhls }} SHALL be grouped with ATNA Secure Node or Secure Application to support the secure channel requirements of the ITI-YY5 Retrieve Manifest transaction.
 
-Note: The {{ linkvhls }} SHALL be grouped with an MHD Document Responder so that the binary referenced from `DocumentReference.content.attachment.url` can be retrieved via [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). The {{ linkvhlr }} SHALL be grouped with an MHD Document Consumer to perform that retrieval. Document binaries are encrypted as JWE (`alg=dir`, `enc=A256GCM`) using the `key` from the VHL payload decoded by the {{ linkvhlr }} in ITI-YY4.
+Note: The {{ linkvhls }} SHALL be grouped with an MHD Document Responder so that the binary referenced from `DocumentReference.content.attachment.url` can be retrieved via [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). The {{ linkvhlr }} SHALL be grouped with an MHD Document Consumer to perform that retrieval. Document binaries are encrypted as JWE per RFC 7516/7518 using the `key` from the VHL payload decoded by the {{ linkvhlr }} in ITI-YY4; specific JWE algorithms are selected per [Cryptographic Algorithm Selection](#xx53-cryptographic-algorithm-selection).
 
 <a name="overview"> </a>
 
@@ -444,14 +444,27 @@ Key security considerations include:
 - Both {{ linkvhlr }} and {{ linkvhls }} SHALL present credentials validated against the {{ linkta }}.
 - Mutual authentication is required for all document retrieval operations.
 
-### XX.5.3 VHL Integrity and Authorization
+### XX.5.3 Cryptographic Algorithm Selection
+
+The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic primitives for digital signatures, message authentication, and content encryption. This IG does not mandate a single algorithm suite for deployment. Implementers select algorithms consistent with the underlying specifications — for example, RFC 9421 (HTTP Message Signatures), RFC 7515/7516/7518 (JWS/JWE/JWA), RFC 8152 (COSE), W3C Data Integrity (Verifiable Credentials), the HL7 SSRAA IG (OAuth with SSRAA Option), and the WHO SMART Trust specification (HCERT). The preceding list is illustrative, not exhaustive.
+
+**Interoperability baseline:** For the purpose of interoperability testing, implementations SHALL support **RS256** (RSASSA-PKCS1-v1_5 using SHA-256, per RFC 7518) as a common baseline across signature operations where a JWS/JWT algorithm is applicable. This baseline ensures that two independent conformant implementations can always interoperate during testing. It does not preclude support for — or preferred deployment use of — other algorithms (ECDSA families, EdDSA, RSA-PSS, COSE equivalents, or future post-quantum algorithms).
+
+**Deployment considerations:** Implementers SHOULD take into account additional considerations beyond the interoperability baseline when selecting algorithms for production deployments, including but not limited to:
+- **Jurisdictional policies and regulatory requirements** (e.g., national cryptographic agency guidance, healthcare-sector rules, data-protection law);
+- **Post-quantum / quantum-safe cryptography** as standards mature (e.g., NIST PQC) and migration guidance evolves;
+- **Evolving industry guidance** on algorithm deprecation, minimum key strengths, and cryptosuite lifecycle (e.g., updates from IETF, W3C, NIST, ENISA).
+
+Algorithms named in examples, tables, and code blocks throughout this IG are illustrative. Except for the RS256 interoperability baseline stated above, they do not constrain deployment choices. Jurisdictions and trust networks MAY define additional profiles (permitted algorithm lists, minimum key lengths, deprecation schedules) consistent with this guidance.
+
+### XX.5.4 VHL Integrity and Authorization
 
 - VHL signatures SHALL be verified before trusting VHL content.
 - VHL expiration timestamps should be enforced.
 - Passcodes (if used) should be communicated out-of-band and validated server-side.
 - VHL Sharers should implement rate limiting and account lockout for failed passcode attempts.
 
-### XX.5.4 Audit Requirements
+### XX.5.5 Audit Requirements
 
 - The European Health Data Space (EHDS) requires detailed audit information on data access.
 - Provisions 8f) and 12a) outline requirements for auditability of data access.
@@ -461,7 +474,7 @@ Key security considerations include:
   - Document retrieval attempts
   - Authentication/authorization failures
 
-### XX.5.5 Privacy Considerations
+### XX.5.6 Privacy Considerations
 
 - VHL payloads do not contain PHI - only references to documents.
 - Actual health data is transmitted over secure channels (ITI-YY5).

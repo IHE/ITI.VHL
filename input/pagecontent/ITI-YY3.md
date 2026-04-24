@@ -39,7 +39,7 @@
 **VC Enveloped VHL Option(Optional):**
 - **W3C VC Data Model v2**: [Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)
 - **W3C Data Integrity**: [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) — `DataIntegrityProof`
-- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/) — proof cryptosuite
+- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/)
 
 
 ### 2:3.YY3.4 Messages
@@ -275,7 +275,7 @@ The response SHALL include exactly one of the following output parameters, selec
 **Verifiable Credential Output (VC Enveloped VHL Option only):**
 - SHALL be a JSON-LD document per W3C VC Data Model v2 with `Content-Type: application/vc+ld+json`
 - SHALL carry the VHL payload under `credentialSubject` (same fields otherwise embedded at HCERT claim key 5)
-- SHALL be signed by the VHL Sharer using a `DataIntegrityProof` (cryptosuite `ecdsa-2019`) with its trust-network key
+- SHALL be signed by the VHL Sharer using a `DataIntegrityProof` with its trust-network key (cryptosuite selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection))
 
 ##### 2:3.YY3.4.2.3 Expected Actions
 
@@ -296,7 +296,7 @@ The VHL Holder MAY:
 
 VHL Sharers MAY support the **VC Enveloped VHL Option**, in which the VHL payload is returned as a signed W3C Verifiable Credential instead of a QR code. This is selected at request time via `format=vc` and returned in the `verifiableCredential` output parameter. It is an alternative carrier for the same VHL payload — the manifest URL, decryption key, flags, label, expiration, and optional extension are identical to those otherwise embedded at HCERT claim key 5.
 
-The {{ linkvhls }} SHALL construct the VC as a JSON-LD document per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` (cryptosuite `ecdsa-2019`) per the [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification. The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures (no new trust framework is introduced — the {{ linkvhlr }} verifies the VC proof against the trust list via the existing trust framework).
+The {{ linkvhls }} SHALL construct the VC as a JSON-LD document per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification (cryptosuite selected per the central [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)). The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures (no new trust framework is introduced — the {{ linkvhlr }} verifies the VC proof against the trust list via the existing trust framework).
 
 **Example VC carrying the VHL payload:**
 

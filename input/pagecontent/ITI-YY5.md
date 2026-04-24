@@ -50,7 +50,7 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 - **RFC 6234**: SHA-256 Hash Function
 - **W3C VC Data Model v2**: [Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) - for Verifiable Credential Option
 - **W3C Data Integrity**: [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) - DataIntegrityProof for Verifiable Credential Option
-- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/) - for Verifiable Credential Option proof
+- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/)
 
 **FHIR Specifications:**
 - **FHIR R4**: [HL7 FHIR Release 4](http://hl7.org/fhir/R4/)
@@ -169,7 +169,7 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
    - Components signed: `@method`, `@path`, `@authority`, `content-type`, `content-digest`
    - `created`: Unix timestamp when signature was created
    - `keyid`: Identifier of receiver's public key (used to locate key in trust list)
-   - `alg`: Signature algorithm (ecdsa-p256-sha256, ecdsa-p384-sha384, rsa-pss-sha256, rsa-v1_5-sha256)
+   - `alg`: Signature algorithm — selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)
 
 3. **Signature Header:**
    - Contains the actual cryptographic signature
@@ -210,15 +210,7 @@ The signature base is constructed per RFC 9421 from the signed components:
 
 **Signature Algorithms:**
 
-The following signature algorithms SHALL be supported:
-
-| Algorithm | Key Type | Description |
-|-----------|----------|-------------|
-| ecdsa-p256-sha256 | ECDSA P-256 | Recommended - efficient and secure |
-| ecdsa-p384-sha384 | ECDSA P-384 | Higher security level |
-| rsa-pss-sha256 | RSA 2048+ | RSA with PSS padding |
-| rsa-v1_5-sha256 | RSA 2048+ | RSA with PKCS#1 v1.5 padding (legacy support) |
-{: .grid}
+Signature algorithms are selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection).
 
 **Security Considerations for HTTP Signatures:**
 
@@ -264,7 +256,7 @@ grant_type=client_credentials
 ```
 
 **JWT Client Assertion:**
-- Algorithm: RS256, ES256, or ES384
+- Algorithm: selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection); the interoperability baseline is RS256
 - Header: `{"alg":"RS256","typ":"JWT","x5c":["<base64-encoded-client-cert>","<base64-encoded-intermediate>"]}`
   - `x5c`: The receiver's X.509 certificate (and optionally the full chain) from the trust community PKI, per the HL7 Security for Scalable Registration, Authentication, and Authorization IG
 - Payload:
@@ -388,7 +380,7 @@ The {{ linkvhlr }} SHALL construct the VC as a JSON-LD document per the [W3C Ver
 | `credentialSubject.embeddedLengthMax` | Optional size hint for embedded content (replaces SHL `embeddedLengthMax` body parameter) |
 | **`proof`** | **Embedded DataIntegrityProof — the cryptographic proof of the {{ linkvhlr }}'s identity** |
 | `proof.type` | `DataIntegrityProof` — W3C Data Integrity proof |
-| `proof.cryptosuite` | Cryptosuite used: `ecdsa-2019` (ECDSA P-256 or P-384) or `eddsa-2022` (Ed25519) |
+| `proof.cryptosuite` | Cryptosuite used — selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection) |
 | `proof.created` | Timestamp when the proof was created (SHALL match `issuanceDate`) |
 | `proof.verificationMethod` | DID URL resolving to the {{ linkvhlr }}'s public key in the trust network (e.g., `did:web:receiver.example.org#key-id`) |
 | `proof.proofPurpose` | `assertionMethod` — the {{ linkvhlr }} is asserting this credential |
@@ -444,7 +436,7 @@ Accept: application/fhir+json
 4. {{ linkvhlr }} sets `issuanceDate` and `expirationDate` (short-lived; recommended 5 minutes)
 5. {{ linkvhlr }} constructs the **`proof`** element:
    - `type`: `DataIntegrityProof`
-   - `cryptosuite`: `ecdsa-2019` or `eddsa-2022` per trust network key type
+   - `cryptosuite`: selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)
    - `created`: current timestamp
    - `verificationMethod`: DID URL of the trust network key
    - `proofPurpose`: `assertionMethod`
@@ -919,8 +911,7 @@ VHL document binaries are encrypted following the [SMART Health Links — Encryp
 
 **Algorithm:**
 - **Serialization:** JWE Compact Serialization per RFC 7516.
-- **Key management (`alg`):** `dir` — direct use of a shared symmetric key (no key wrapping).
-- **Content encryption (`enc`):** `A256GCM` — AES-256 in Galois/Counter Mode with a 96-bit IV and 128-bit authentication tag.
+- **Key management (`alg`) and content encryption (`enc`):** selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection), following the SMART Health Links convention referenced above.
 - **Symmetric key:** The 32-byte (256-bit) value carried as `key` in the VHL payload generated by [ITI-YY3](ITI-YY3.html) and decoded by the {{ linkvhlr }} in [ITI-YY4](ITI-YY4.html). The receiver caches this key for the duration of the VHL session.
 
 **Scope:**
@@ -955,7 +946,7 @@ Secure transport is required for all communications in this transaction. Impleme
 All implementations SHALL support HTTP Message Signatures per RFC 9421:
 - Signature SHALL include `@method`, `@path`, `@authority`, `content-type`, `content-digest`
 - Content-Digest SHALL be SHA-256 or stronger
-- Signature algorithm: ECDSA P-256 SHA-256 (recommended) or RSA 2048+ with PSS or PKCS#1 v1.5
+- Signature algorithm and key strength — see [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)
 - Private keys SHALL be stored securely (Hardware Security Module recommended)
 - Public keys SHALL be obtained from trust network
 - `keyid` SHALL uniquely identify receiver's public key in trust list
