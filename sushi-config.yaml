@@ -54,9 +54,34 @@ parameters:  # see https://confluence.hl7.org/display/FHIR/Implementation+Guide+
     - input/tests/features
   path-test:
     - input/tests/features
-#resources:
-# list every example here with a name, description and that exampleBoolean is true; These are used to populate the artifacts page, and are needed to eliminate build warnings
-# You may delay filling out this section until you approach publication as it is merely a nice to have and eliminates build warnings -- If you do this then you will need above the autoload-resources true
+resources:
+  ActorDefinition/TrustAnchor:
+    name: "Trust Anchor"
+    description: "An authorized organization in the trust framework that manages and distributes PKI material—such as public key certificates and revocation lists—to participants in the network."
+  ActorDefinition/VHLHolder:
+    name: "VHL Holder"
+    description: "An individual—typically the patient or their delegate—who possesses a Verified Health Link (VHL) and presents it to a VHL Receiver."
+  ActorDefinition/VHLReceiver:
+    name: "VHL Receiver"
+    description: "A system or organization that receives a VHL from a VHL Holder and uses it to retrieve health documents from a VHL Sharer, after verifying the authenticity and integrity of the VHL."
+  ActorDefinition/VHLSharer:
+    name: "VHL Sharer"
+    description: "A system that generates VHLs, provides them to a VHL Holder, and responds to requests from a VHL Receiver to retrieve document manifests authorized by the VHL."
+  ExampleScenario/UseCaseGDHCN:
+    name: "WHO GDHCN Trust Establishment"
+    description: "Use case describing how participating jurisdictions establish trust within the WHO Global Digital Health Certification Network (GDHCN) through PKI material submission and trust list distribution."
+  ExampleScenario/UseCaseHajjPilgrimage:
+    name: "Hajj Pilgrimage VHL Flow"
+    description: "Use case describing the sharing of pilgrim health records (International Patient Summary) during Hajj using VHL with WHO GDHCN trust infrastructure for cross-border verification."
+  ExampleScenario/UseCasePH4H:
+    name: "Pan-American Highway for Health (PH4H)"
+    description: "Use case describing cross-border health record sharing in the Americas using VHL to support continuity of care for internal migrants across overlapping trust networks."
+  ExampleScenario/UseCaseEVAC:
+    name: "European Vaccination Card (EVC)"
+    description: "Use case describing the European Vaccination Card, a citizen-held portable vaccination record enabling bilateral verification across EU member states via an interoperable trust architecture."
+  ExampleScenario/UseCaseTEFCA:
+    name: "TEFCA Health Information Exchange"
+    description: "Use case describing how US TEFCA participants (QHINs, providers, payers) can act as VHL Sharers and Receivers using existing TEFCA certificate infrastructure as a trust anchor for VHL exchanges."
 
 
 dependencies:
