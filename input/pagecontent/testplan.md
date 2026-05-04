@@ -10,9 +10,7 @@ VHL is an API between four actors: Trust Anchor, VHL Sharer, VHL Holder, and VHL
 
 The testing focuses on the five transactions defined in this profile: Submit PKI Material with DID [ITI-YY1], Retrieve Trust List with DID [ITI-YY2], Generate VHL [ITI-YY3], Provide VHL [ITI-YY4], and Retrieve Manifest [ITI-YY5]. Testing is primarily focused on server-side actor expectations (Trust Anchor and VHL Sharer) where transaction semantics can be validated against conformance criteria, as well as VHL Receiver decoding and verification behavior.
 
-Overall test plan leverages the Profiles, and Examples shown on the [Artifacts Summary](artifacts.html). The [Profiles](artifacts.html#structures-resource-profiles) listed are describing the constraints that would be adhered to by actors claiming conformance to this implementation guide. Thus any applicable resources that are known to have been published by an app or server SHALL be conformant to these profiles as appropriate.
-
-The Examples listed in [Example Instances](artifacts.html#example-example-instances) are example instances. Some are conformant to the profiles. Other examples that either assist with the structure of the examples (e.g. Patient) or are examples that should be able to handle in various ways.
+Overall test plan leverages the Examples shown on the [Artifacts Summary](artifacts.html). The [Example Scenarios](artifacts.html#example-example-scenarios) listed illustrate the use cases and interactions defined by this implementation guide. Any applicable resources that are known to have been published by an app or server SHALL conform to the actor and transaction requirements defined in this guide.
 
 This section will be filled in as the IHE-Connectathon need drives the creation of the test plans, test procedures, test tools, and reporting.
 
