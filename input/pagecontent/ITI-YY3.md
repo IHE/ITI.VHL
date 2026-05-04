@@ -80,7 +80,7 @@ GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[number]}{&flag=[
 
 Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g., `http://terminology.hl7.org/CodeSystem/v3-ActReason|TREAT`) and MAY repeat.
 
-**Note:** By default the operation generates a QR code containing the VHL encoded as an HCERT/CWT structure. When the VHL Sharer supports the **VC Enveloped VHL Option** (see [2:3.YY3.4.3](#23yy343-vc-enveloped-vhl)) the caller MAY set `format=vc` to request the VHL as a signed Verifiable Credential instead.
+**Note:** By default the operation generates a QR code containing the VHL encoded as an HCERT/CWT structure. When the VHL Sharer supports the **VC Enveloped VHL Option** (see [2:3.YY3.4.3](#23yy343-vc-enveloped-vhl-option)) the caller MAY set `format=vc` to request the VHL as a signed Verifiable Credential instead.
 
 **Table 2:3.YY3.4.1.2-1: $generate-vhl Message HTTP query Parameters**
 

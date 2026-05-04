@@ -1,7 +1,6 @@
 Instance: generate-vhl
 InstanceOf: OperationDefinition
 Usage: #definition
-* url = "http://example.org/fhir/OperationDefinition/generate-vhl"
 * title = "Generate VHL"
 * description = "This operation generates a Verifiable Health Link (VHL) for transmission or display. The VHL MAY be returned as a QR code (HCERT/CWT) or, when the VHL Sharer supports the VC Envelope Option, as a signed W3C Verifiable Credential.\n\nInput Parameters:\n- sourceIdentifier: Patient identifier (required)\n- exp: Expiration time in Epoch seconds (optional)\n- flag: Single-character flags in alphabetical order - L (long-term use), P (Passcode required), U (direct file access) (optional)\n- label: Short description up to 80 characters (optional)\n- passcode: User-supplied passcode for passcode-protected VHLs (optional)\n- purposeOfUse: Purpose(s) of use the VHL Holder is authorizing for this share, bound to the HL7 v3 PurposeOfUse value set (optional). Populates Consent.provision.purpose when an IHE PCF Consent is bound to the generated folder.\n- format: Requested output carrier - 'qrcode' (default) or 'vc'. 'vc' requires the VHL Sharer to support the VC Envelope Option.\n\nOutput Generation:\n- When format=qrcode: Returns a Binary resource containing the QR code image (PNG or SVG format) that encodes the VHL as an HCERT/CWT structure.\n- When format=vc: Returns a Binary resource (media type application/vc+ld+json) containing a JSON-LD Verifiable Credential whose credentialSubject carries the VHL payload, signed with the VHL Sharer's trust-network key using W3C Data Integrity (DataIntegrityProof, cryptosuite ecdsa-2019).\n- Exactly one of qrcode or verifiableCredential SHALL be populated."
 * name = "GenerateVHL"
@@ -24,7 +23,6 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "1"
-  * searchType = #number
   * type = #integer
   * documentation = "Optional. Number representing expiration time in Epoch seconds, as a hint to help the VHL Receiver determine if this QR is stale."
 * parameter[+]
@@ -56,7 +54,6 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "*"
-  * searchType = #token
   * type = #CodeableConcept
   * binding.strength = #extensible
   * binding.valueSet = "http://terminology.hl7.org/ValueSet/v3-PurposeOfUse"
@@ -66,7 +63,6 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "1"
-  * searchType = #string
   * type = #code
   * documentation = "Optional. Requested carrier for the returned VHL. Allowed values: 'qrcode' (default - HCERT/CWT QR code) or 'vc' (W3C Verifiable Credential). The 'vc' value requires the VHL Sharer to support the VC Enveloped VHL Option; if unsupported, the VHL Sharer SHALL return an OperationOutcome error. If omitted, the VHL Sharer SHALL default to 'qrcode'."
 * parameter[+]
