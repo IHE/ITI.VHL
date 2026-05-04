@@ -27,10 +27,7 @@ The GDHCN Trust Network Gateway (TNG) provides a federated architecture that ena
 
 The PKI operated by the WHO supports a variety of trust domains, two of which — the Hajj Pilgrimage and the Pan-American Highway for Health — are described below.
 
-<figure>
-  <img src="trust_network.png" caption="WHO GDHCN Trust Network" style="width:45em; max-width:100%;"/>
-  <p id="fX.X.X.X-TN" class="figureTitle">Figure X.X.X.X-TN: WHO GDHCN Trust Network</p>
-</figure>
+![WHO GDHCN Trust Network](trust_network.png)
 """
 * actor[+].actorId = "jurisdiction"
 * actor[=].type = #entity
@@ -89,9 +86,7 @@ Some of the challenges faced during the pilot implementation, though not necessa
 - how to scale and automate some of the health checks (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS).
 
 
-<figure>
-  <img src="hajj-diagram.png" caption="Hajj Pilgrimage VHL Flow" style="width:42em; max-width:100%;"/>
-</figure>
+![Hajj Pilgrimage VHL Flow](hajj-diagram.png)
 """
 * process.title = "Hajj Pilgrimage VHL Flow"
 * process.description = "Process for sharing pilgrim health records during Hajj using VHL with WHO GDHCN trust infrastructure for cross-border verification."
@@ -141,9 +136,7 @@ The Pan-American Highway for Health (PH4H)  "aims to provide patients with bette
 
 While there currently there is no single legal framework that broadly enables data sharing across the region, there are sub-regional networks (e.g. COMISCA, CARPHA) that have policies that can be leveraged in the short term while necessary data sharing agreements are developed.   Thus, individuals in this region will need to be able to move through overlapping trust networks.
 
-<figure>
-  <img src="PH4H.png" caption="Pan-American Highway for Digital Health Goals" style="width:38em; max-width: 100%;"/>
-</figure>
+![Pan-American Highway for Digital Health Goals](PH4H.png)
 """
 
 
@@ -161,10 +154,7 @@ The EVC will allow "Member States to bilaterally verify the authenticity of digi
 
 The EVC will operate in the context of the European Health Data Spaces that requires detailed information on access the health data to be recorded.
 
-<figure >
-  <img src="ehds_legal.png" caption="Figure X.X.X.X-8: European Health Data Spaces" style="width:45em; max-width:100%"/>
-  <p id="fX.X.X.X-8" class="figureTitle">Figure X.X.X.X-8: European Health Data Spaces </p>
-</figure>
+![European Health Data Spaces](ehds_legal.png)
 
 For more information see Regulation (EU) 2025/327 of the European Parliament and of the Council of 11 February 2025 on the European Health Data Space and amending Directive 2011/24/EU and Regulation (EU) 2024/2847. Specifically:
 * [ANNEX II - Essential requirements for the harmonised software components of EHR systems and for products for which interoperability with EHR systems has been claimed](https://eur-lex.europa.eu/eli/reg/2025/327/oj#anx_II)
