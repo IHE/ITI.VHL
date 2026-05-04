@@ -32,18 +32,34 @@ The PKI operated by the WHO supports a variety of trust domains, two of which â€
   <p id="fX.X.X.X-TN" class="figureTitle">Figure X.X.X.X-TN: WHO GDHCN Trust Network</p>
 </figure>
 """
+* actor[+].actorId = "jurisdiction"
+* actor[=].type = #system
+* actor[=].name = "Participating Jurisdiction"
+* actor[=].description = "A health jurisdiction participating in the GDHCN trust network, acting as a VHL Sharer or VHL Receiver."
+
+* actor[+].actorId = "trust-anchor"
+* actor[=].type = #system
+* actor[=].name = "WHO Trust Anchor"
+* actor[=].description = "The WHO Trust Anchor that validates, publishes, and distributes PKI material for the GDHCN trust network."
+
 * process.title = "GDHCN Trust Establishment"
 * process.description = "Process for establishing trust within the WHO GDHCN trust network through PKI material submission and trust list distribution."
 * process.preConditions = "Jurisdiction has completed the GDHCN onboarding process and has generated SCA and DSC certificates."
 * process.postConditions = "Jurisdiction's PKI material is published in the GDHCN trust list and available for retrieval by other participants."
 * process.step[0].operation.number = "1"
 * process.step[0].operation.name = "Jurisdiction Onboarding"
+* process.step[0].operation.initiator = "jurisdiction"
+* process.step[0].operation.receiver = "trust-anchor"
 * process.step[0].operation.description = "A participating jurisdiction completes the GDHCN onboarding process and submits its Signing Certificate Authority (SCA) and Document Signer Certificates (DSCs) to the WHO Trust Anchor. The Trust Anchor validates the submitted certificates and onboards the jurisdiction into the trust network."
 * process.step[1].operation.number = "2"
 * process.step[1].operation.name = "Trust List Publication"
+* process.step[1].operation.initiator = "trust-anchor"
+* process.step[1].operation.receiver = "jurisdiction"
 * process.step[1].operation.description = "The WHO Trust Anchor publishes the jurisdiction's PKI material as DID Documents in the GDHCN trust list. Each DID Document contains verification methods with the jurisdiction's public keys, distributed as endpoints that can be discovered and retrieved by other trust network participants."
 * process.step[2].operation.number = "3"
 * process.step[2].operation.name = "Trust List Retrieval"
+* process.step[2].operation.initiator = "jurisdiction"
+* process.step[2].operation.receiver = "trust-anchor"
 * process.step[2].operation.description = "Participating jurisdictions (acting as VHL Sharers or VHL Receivers) retrieve the trust list from the Trust Anchor. The retrieved DID Documents provide the public keys needed to verify digital signatures on health certificates and to establish secure channels for document exchange."
 
 
