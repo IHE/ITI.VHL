@@ -235,7 +235,6 @@ This transaction is captured as the following requirements:
 
 <a name="actor-options"> </a>
 
-<a name="actor-options"> </a>
 
 ## XX.2  Actor Options
 
