@@ -33,12 +33,12 @@ The PKI operated by the WHO supports a variety of trust domains, two of which â€
 </figure>
 """
 * actor[+].actorId = "jurisdiction"
-* actor[=].type = #system
+* actor[=].type = #entity
 * actor[=].name = "Participating Jurisdiction"
 * actor[=].description = "A health jurisdiction participating in the GDHCN trust network, acting as a VHL Sharer or VHL Receiver."
 
 * actor[+].actorId = "trust-anchor"
-* actor[=].type = #system
+* actor[=].type = #entity
 * actor[=].name = "WHO Trust Anchor"
 * actor[=].description = "The WHO Trust Anchor that validates, publishes, and distributes PKI material for the GDHCN trust network."
 

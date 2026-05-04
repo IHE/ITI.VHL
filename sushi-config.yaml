@@ -11,7 +11,6 @@ releaseLabel: ci-build
 #releaseLabel: ballot
 #releaseLabel: trial-use
 #releaseLabel: release
-date: 2026-02-09
 status: draft
 publisher:
   ## Find your domain contact on the https://www.ihe.net/ihe_domains page
