@@ -224,7 +224,7 @@ Submit the public key material and associated metadata to the [Trust Anchor](Act
 * statement[+].key = "support-future-distribution"
 * statement[=].label = "Support Future Distribution"
 * statement[=].requirement = """
-Ensure that the submitted PKI material can be validated, signed, and distributed by the Trust Anchor to other trust network participants through [Distribute PKI Material](Requirements-DistributePKIMaterial.html).
+Ensure that the submitted PKI material can be validated, signed, and distributed by the Trust Anchor to other trust network participants.
 """
 * statement[=].conformance = #SHALL
 

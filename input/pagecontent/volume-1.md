@@ -394,7 +394,7 @@ This use case has the following business requirements:
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)
-* [Create Trusted Channel](Requirements-CreateTrustedChannel.html)
+* [Create Secure Channel](Requirements-CreateSecureChannel.html)
 
 ##### XX.4.2.1.2 Pan-American Highway for Health Use Case Description
 
