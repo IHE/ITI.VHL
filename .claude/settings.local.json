@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh pr:*)",
-      "Read(//c/Program Files/**)",
-      "Read(//c/Program Files \\(x86\\)/**)"
-    ]
-  }
-}
