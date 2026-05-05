@@ -485,6 +485,7 @@ Algorithms named in examples, tables, and code blocks throughout this IG are ill
 
 This section is informative, not normative. It is intended to put this profile in context with other profiles. Any required groupings should have already been described above.
 
+<a name="atna-cross-profile"> </a>
 ### XX.6.1 ATNA - Audit Trail and Node Authentication
 
 The {{ linkvhlr }} and {{ linkvhls }} SHALL be grouped with ATNA Secure Node or Secure Application actors to support the secure channel requirements of ITI-YY5. This grouping ensures:
@@ -492,6 +493,7 @@ The {{ linkvhlr }} and {{ linkvhls }} SHALL be grouped with ATNA Secure Node or 
 - Secure channel establishment per ATNA Authenticate Node [ITI-19]
 - Audit logging capabilities for security events
 
+<a name="pcf-cross-profile"> </a>
 ### XX.6.2 PCF - Privacy Consent on FHIR
 
 The [IHE Privacy Consent on FHIR (PCF)](https://profiles.ihe.net/ITI/PCF/) profile is the recommended companion for capturing, storing, and enforcing patient consent alongside VHL. When the {{ linkvhls }} implements the Record Consent option, it acts as a Consent Recorder and initiates Access Consent [ITI-108] transactions to record consent declarations by the {{ linkvhlh }}.
