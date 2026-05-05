@@ -1,7 +1,6 @@
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 
-## 2:3.YY5 Retrieve Manifest
 
 {% assign reqRequestVHLDocs = site.data.Requirements-RequestVHLDocuments %}
 

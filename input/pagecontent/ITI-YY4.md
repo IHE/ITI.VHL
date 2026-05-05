@@ -1,7 +1,6 @@
 {% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-## 2:3.YY4 Provide VHL
  {% assign provideVHL = site.data.Requirements-ProvideVHL %}
  {% assign provideVHLResp = site.data.Requirements-RespondtoProvideVHL %}
 

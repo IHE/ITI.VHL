@@ -4,7 +4,7 @@ You can also download:
 - [this entire guide](full-ig.zip),
 
 
-The source code for this Implementation Guide can be found on **TODO: Put your github repo here**
+The source code for this Implementation Guide can be found on https://github.com/IHE/ITI.VHL 
 
 #### Cross Version Analysis
 

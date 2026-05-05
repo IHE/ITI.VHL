@@ -17,14 +17,14 @@ loop routine synchronization
 end
 destroy TA
 
-Request -> Create1  : request VHL enclosing health document\nwith selective disclosure,\ntime limits and passcode
-Create1 -> Request : issue and return VHL
+Request -> Sharer  : request VHL enclosing health document\nwith selective disclosure,\ntime limits and passcode
+Sharer -> Request : issue and return VHL
 
-Consume -> Respond : retrieve VHLink Manifest [optional]
-Respond -> Consume : return VHLink Manifest
+Consume -> Sharer : retrieve VHLink Manifest [optional]
+Sharer -> Consume : return VHLink Manifest
 
-Consume -> Respond : retrieve VHLink Clinical Data
-Respond -> Consume : return VHLink Clinical Data
+Consume -> Sharer : retrieve VHLink Clinical Data
+Sharer -> Consume : return VHLink Clinical Data
 
 
 
