@@ -5,6 +5,7 @@ Usage: #definition
 * title = "Trust Anchor"
 * description = "CapabilityStatement for Trust Anchor Actor in the IHE IT Infrastructure Technical Framework Supplement IHE VHL. An authorized organization in the trust framework that manages and distributes PKI material—such as public key certificates and revocation lists—to participants in the network. It ensures that this material is trustworthy and available, enabling VHL Sharers and VHL Receivers to verify digital signatures and authenticate the origin of shared data."
 * status = $pubStatus#active
+* date = "2024-12-31"
 * publisher = "IHE"
 * kind = #requirements
 * fhirVersion = #"4.0.1"
@@ -20,6 +21,7 @@ Usage: #definition
 * name = "VHLSharerCapabilityStatement"
 * title = "VHL Sharer Server Capability Statement"
 * status = #active
+* date = "2024-12-31"
 * experimental = false
 * publisher = "IHE ITI"
 * description = "Capability Statement for a VHL Sharer implementing the Retrieve Manifest [ITI-YY5] transaction as a server. This server supports FHIR search on List resources with _include parameter to retrieve document manifests authorized by Verified Health Links."
@@ -94,6 +96,7 @@ Usage: #definition
 * name = "VHLReceiverCapabilityStatement"
 * title = "VHL Receiver Client Capability Statement"
 * status = #active
+* date = "2024-12-31"
 * experimental = false
 * publisher = "IHE ITI"
 * description = "Capability Statement for a VHL Receiver implementing the Retrieve Manifest [ITI-YY5] transaction as a client. This client searches for List resources using VHL-authorized manifest URLs and can request inclusion of DocumentReference resources via the _include parameter."
