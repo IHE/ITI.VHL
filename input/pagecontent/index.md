@@ -31,10 +31,11 @@ This guide is organized into the following sections:
    1. [Generate VHL [ITI-YY3]](ITI-YY3.html)
    1. [Provide VHL [ITI-YY4]](ITI-YY4.html)
    1. [Retrieve Manifest [ITI-YY5]](ITI-YY5.html)
-5. Other
+3. Other
    1. [Test Plan](testplan.html)
    1. [Changes to Other IHE Specifications](other.html)
    1. [Download and Analysis](download.html)
+   1. [Appendix A: Comparison of VHL and SHL](vhl_vs_shl.html)
 
 See also the [Table of Contents](toc.html) and the index of [Artifacts](artifacts.html) defined as part of this implementation guide.
 

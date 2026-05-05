@@ -119,6 +119,7 @@ pages:
     generation: markdown
   vhl_vs_shl.md:
     title: "Appendix A: Comparison of health links"
+    generation: markdown
   download.md:
     title: "Download and Analysis"
     generation: markdown
