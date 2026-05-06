@@ -381,7 +381,7 @@ A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to sh
 
 {% assign UseCaseGDHCN = site.data.ExampleScenario-UseCaseGDHCN %}
 
-<div class="usecase-purpose">{{ UseCaseGDHCN.purpose }}</div>
+<div class="usecase-purpose">{{ UseCaseGDHCN.purpose | markdownify }}</div>
 
 This use case has the following business requirements:
 * [Establish Trust](Requirements-EstablishTrust.html)
@@ -391,7 +391,7 @@ This use case has the following business requirements:
 ##### XX.4.2.1.1 Hajj Pilgrimage Use Case Description
 {% assign useCaseHajjPilgrimage = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
 
-<div class="usecase-purpose">{{ useCaseHajjPilgrimage.purpose }}</div>
+<div class="usecase-purpose">{{ useCaseHajjPilgrimage.purpose | markdownify }}</div>
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)
@@ -401,7 +401,7 @@ This use case has the following business requirement:
 
 {% assign UseCasePH4H = site.data.ExampleScenario-UseCasePH4H %}
 
-<div class="usecase-purpose">{{ UseCasePH4H.purpose }}</div>
+<div class="usecase-purpose">{{ UseCasePH4H.purpose | markdownify }}</div>
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)
@@ -410,7 +410,7 @@ This use case has the following business requirement:
 
 {% assign UseCaseEVAC = site.data.ExampleScenario-UseCaseEVAC %}
 
-<div class="usecase-purpose">{{ UseCaseEVAC.purpose }}</div>
+<div class="usecase-purpose">{{ UseCaseEVAC.purpose | markdownify }}</div>
 
 This use case has the following business requirement:
 * [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
@@ -419,7 +419,7 @@ This use case has the following business requirement:
 
 {% assign UseCaseTEFCA = site.data.ExampleScenario-UseCaseTEFCA %}
 
-<div class="usecase-purpose">{{ UseCaseTEFCA.purpose }}</div>
+<div class="usecase-purpose">{{ UseCaseTEFCA.purpose | markdownify }}</div>
 
 This use case has the following business requirements:
 * [Establish Trust](Requirements-EstablishTrust.html)
