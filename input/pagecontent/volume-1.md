@@ -375,11 +375,13 @@ A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to sh
 
 #### XX.4.2 Use Cases
 
+<style>.usecase-purpose img { max-width: 100%; height: auto; }</style>
+
 #### XX.4.2.1 Use Case \#1: WHO Global Digital Health Certification Network
 
 {% assign UseCaseGDHCN = site.data.ExampleScenario-UseCaseGDHCN %}
 
-{{ UseCaseGDHCN.purpose }}
+<div class="usecase-purpose">{{ UseCaseGDHCN.purpose }}</div>
 
 This use case has the following business requirements:
 * [Establish Trust](Requirements-EstablishTrust.html)
@@ -389,7 +391,7 @@ This use case has the following business requirements:
 ##### XX.4.2.1.1 Hajj Pilgrimage Use Case Description
 {% assign useCaseHajjPilgrimage = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
 
-{{ useCaseHajjPilgrimage.purpose }}
+<div class="usecase-purpose">{{ useCaseHajjPilgrimage.purpose }}</div>
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)
@@ -399,7 +401,7 @@ This use case has the following business requirement:
 
 {% assign UseCasePH4H = site.data.ExampleScenario-UseCasePH4H %}
 
-{{ UseCasePH4H.purpose }}
+<div class="usecase-purpose">{{ UseCasePH4H.purpose }}</div>
 
 This use case has the following business requirement:
 * [Establish Trust](Requirements-EstablishTrust.html)
@@ -408,7 +410,7 @@ This use case has the following business requirement:
 
 {% assign UseCaseEVAC = site.data.ExampleScenario-UseCaseEVAC %}
 
-{{ UseCaseEVAC.purpose }}
+<div class="usecase-purpose">{{ UseCaseEVAC.purpose }}</div>
 
 This use case has the following business requirement:
 * [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
@@ -417,7 +419,7 @@ This use case has the following business requirement:
 
 {% assign UseCaseTEFCA = site.data.ExampleScenario-UseCaseTEFCA %}
 
-{{ UseCaseTEFCA.purpose }}
+<div class="usecase-purpose">{{ UseCaseTEFCA.purpose }}</div>
 
 This use case has the following business requirements:
 * [Establish Trust](Requirements-EstablishTrust.html)
