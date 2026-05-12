@@ -435,7 +435,7 @@ Key security considerations include:
 
 ### XX.5.1 Trust Network Security
 
-- All participants ({{ linkvhlr }}, {{ linkvhls }}) SHALL establish trust via the {{ linkta }} using ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions.
+- All participants ({{ linkvhlr }}, {{ linkvhls }}) SHALL establish trust via the {{ linkta }}. ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions MAY be used to support this trust establishment.
 - PKI material SHALL be validated before use in signature verification or secure channel establishment.
 - Certificates and keys should be regularly updated and revocation status checked.
 

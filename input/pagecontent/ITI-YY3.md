@@ -122,7 +122,7 @@ If one or more `purposeOfUse` values are provided, the VHL Sharer SHALL:
 2. Persist the value(s) against the generated folder ID so that they remain discoverable for downstream enforcement at ITI-YY5.
 3. When grouped with an IHE PCF [Consent Creator](https://profiles.ihe.net/ITI/PCF/) or [Consent Recipient](https://profiles.ihe.net/ITI/PCF/), populate `Consent.provision.purpose` on any Consent created for or bound to this folder from the persisted value(s).
 
-At [ITI-YY5](ITI-YY5.html) the {{ linkvhls }} MAY use the recorded purpose to enforce consistency with the {{ linkvhlr }}'s declared purpose claim — for example, the `purposeOfUse` claim of an OAuth access token under the OAuth with SSRAA Option, the `sub_purpose` extension of a UDAP assertion, or an equivalent claim carried in a Verifiable Credential under the Verifiable Credential Option. Inconsistent purposes MAY be rejected with HTTP `403 Forbidden`.
+At [ITI-YY5](ITI-YY5.html) the {{ linkvhls }} MAY use the recorded purpose to enforce consistency with the {{ linkvhlr }}'s declared purpose claim — for example, the `purposeOfUse` claim of an OAuth access token under the OAuth with SSRAA Option, the `hl7-b2b` extension of a UDAP assertion, or an equivalent claim carried in a Verifiable Credential under the Verifiable Credential Option. Inconsistent purposes MAY be rejected with HTTP `403 Forbidden`.
 
 The `purposeOfUse` value(s) SHALL NOT be embedded in the QR code or the VHL payload; they are metadata about the share held by the {{ linkvhls }}, not content consumed by the {{ linkvhlr }}.
 
@@ -262,7 +262,7 @@ The response SHALL include exactly one of the following output parameters, selec
 
 | Parameter | Type | Cardinality | Description |
 |-----------|------|-------------|-------------|
-| qrcode | Binary | [0..1] | QR code image containing HCERT-encoded VHL. Populated when `format=qrcode` (default). |
+| qrcode | Binary | [0..1] | QR code image containing HCERT-encoded VHL. Populated when `format=qrcode` or when format is absent, as the default format. |
 | verifiableCredential | Binary | [0..1] | A Verifiable Credential (`application/vc+ld+json`) carrying the VHL. Populated when `format=vc` and the VHL Sharer supports the [VC Enveloped VHL Option](#23yy343-vc-enveloped-vhl-option). |
 {: .grid}
 

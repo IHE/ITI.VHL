@@ -54,10 +54,9 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "*"
-  * type = #CodeableConcept
-  * binding.strength = #extensible
-  * binding.valueSet = "http://terminology.hl7.org/ValueSet/v3-PurposeOfUse"
-  * documentation = "Optional. Purpose(s) of use the VHL Holder is authorizing for this share (e.g., TREAT, HPAYMT, HRESCH). The VHL Sharer SHALL persist these value(s) against the generated folder ID. When the VHL Sharer is grouped with an IHE PCF Consent Creator or Consent Recipient, these values SHALL populate Consent.provision.purpose on any Consent created for or bound to this folder. At ITI-YY5 the VHL Sharer MAY use the recorded purpose to enforce consistency with the VHL Receiver's declared purpose claim (e.g., the OAuth access token's purposeOfUse claim, the UDAP sub_purpose extension, or an equivalent claim carried in a Verifiable Credential)."
+  * type = #string
+  * searchType = #token
+  * documentation = "Optional. Purpose(s) of use the VHL Holder is authorizing for this share (e.g., TREAT, HPAYMT, HRESCH). The VHL Sharer SHALL persist these value(s) against the generated folder ID. When the VHL Sharer is grouped with an IHE PCF Consent Creator or Consent Recipient, these values SHALL populate Consent.provision.purpose on any Consent created for or bound to this folder. At ITI-YY5 the VHL Sharer MAY use the recorded purpose to enforce consistency with the VHL Receiver's declared purpose claim (e.g., the OAuth access token's purposeOfUse claim, the SSRAA hl7-b2b extension, or an equivalent claim carried in a Verifiable Credential)."
 * parameter[+]
   * name = #format
   * use = #in

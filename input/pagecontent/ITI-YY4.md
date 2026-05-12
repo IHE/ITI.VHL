@@ -81,21 +81,30 @@ When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#23yy343-
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
 
+**QR Code Transmission:**
+
 The VHL Holder SHALL:
 1. Verify QR code validity (not expired, CWT signature valid)
 2. Display QR code on device screen or provide printed copy
+3. Ensure QR code is displayed at appropriate size for reliable scanning
+4. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
+
+**Verifiable Credential Transmission (VC Enveloped VHL Option):**
+
+When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#23yy343-vc-enveloped-vhl-option), the VHL Holder SHALL:
+1. Verify the VC is valid (not expired, `DataIntegrityProof` intact)
+2. Transmit the `application/vc+ld+json` document to the VHL Receiver via an agreed channel (HTTPS, email attachment, file transfer, or NFC)
 3. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
-4. Ensure QR code is displayed at appropriate size for reliable scanning
 
 The VHL Holder MAY:
-- Maintain record of QR code presentations
+- Maintain record of VHL presentations (QR or VC)
 - Revoke VHL access if supported by VHL Sharer
 
 ##### 2:3.YY4.4.1.4 Expected Actions - VHL Receiver
 
 {{ provideVHLRespDescription.valueMarkdown }}
 
-Upon receiving a VHL via QR code, the VHL Receiver SHALL perform the following 9-step decoding process:
+The VHL Receiver SHALL decode the received VHL using the appropriate path below. Upon receiving a VHL via QR code, the VHL Receiver SHALL perform the following 9-step decoding process. When the VHL is received as a Verifiable Credential (VC Enveloped VHL Option), see the VC Decoding section further below.
 
 1. **Scan QR Code**:
    - Use QR code scanner (camera, dedicated scanner, or software library)
