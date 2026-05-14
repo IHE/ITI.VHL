@@ -339,7 +339,7 @@ When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} suppo
 
 **Naming Note:** This option (a Sharer option carrying the VHL) is distinct from the **Verifiable Credential Option** (a Receiver authentication option at ITI-YY5 where the Receiver self-issues a VC as the manifest request body).
 
-See ITI-YY3 Section 2:3.YY3.4.3 and ITI-YY4 Section 2:3.YY4.4.1.2 for detailed VC construction, transmission, and decoding.
+See ITI-YY3 Section [2:3.YY3.4.1.2.1 Output Carrier Options](ITI-YY3.html#output-carrier-options) and ITI-YY4 Section 2:3.YY4.4.1.2 for detailed VC construction, transmission, and decoding.
 
 <a name="required-groupings"> </a>
 

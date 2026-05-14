@@ -23,8 +23,8 @@ Usage: #definition
   * use = #in
   * min = 0
   * max = "1"
-  * type = #integer
-  * documentation = "Optional. Number representing expiration time in Epoch seconds, as a hint to help the VHL Receiver determine if this QR is stale."
+  * type = #positiveInt
+  * documentation = "Optional. Number representing expiration time in Epoch seconds."
 * parameter[+]
   * name = #flag
   * use = #in
