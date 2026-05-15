@@ -8,17 +8,11 @@ participant "VHL Sharer" as Sharer
 Holder -> Sharer: Generate VHL Request [ITI-YY3]
 note right
   Request VHL generation
-  with parameters:
-  - patient identifier
-  - expiration time
-  - passcode flag
 end note
 
 Sharer --> Holder: Generate VHL Response
 note left
-  Returns signed VHL
-  (JWS token with
-  manifest URL)
+  Returns VHL as QR code (default) or VC Enveloped VHL
 end note
 
 @enduml

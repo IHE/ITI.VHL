@@ -204,12 +204,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
      - `_include=List:item`: (if VHL Sharer supports Include DocumentReference Option)
    - Example: `https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item`
 
-3. **Prepare to Retrieve Manifest**:
-   - The VHL Receiver will use ITI-YY5 Retrieve Manifest with 3-part multipart request:
-     - **Part 1 (fhir-parameters):** FHIR search parameters from the manifest URL
-     - **Part 2 (shl-parameters):** JSON object with `recipient`, `passcode` (if P flag), `embeddedLengthMax`
-     - **Part 3 (signature):** Optional digital signature over Parts 1 and 2
-   - Store manifest URL and prepare the SHL-defined manifest parameters (per the SMART Health Links spec) for the ITI-YY5 request
+3. Prepare to Retrieve Manifest as per ITI-YY5
 
 The VHL Receiver MAY:
 - Prompt user for passcode if "P" flag is present (required for ITI-YY5)
@@ -244,7 +239,7 @@ Step 7: Within hcert (claim -260), extract claim key 5 (VHL payload):
   }
 Step 8: Validate VHL payload fields
 Step 9: Parse manifest URL to extract FHIR search parameters
-Step 10: Prepare for ITI-YY5 Retrieve Manifest with 3-part multipart request
+Step 10: Prepare for ITI-YY5 Retrieve Manifest
 ```
 
 **Manifest URL Parsing:**
@@ -329,7 +324,6 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 - VHL does NOT contain PHI
 - VHL only contains reference (URL) to retrieve documents
 - Actual documents retrieved over secure channel (ITI-YY5)
-- Encryption key in VHL enables document decryption (ITI-YY6)
 
 #### 2:3.YY4.5.3 Replay Attacks
 - VHL Sharers SHOULD include expiration timestamps in both CWT and VHL payload

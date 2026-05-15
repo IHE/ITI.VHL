@@ -5,47 +5,7 @@ hide footbox
 participant "VHL Receiver" as Receiver
 participant "VHL Sharer" as Sharer
 
-alt HTTP Message Signatures Option
-  Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]
-  note right
-    POST /List/_search
-    Signature-Input: sig1=(...)
-    Signature: sig1=:...:
-    Content-Digest: sha-256=...
-    Body: search params + SHL params
-    Over ATNA secure channel
-  end note
-else OAuth with SSRAA Option
-  Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]
-  note right
-    POST /List/_search
-    Authorization: Bearer <access-token>
-    Body: search params + SHL params
-    Over ATNA secure channel
-  end note
-else Verifiable Credential Option
-  Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]
-  note right
-    POST /List/_search?_id=...&code=...
-    Content-Type: application/vc+ld+json
-    Body: JSON-LD LDP-VC with:
-    - credentialSubject.id = manifest URL
-    - credentialSubject.manifest (from QR)
-    - credentialSubject.recipient/passcode
-    - proof.type = DataIntegrityProof
-    - proof.proofValue (trust network key)
-    Over ATNA secure channel
-  end note
-end
-
-Sharer --> Receiver: Retrieve Manifest Response
-note left
-  FHIR Bundle (searchset)
-  - List resource (search.mode=match)
-  - DocumentReference resources
-    (search.mode=include, if
-    Include DocumentReference
-    Option supported)
-end note
+Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]\nPOST /List/_search\n(authenticated)
+Sharer --> Receiver: Retrieve Manifest Response\nFHIR Bundle (searchset)
 
 @enduml

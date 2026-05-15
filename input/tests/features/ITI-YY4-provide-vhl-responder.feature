@@ -178,12 +178,13 @@ Feature: ITI-YY4 Provide VHL – VHL Receiver Expected Actions
     And SHALL note whether "_include=List:item" is present
 
   @responder-actions @SHALL
-  Scenario: VHL Receiver prepares a multipart request structure for ITI-YY5
+  Scenario: VHL Receiver prepares a request structure for ITI-YY5
     Given the manifest URL and SHL parameters are ready
     When the VHL Receiver prepares the ITI-YY5 request
-    Then Part 1 (fhir-parameters) SHALL contain the FHIR search parameters from the manifest URL
-    And Part 2 (shl-parameters) SHALL contain "recipient" and "passcode" (if P flag) and optionally "embeddedLengthMax"
-    And Part 3 (signature) SHALL optionally contain a digital signature over Parts 1 and 2
+    Then the request SHALL be an HTTP POST to the manifest URL "_search" endpoint
+    And the request body SHALL contain the FHIR search parameters extracted from the manifest URL
+    And the request body SHALL include "recipient" and "passcode" (if P flag) and optionally "embeddedLengthMax"
+    And the request SHALL include authentication via at least one of: HTTP Message Signatures (RFC 9421), OAuth Bearer token (SSRAA), or Verifiable Credential option
 
   # ─── Error Handling ──────────────────────────────────────────────────────────
 

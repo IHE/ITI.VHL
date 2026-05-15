@@ -80,7 +80,7 @@ Where **[base]** is the URL of VHL Sharer Service provider.
 The Generate VHL message is performed by an HTTP GET command shown below:
 
 ```
-GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[number]}{&flag=[string]}{&label=[string]}{&passcode=[string]}{&purposeOfUse=[token]}{&format=[token]}
+GET [base]/Patient/$generate-vhl?sourceIdentifier=[token]{&exp=[positiveInt]}{&flag=[string]}{&label=[string]}{&passcode=[string]}{&purposeOfUse=[token]}{&format=[token]}
 ```
 
 Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g., `http://terminology.hl7.org/CodeSystem/v3-ActReason|TREAT`) and MAY repeat.
@@ -147,7 +147,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
      [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[sourceIdentifier-system|value]
      ```
    
-   Note: The manifest URL includes all mandatory FHIR search parameters (_id, code, status) and the patient identifier via FHIR chained search on the patient reference parameter (`patient.identifier=system|value`). It optionally includes `_include=List:item` if the VHL Sharer supports the Include DocumentReference Option.
+   Note: The manifest URL is a FHIR search on `List` using the search parameters that the Document Responder in [IHE MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html) is required to support — specifically `_id`, `code`, `status`, and the patient identifier expressed as a chained search on the `patient` reference parameter (`patient.identifier=system|value`). `_include=List:item` is added only when the {{ linkvhls }} supports the Include DocumentReference Option.
 
 4. Create the VHL payload (using the SHL payload format) as a JSON object with:
    - `url`: the manifest URL from step 3
