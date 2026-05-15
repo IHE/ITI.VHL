@@ -113,44 +113,7 @@ The default carrier when `format` is omitted or set to `qrcode`. The VHL payload
 
 **VC Enveloped VHL Carrier (Option — `format=vc`)**
 
-Optional. Available only when the {{ linkvhls }} supports the **VC Enveloped VHL Option** (see [Volume 1 §XX.2.6 VC Enveloped VHL Option](volume-1.html#xx26-vc-enveloped-vhl-option-vhl-sharer)). When `format=vc` is requested but the option is unsupported, the {{ linkvhls }} SHALL return an `OperationOutcome` error. The VC is an alternative carrier for the same VHL payload — the manifest URL, decryption key, flags, label, expiration, and optional extension are identical to those otherwise embedded at HCERT claim key 5.
-
-The {{ linkvhls }} SHALL construct the VC as a JSON-LD document per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification (cryptosuite selected per the central [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)). The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures (no new trust framework is introduced — the {{ linkvhlr }} verifies the VC proof against the trust list via the existing trust framework).
-
-The `credentialSubject` carries the VHL payload (conforming to the SHL payload format) with the same fields that are otherwise embedded at HCERT claim key 5 (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`).
-
-**Example VC carrying the VHL payload:**
-
-```json
-{
-  "@context": ["https://www.w3.org/ns/credentials/v2"],
-  "type": ["VerifiableCredential", "VHLEnvelopeCredential"],
-  "issuer": "did:web:vhl-sharer.example.org",
-  "issuanceDate": "2024-01-01T00:00:00Z",
-  "expirationDate": "2025-01-01T00:00:00Z",
-  "credentialSubject": {
-    "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
-    "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
-    "exp": 1735689600,
-    "flag": "LP",
-    "label": "Patient Health Summary",
-    "v": 1,
-    "extension": {
-      "fhirBaseUrl": "https://vhl-sharer.example.org"
-    }
-  },
-  "proof": {
-    "type": "DataIntegrityProof",
-    "cryptosuite": "ecdsa-2019",
-    "created": "2024-01-01T00:00:00Z",
-    "verificationMethod": "did:web:vhl-sharer.example.org#sharer-key-1",
-    "proofPurpose": "assertionMethod",
-    "proofValue": "z3FD9sJ8kL2m9pQ7rT4vW5xY6zAb3cD4eF5gH6iJ7kL8mN9oP0qR1sT2uV3wX4yZ"
-  }
-}
-```
-
-The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the {{ linkvhlr }} per [ITI-YY4 Provide VHL](ITI-YY4.html) using any channel capable of conveying JSON (HTTPS, email attachment, file transfer, etc.).
+Optional carrier. Available only when the {{ linkvhls }} supports the **VC Enveloped VHL Option** (see [Volume 1 §XX.2.6 VC Enveloped VHL Option](volume-1.html#xx26-vc-enveloped-vhl-option-vhl-sharer)); if requested but unsupported, the {{ linkvhls }} SHALL return an `OperationOutcome` error. The same VHL payload is carried under `credentialSubject` of a JSON-LD W3C Verifiable Credential ([VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)) with an embedded `DataIntegrityProof` ([VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/)) signed by the {{ linkvhls }} using its trust-network key — no new trust framework is introduced. See [2:3.YY3.4.1.3 Expected Actions](#23yy3413-expected-actions) for the full construction steps and a worked example.
 
 > **Naming note:** This "VC Enveloped VHL Option" at ITI-YY3/YY4 carries the VHL itself. It is distinct from the "Verifiable Credential Option" at [ITI-YY5](ITI-YY5.html#23yy5415-authentication-option---verifiable-credential-option), which is a separate option for {{ linkvhlr }} authentication where the Receiver self-issues a VC as the manifest request body.
 
@@ -160,40 +123,9 @@ The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the {{
 
 {% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
 
-The {{linkvhls}} generates a QR code containing the VHL. The QR code is encoded as an HCERT/CWT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html) and contains the VHL payload embedded at claim key 5 within the hcert claim (claim key -260).
+Based on the requested `format`, the {{ linkvhls }} generates the VHL as either a QR code (HCERT/CWT-encoded per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html), with the VHL payload embedded at claim key 5) or a Verifiable Credential (JSON-LD per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with the VHL payload under `credentialSubject`). Both carriers share the same VHL payload construction.
 
 The generation process is as follows:
-
-**sourceIdentifier Validation**
-
-Before generating the VHL, the {{ linkvhls }} SHALL:
-
-- Parse `sourceIdentifier` as a FHIR `Identifier` in `system|value` form, resolve it to a known Patient, and authorize the caller for that Patient — rejecting with an `OperationOutcome` (`400`, `404`, or `403` respectively) on failure.
-- In patient-constrained contexts (e.g., patient-facing app, SMART `launch/patient` scope), verify the `sourceIdentifier` resolves to the patient-in-context; reject mismatches with `403`.
-- Echo this exact `system|value` into the manifest URL as `patient.identifier` (see [VHL Payload Construction](#vhl-payload-construction) below) — never substitute a `Patient.id`.
-
-<a name="purpose-of-use-handling"></a>
-
-**Purpose of Use Handling (if provided)**
-
-If one or more `purposeOfUse` values are provided, the VHL Sharer SHALL:
-
-1. Validate each value against the [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) value set (extensible binding — jurisdiction- or use-case-specific codes are permitted).
-2. Persist the value(s) against the generated folder ID so that they remain discoverable for downstream enforcement at ITI-YY5.
-3. When grouped with an IHE PCF [Consent Creator](https://profiles.ihe.net/ITI/PCF/) or [Consent Recipient](https://profiles.ihe.net/ITI/PCF/), populate `Consent.provision.purpose` on any Consent created for or bound to this folder from the persisted value(s).
-
-At [ITI-YY5](ITI-YY5.html) the {{ linkvhls }} MAY use the recorded purpose to enforce consistency with the {{ linkvhlr }}'s declared purpose claim — for example, the `purposeOfUse` claim of an OAuth access token under the OAuth with SSRAA Option, the `hl7-b2b` extension of a UDAP assertion, or an equivalent claim carried in a Verifiable Credential under the Verifiable Credential Option. Inconsistent purposes MAY be rejected with HTTP `403 Forbidden`.
-
-The `purposeOfUse` value(s) SHALL NOT be embedded in the QR code or the VHL payload; they are metadata about the share held by the {{ linkvhls }}, not content consumed by the {{ linkvhlr }}.
-
-**Passcode Handling (if provided)**
-
-If the `passcode` parameter is provided:
-1. The VHL Sharer SHALL securely hash the passcode using a strong one-way hash function (e.g., bcrypt, Argon2, PBKDF2)
-2. The VHL Sharer SHALL store the hashed passcode associated with the folder ID for later validation during ITI-YY5 Retrieve Manifest
-3. The VHL Sharer SHALL include the 'P' flag in the `flag` parameter of the VHL payload
-4. The passcode itself SHALL NOT be included in the VHL URL or QR code
-5. The VHL Holder SHALL securely store the plaintext passcode for future use by the VHL Receiver during manifest retrieval
 
 <a name="vhl-payload-construction"></a>
 
@@ -265,11 +197,9 @@ vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19p
 // The VHL link (step 5c) will be embedded in the HCERT structure (see QR Code Generation below)
 ```
 
-**QR Code Generation (HCERT/CWT Encoding)**
+**QR Code Generation (HCERT/CWT Encoding) — `format=qrcode`**
 
-After constructing the VHL payload (steps 1-4 above), the VHL Sharer SHALL encode it within an [HCERT](https://smart.who.int/trust/StructureDefinition-HCert.html) structure as per the WHO SMART TRUST specification. The HCERT claim SHALL be 5 for VHL.
-
-The VHL Sharer shall than generate the QR Code as per the [HCERT Specification](https://smart.who.int/trust/hcert_spec.html).
+After constructing the VHL payload (steps 1–4 above), the {{ linkvhls }} SHALL encode it within an [HCERT](https://smart.who.int/trust/StructureDefinition-HCert.html) structure per the WHO SMART Trust specification with the VHL payload at HCERT claim 5, then generate the QR code per the [HCERT Specification](https://smart.who.int/trust/hcert_spec.html).
 
 **Example HCERT/CWT Structure:**
 
@@ -288,16 +218,52 @@ The VHL Sharer shall than generate the QR Code as per the [HCERT Specification](
 HC1:NCF3R0KLBBA...V8N8W.CE8WY
 ```
 
-**Manifest URL Construction Notes:**
+**VC Envelope Generation (Option — `format=vc`)**
 
-The manifest URL constructed in step 3 SHALL include all mandatory FHIR search parameters required by ITI-YY5:
-- `_id`: The unique folder ID (required)
-- `code`: The List type, typically "folder" (required)
-- `status`: The List status, typically "current" (required)
-- `patient.identifier`: The patient identifier using FHIR chained search on the patient reference parameter, in `system|value` format (required). 
-- `_include=List:item`: Include DocumentReferences (optional - only if VHL Sharer supports Include DocumentReference Option)
+When `format=vc` is requested and the {{ linkvhls }} supports the [VC Enveloped VHL Option](#vc-enveloped-vhl-carrier-option--formatvc), the {{ linkvhls }} SHALL construct a JSON-LD document per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification (cryptosuite selected per the central [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)). The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures — no new trust framework is introduced. The `credentialSubject` SHALL carry the VHL payload from step 4 (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`). The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the {{ linkvhlr }} per [ITI-YY4 Provide VHL](ITI-YY4.html).
 
-The VHL Receiver will use this exact manifest URL when performing the ITI-YY5 Retrieve Manifest transaction, adding the SHL-defined manifest parameters (`recipient`, `passcode`, `embeddedLengthMax` — per the [SMART Health Links specification](http://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)) separately in Part 2 of the multipart request.
+**Example VC carrying the VHL payload:**
+
+```json
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": ["VerifiableCredential", "VHLEnvelopeCredential"],
+  "issuer": "did:web:vhl-sharer.example.org",
+  "issuanceDate": "2024-01-01T00:00:00Z",
+  "expirationDate": "2025-01-01T00:00:00Z",
+  "credentialSubject": {
+    "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+    "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
+    "exp": 1735689600,
+    "flag": "LP",
+    "label": "Patient Health Summary",
+    "v": 1,
+    "extension": {
+      "fhirBaseUrl": "https://vhl-sharer.example.org"
+    }
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "ecdsa-2019",
+    "created": "2024-01-01T00:00:00Z",
+    "verificationMethod": "did:web:vhl-sharer.example.org#sharer-key-1",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3FD9sJ8kL2m9pQ7rT4vW5xY6zAb3cD4eF5gH6iJ7kL8mN9oP0qR1sT2uV3wX4yZ"
+  }
+}
+```
+
+**Handling Notes**
+
+The following handling rules apply within the steps above:
+
+**sourceIdentifier Validation** — The {{ linkvhls }} SHALL parse `sourceIdentifier` as a FHIR `Identifier` in `system|value` form, resolve it to a known Patient, authorize the caller, and echo the exact `system|value` into the manifest URL as `patient.identifier` (never substituting `Patient.id`). In patient-constrained contexts (e.g., SMART `launch/patient` scope), mismatches with the patient-in-context SHALL be rejected with `403`. Other failures return `OperationOutcome` with `400` / `404` / `403` as appropriate.
+
+<a name="purpose-of-use-handling"></a>
+
+**Purpose of Use Handling (if provided)** — The {{ linkvhls }} SHALL validate each `purposeOfUse` value against [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) (extensible binding) and persist the value(s) against the folder ID for downstream enforcement at [ITI-YY5](ITI-YY5.html). When grouped with an IHE PCF [Consent Creator](https://profiles.ihe.net/ITI/PCF/) or [Consent Recipient](https://profiles.ihe.net/ITI/PCF/), the persisted value(s) SHALL populate `Consent.provision.purpose`. `purposeOfUse` value(s) SHALL NOT be embedded in the QR code, VC, or VHL payload — they are share metadata held by the {{ linkvhls }}, not content consumed by the {{ linkvhlr }}.
+
+**Passcode Handling (if provided)** — The {{ linkvhls }} SHALL hash the passcode with a strong one-way function (e.g., bcrypt, Argon2, PBKDF2), store the hash against the folder ID for ITI-YY5 validation, and set the `P` flag in the VHL payload. The plaintext passcode SHALL NOT appear in the VHL URL, QR code, or VC, and SHALL NOT be stored by the {{ linkvhls }}; the {{ linkvhlh }} retains it for out-of-band sharing with the {{ linkvhlr }}.
 
 
 #### 2:3.YY3.4.2  Generate VHL Response Message 
