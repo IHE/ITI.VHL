@@ -396,7 +396,7 @@ The {{ linkvhlr }} SHALL:
      - embeddedLengthMax (optional) - size hint for embedded content
    - Encode parameters as `application/x-www-form-urlencoded`
 
-3. **Authenticate Request** (use one of the following options; none is required):
+3. **Authenticate Request** (use atleast one of the following options):
    - **Option A - HTTP Message Signatures** (if supported):
      - Compute Content-Digest (SHA-256 of request body)
      - Construct signature base from HTTP components
@@ -810,7 +810,7 @@ The protected header decodes to `{"alg":"dir","enc":"A256GCM"}`. The empty secon
 Secure transport is required for all communications in this transaction. Implementations SHALL comply with the **IHE ATNA Profile** (ITI TF-1: Section 9) for transport security requirements
 
 #### 2:3.YY5.5.2 HTTP Message Signatures 
-All implementations SHALL support HTTP Message Signatures per RFC 9421:
+Implementations that support HTTP Message Signatures per RFC 9421:
 - Signature SHALL include `@method`, `@path`, `@authority`, `content-type`, `content-digest`
 - Content-Digest SHALL be SHA-256 or stronger
 - Signature algorithm and key strength — see [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)
@@ -835,7 +835,7 @@ Implementations that support OAuth with SSRAA Option SHALL:
 {{ linkvhls }} SHALL validate VHL before returning documents:
 - Verify folder ID (_id parameter) corresponds to valid VHL
 - Validate VHL signature (HCERT/CWT COSE signature from ITI-YY3)
-- Check VHL expiration (CWT exp claim)
+- Check VHL expiration (either exp in CWT or VHL payload)
 - Verify VHL not revoked (if revocation list maintained)
 - Validate passcode if VHL requires it (P flag present):
   - Compare against stored hash using constant-time comparison

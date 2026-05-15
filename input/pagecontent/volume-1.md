@@ -269,7 +269,7 @@ This option provides:
 
 **Complementary Option:** This option is designed to work with the Sign Manifest Request Option (VHL Sharer). If a {{ linkvhlr }} signs requests, the {{ linkvhls }} should support signature verification.
 
-See ITI-YY5 Section 2:3.YY5.4.1.2 for detailed signature format.
+See ITI-YY5 Section [2:3.YY5.4.1.3 Authentication Option - HTTP Message Signatures](ITI-YY5.html#23yy5413-authentication-option---http-message-signatures) for detailed signature format.
 
 ### XX.2.2 Include DocumentReference Option (VHL Sharer)
 
@@ -282,7 +282,7 @@ The Include DocumentReference Option enables the {{ linkvhls }} to process the `
 
 **Implementation Note:** When generating VHLs in ITI-YY3, VHL Sharers supporting this option SHOULD include `_include=List:item` in the manifest URL. VHL Sharers not supporting this option SHOULD NOT include the `_include` parameter in the manifest URL.
 
-See ITI-YY5 Section 2:3.YY5.4.1.3 for detailed behavior.
+See ITI-YY5 Section [2:3.YY5.4.2.2 Message Semantics](ITI-YY5.html#23yy5422-message-semantics) and [2:3.YY5.4.1.7 Expected Actions - VHL Sharer](ITI-YY5.html#23yy5417-expected-actions---vhl-sharer) for detailed behavior.
 
 ### XX.2.3 Verify Document Signature Option (VHL Receiver)
 
@@ -339,7 +339,7 @@ When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} suppo
 
 **Naming Note:** This option (a Sharer option carrying the VHL) is distinct from the **Verifiable Credential Option** (a Receiver authentication option at ITI-YY5 where the Receiver self-issues a VC as the manifest request body).
 
-See ITI-YY3 Section [2:3.YY3.4.1.2.1 Output Carrier Options](ITI-YY3.html#output-carrier-options) and ITI-YY4 Section 2:3.YY4.4.1.2 for detailed VC construction, transmission, and decoding.
+See ITI-YY3 Section [2:3.YY3.4.1.2.1 Output Carrier Options](ITI-YY3.html#output-carrier-options) for VC construction, ITI-YY4 Section [2:3.YY4.4.1.2 Message Semantics](ITI-YY4.html#23yy4412-message-semantics) for transmission, and ITI-YY4 Section [2:3.YY4.4.1.4 Expected Actions - VHL Receiver](ITI-YY4.html#23yy4414-expected-actions---vhl-receiver) for decoding.
 
 <a name="required-groupings"> </a>
 
@@ -509,9 +509,7 @@ The `$generate-vhl` operation (ITI-YY3) accepts an optional `purposeOfUse` input
 
 ### XX.6.3 MHD - Mobile Health Document Sharing
 
-ITI-YY5 (Retrieve Manifest) follows patterns similar to MHD transactions:
-- Returns FHIR Bundle (searchset) with DocumentReference resources, similar to MHD ITI-67
-- Document retrieval patterns could be extended to align with MHD ITI-68
+ITI-YY5 (Retrieve Manifest) reuses the FHIR search machinery of [MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html): the VHL manifest URL constructed at ITI-YY3 is a FHIR `List` search using the parameters the Document Responder is required to support per ITI-66, and the ITI-YY5 response is an ITI-66 `searchset` Bundle. Binary retrieval is delegated to [MHD ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html) per the required grouping in [§XX.3 Required Actor Groupings](#required-groupings).
 
 ### XX.6.4 mCSD - Mobile Care Services Discovery
 

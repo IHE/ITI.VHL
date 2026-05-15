@@ -3,7 +3,7 @@
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
 
-> **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for Trust Anchor actors and **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors. Implementations that do not support this transaction must use alternative mechanisms (out of scope for this profile) to retrieve PKI material from the Trust Anchor. Only implementations that claim support for this transaction can participate in IHE Connectathon testing for trust material retrieval. See Volume 1 Section XX.2.1 for details on trust establishment approaches.
+> **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for Trust Anchor actors and **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors. Implementations that do not support this transaction must use alternative mechanisms (out of scope for this profile) to retrieve PKI material from the Trust Anchor. Only implementations that claim support for this transaction can participate in IHE Connectathon testing for trust material retrieval. See Volume 1 Section [XX.5.1 Trust Network Security](volume-1.html#xx51-trust-network-security) for details on trust establishment approaches.
 
 {% assign reqRetrievePKI = site.data.Requirements-InitiateRetrieveTrustListRequest %}
 {% assign reqRetrievePKIResp = site.data.Requirements-RespondtoRetrieveTrustListRequest %}
@@ -186,7 +186,7 @@ Upon receiving a Retrieve Trust List Request, the {{ linkta }} SHALL:
 2. **Process Query**: Identify the requested DID Document(s) based on query parameters
 3. **Filter Results**: Return only active, non-revoked DID Documents
 4. **Construct Response**: Format the response according to the requested representation, ensure returned DID Documents conform to W3C DID Core specification and include sufficient verification methods for signature validation
-5. **Sign Response** (optional): Digitally sign the response to ensure integrity
+5. **Sign Response** : Digitally sign the response to ensure integrity
 
 **VHL Receiver / VHL Sharer:**
 
