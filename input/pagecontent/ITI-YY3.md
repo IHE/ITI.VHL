@@ -147,7 +147,7 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
      [base]/List?_id=[folder-id]&code=folder&status=current&patient.identifier=[sourceIdentifier-system|value]
      ```
    
-   Note: The manifest URL is a FHIR search on `List` using the search parameters that the Document Responder in [IHE MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html) is required to support — specifically `_id`, `code`, `status`, and the patient identifier expressed as a chained search on the `patient` reference parameter (`patient.identifier=system|value`). `_include=List:item` is added only when the {{ linkvhls }} supports the Include DocumentReference Option.
+ Note: This profile requires the manifest URL to include `_id`, `code`, `status`, and `patient.identifier` (chained search on the `patient` reference parameter, in `system|value` form). [IHE MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html) already requires the Document Consumer to include `code`, `status`, and `patient`/`patient.identifier`, and requires the Document Responder to support `_id` — this profile additionally requires `_id` to be present in every VHL manifest URL, since the folder ID is the primary authorization mechanism for the VHL (see [ITI-YY5 §2:3.YY5.4.1.2 FHIR Search Parameters](ITI-YY5.html#23yy5412-message-semantics) where `_id` is marked `[1..1]`). `_include=List:item` is added only when the {{ linkvhls }} supports the Include DocumentReference Option.
 
 4. Create the VHL payload (using the SHL payload format) as a JSON object with:
    - `url`: the manifest URL from step 3
