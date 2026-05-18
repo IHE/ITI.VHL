@@ -403,7 +403,7 @@ The {{ linkvhlr }} SHALL:
      - Sign using receiver's private key
      - Include Content-Digest, Signature-Input, and Signature headers
    - **Option B - OAuth with SSRAA** (if supported):
-     - **One-time per VHL Sharer:** if not already registered with this {{ linkvhls }}, perform UDAP Discovery (SSRAA §2) using the FHIR Base URL from the VHL payload and Dynamic Client Registration (SSRAA §3) to obtain a client ID. Cache the registration per FHIR Base URL.
+     - **One-time setup:** if not already registered with this {{ linkvhls }}, perform UDAP Discovery (SSRAA §2) using the FHIR Base URL from the VHL payload and Dynamic Client Registration (SSRAA §3) to obtain a client ID.
      - Create a JWT client assertion (`private_key_jwt`) signed with the receiver's trust-network private key — the X.509 cert (or chain) goes in the `x5c` header; `iss` and `sub` are the registered client ID; `aud` is the authorization server token endpoint; include `jti` and the `hl7-b2b` extension per SSRAA §5.2.1
      - Request an access token from the authorization server (`grant_type=client_credentials`) with appropriate scopes
      - Include the returned Bearer access token in the `Authorization` header of the manifest request
