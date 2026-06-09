@@ -191,7 +191,7 @@ The signature base is constructed per RFC 9421 from the signed components:
 
 Signature algorithms are selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection).
 
-> The {{ linkvhlr }} signing steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} verification steps are described in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations §2:3.YY5.5.2](#23yy552-http-message-signatures).
+> The {{ linkvhlr }} signing steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} verification steps are described in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations Section 2:3.YY5.5.2](#23yy552-http-message-signatures).
 
 ##### 2:3.YY5.4.1.4 Authentication option - OAuth with SSRAA Option
 
@@ -199,7 +199,7 @@ Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 a
 
 **Preconditions: SSRAA Discovery and Registration**
 
-Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} SHALL have completed SSRAA Discovery (SSRAA §2) and Dynamic Client Registration (SSRAA §3) at least once per {{ linkvhlr }} \/ {{ linkvhls }} pair — the FHIR Base URL of the {{ linkvhls }} comes from the VHL payload. These steps MAY take place in advance or just in time; the {{ linkvhlr }} steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver).
+Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} SHALL have completed SSRAA Discovery and Dynamic Client Registration (per SSRAA Sections 2 and 3) at least once per {{ linkvhlr }} \/ {{ linkvhls }} pair — the FHIR Base URL of the {{ linkvhls }} comes from the VHL payload. These steps MAY take place in advance or just in time; the {{ linkvhlr }} steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver).
 
 **Option Requirements:**
 
@@ -271,7 +271,7 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
 - Token Lifetime: Typically 1 hour (3600 seconds)
 - Token Reuse: Access token MAY be reused for multiple requests until expiration, consistent with underlying requirements from the HL7 Security for Scalable Registration, Authentication, and Authorization IG.
 
-> The {{ linkvhlr }} side (SSRAA Discovery/Registration, JWT client assertion creation, access token acquisition, and Authorization-header inclusion) is described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} side (Bearer token validation) is in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations §2:3.YY5.5.3](#23yy553-oauth-with-ssraa-option).
+> The {{ linkvhlr }} side (SSRAA Discovery/Registration, JWT client assertion creation, access token acquisition, and Authorization-header inclusion) is described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} side (Bearer token validation) is in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations Section 2:3.YY5.5.3](#23yy553-oauth-with-ssraa-option).
 
 ##### 2:3.YY5.4.1.5 Authentication Option - Verifiable Credential Option
 
@@ -377,7 +377,7 @@ Accept: application/fhir+json
 }
 ```
 
-> The {{ linkvhlr }} VC issuance steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} VC verification steps are in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations §2:3.YY5.5.9](#23yy559-verifiable-credential-option).
+> The {{ linkvhlr }} VC issuance steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} VC verification steps are in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations Section 2:3.YY5.5.9](#23yy559-verifiable-credential-option).
 
 ##### 2:3.YY5.4.1.6 Expected Actions - VHL Receiver
 
@@ -403,8 +403,8 @@ The {{ linkvhlr }} SHALL:
      - Sign using receiver's private key
      - Include Content-Digest, Signature-Input, and Signature headers
    - **Option B - OAuth with SSRAA** (if supported):
-     - **One-time setup:** if not already registered with this {{ linkvhls }}, perform UDAP Discovery (SSRAA §2) using the FHIR Base URL from the VHL payload and Dynamic Client Registration (SSRAA §3) to obtain a client ID.
-     - Create a JWT client assertion (`private_key_jwt`) signed with the receiver's trust-network private key — the X.509 cert (or chain) goes in the `x5c` header; `iss` and `sub` are the registered client ID; `aud` is the authorization server token endpoint; include `jti` and the `hl7-b2b` extension per SSRAA §5.2.1
+     - **One-time setup:** if not already registered with this {{ linkvhls }}, perform UDAP Discovery and Dynamic Client Registration (per SSRAA Sections 2 and 3) using the FHIR Base URL from the VHL payload to obtain a client ID.
+     - Create a JWT client assertion (`private_key_jwt`) signed with the receiver's trust-network private key — the X.509 cert (or chain) goes in the `x5c` header; `iss` and `sub` are the registered client ID; `aud` is the authorization server token endpoint; include `jti` and the `hl7-b2b` extension per SSRAA Section 5.2.1
      - Request an access token from the authorization server (`grant_type=client_credentials`) with appropriate scopes
      - Include the returned Bearer access token in the `Authorization` header of the manifest request
      - Reuse the access token across requests until expiration
@@ -801,7 +801,7 @@ XFBoMYUZodetZdvTiFvSkQ
 
 The protected header decodes to `{"alg":"dir","enc":"A256GCM"}`. The empty second segment reflects `alg=dir` (no encrypted key).
 
-**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached VHL payload `key` and the protected header as Additional Authenticated Data (per RFC 7516 §5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
+**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached VHL payload `key` and the protected header as Additional Authenticated Data (per RFC 7516 Section 5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
 
 ### 2:3.YY5.5 Security Considerations
 
