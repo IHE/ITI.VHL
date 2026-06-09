@@ -3,7 +3,7 @@
 # the id should be lowercase made up of "ihe." + {domain acronym} + "." + {profile acronym/short-name}
 id: ihe.iti.vhl
 canonical: https://profiles.ihe.net/ITI/VHL
-version: 0.0.2-current
+version: 1.0.0-comment
 name: IHE_ITI_VHL
 title: "Verifiable Health Link"
 description: Patient Mediated sharing of their health information using internet accessible verifiable health link.
