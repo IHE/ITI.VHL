@@ -199,7 +199,7 @@ Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 a
 
 **Preconditions: SSRAA Discovery and Registration**
 
-Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} SHALL have completed SSRAA Discovery (SSRAA §2) and Dynamic Client Registration (SSRAA §3) at least once per {{ linkvhlr }} / {{ linkvhls }} pair — the FHIR Base URL of the {{ linkvhls }} comes from the VHL payload. These steps MAY take place in advance or just in time; the {{ linkvhlr }} steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver).
+Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} SHALL have completed SSRAA Discovery (SSRAA §2) and Dynamic Client Registration (SSRAA §3) at least once per {{ linkvhlr }} \/ {{ linkvhls }} pair — the FHIR Base URL of the {{ linkvhls }} comes from the VHL payload. These steps MAY take place in advance or just in time; the {{ linkvhlr }} steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver).
 
 **Option Requirements:**
 
