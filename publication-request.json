@@ -1,0 +1,15 @@
+{
+    "package-id" : "ihe.iti.vhl",
+    "version" : "1.0.0-comment",
+    "path" : "https://profiles.ihe.net/ITI/VHL/1.0.0-comment",
+    "mode" : "milestone",
+    "status" : "ballot",
+    "sequence" : "Releases",
+    "desc" : "Public Comment ballot",
+    "descmd" : "Public Comment ballot",
+    "changes" : "issues.html",
+    "title" : "Verifiable Health Link",
+    "ci-build" : "https://build.fhir.org/ig/IHE/ITI.VHL",
+    "category" : "ITI",
+    "introduction" : "Patient-mediated sharing of personal health information through verifiable health links across trusted networks."
+  }
