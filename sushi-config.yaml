@@ -7,8 +7,8 @@ version: 1.0.0-comment
 name: IHE_ITI_VHL
 title: "Verifiable Health Link"
 description: Patient Mediated sharing of their health information using internet accessible verifiable health link.
-releaseLabel: ci-build
-#releaseLabel: ballot
+#releaseLabel: ci-build
+releaseLabel: ballot
 #releaseLabel: trial-use
 #releaseLabel: release
 status: draft
