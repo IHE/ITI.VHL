@@ -8,8 +8,12 @@
     "desc" : "Public Comment ballot",
     "descmd" : "Public Comment ballot",
     "changes" : "issues.html",
+	"first": true,
     "title" : "Verifiable Health Link",
     "ci-build" : "https://build.fhir.org/ig/IHE/ITI.VHL",
+	"registry-description" : "This De-Identifaction Handbook defines the requirements for the de-identification of health information.",
+    "registry-country" : "USA",
+    "registry-authority" : "IHE",
     "category" : "ITI",
     "introduction" : "Patient-mediated sharing of personal health information through verifiable health links across trusted networks."
   }
