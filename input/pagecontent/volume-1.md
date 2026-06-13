@@ -8,11 +8,9 @@
 {% assign linkprovidevhl = '<a href="ITI-YY4.html">Provide VHL</a>' %}
 {% assign linkretrievemanifest = '<a href="ITI-YY5.html">Retrieve Manifest</a>' %}
 
-
-
 As individuals move within or across jurisdictional boundaries, they may wish to provide access to clinical or other health-related documents to a defined set of trusted parties who are authorized to access their records. This access may be granted for a single document or for a set of related documents.
 
-The **Verifiable Health Link (VHL)** profile defines a set of protocols and patterns that enable health documents to be shared in a verifiable and auditable manner—both within and across jurisdictions. Central to this profile is the concept of the **VHL**, a signed artifact that an individual (the **VHL Holder**) can use to authorize access to their health records from an issuer (the {{ linkvhls }}) to a third party (the {{ linkvhlr }}). The mechanisms by which the VHL is held by the Holder or transmitted to the {{ linkvhlr }} are out of scope for this profile.
+The **Verifiable Health Links (VHL)** profile defines a set of protocols and patterns that enable health documents to be shared in a verifiable and auditable manner—both within and across jurisdictions. Central to this profile is the concept of the **VHL**, a signed artifact that an individual (the **VHL Holder**) can use to authorize access to their health records from an issuer (the {{ linkvhls }}) to a third party (the {{ linkvhlr }}). The mechanisms by which the VHL is held by the Holder or transmitted to the {{ linkvhlr }} are out of scope for this profile.
 
 VHL leverages **Public Key Infrastructure (PKI)** to establish trust among actors and to verify the authenticity and integrity of exchanged artifacts.
 
@@ -37,10 +35,9 @@ As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} ar
 > - **SHL-defined manifest parameters** — `recipient`, `passcode`, `embeddedLengthMax`, etc., as defined by the SHL specification and reused here.
 > - Actors in this IG are always the {{ linkvhlh }}, {{ linkvhls }}, and {{ linkvhlr }} — never "SHL Receiver" or "SHL Sharer" (those terms only appear in the comparison at Appendix A).
 
-
 <a name="actors-and-transactions"> </a>
 
-## 1:X.1 Actors, Transactions, and Content Modules
+## 1:XX.1 Actors, Transactions, and Content Modules
 
 This section defines the actors, transactions, and/or content modules in this profile. Further information about actor and transaction definitions can be found in the IHE Technical Frameworks General Introduction [Appendix A: Actors](https://profiles.ihe.net/GeneralIntro/ch-A.html) and [Appendix B: Transactions](https://profiles.ihe.net/GeneralIntro/ch-B.html).
 
@@ -67,14 +64,14 @@ This trust MAY be established through:
 - Implementation of the optional Submit PKI Material with DID [ITI-YY1] and Retrieve Trust List with DID [ITI-YY2] transactions, OR
 - Alternative jurisdiction-specific PKI exchange mechanisms (out of scope for this profile)
 
-This is illustrated in Figure X.X.X.X-1.
-
+This is illustrated in Figure 1:XX.1-1.
 
 <figure >
   <div style="width:35em; max-width:100%;">
   {%include trust_interaction.svg%}
   </div>
-  <p id="fX.X.X.X-1" class="figureTitle">Figure X.X.X.X-1: Trust Network PKI Exchange</p>
+  <p id="f1:XX.1-1" class="figureTitle">Figure 1:XX.1-1
+  : Trust Network PKI Exchange</p>
 </figure>
 
 The process of a VHL Holder requesting a VHL for a set of health documents from a {{ linkvhls }} and subsequently sharing them to a {{ linkvhlr }} is illustrated in Figure X.X.X.X-2.
@@ -83,7 +80,7 @@ The process of a VHL Holder requesting a VHL for a set of health documents from 
   <div style="width:18em; max-width:100%;">
   {%include vhl_interaction.svg%}
   </div>
-  <p id="fX.X.X.X-2" class="figureTitle" >Figure X.X.X.X-2: VHL Generation, Provision, and Document Retrieval Flow</p>
+  <p id="f1:XX.1-2" class="figureTitle" >Figure 1:XX.1-2: VHL Generation, Provision, and Document Retrieval Flow</p>
 </figure>
 
 <br clear="all">
@@ -107,9 +104,8 @@ The process of a VHL Holder requesting a VHL for a set of health documents from 
 {: .grid}
 
 
-### XX.1.1 Actors
+### 1:XX.1.1 Actors
 The actors in this profile are described in more detail in the sections below.
-
 
 {% assign canonicals = site.data.canonicals | where: 'type' , 'ActorDefinition' %}
 {% for canonical in canonicals %}
@@ -119,11 +115,11 @@ The actors in this profile are described in more detail in the sections below.
 {% endfor %}
 
 
-### XX.1.2 Transaction Descriptions
+### 1:XX.1.2 Transaction Descriptions
 
 The transactions in this profile are summarized in the sections below.
 
-#### XX.1.2.1 Submit PKI Material with DID [ITI-YY1]
+#### 1:XX.1.2.1 Submit PKI Material with DID [ITI-YY1]
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }} using Decentralized Identifiers (DIDs). The submitted material is formatted as DID Documents containing public keys and associated metadata for validation and inclusion in the Trust List.
 
@@ -141,10 +137,10 @@ Actors that do not implement this transaction SHALL establish trust relationship
 For more details see the detailed [transaction description](ITI-YY1.html)
 
 This transaction is captured as the following requirements:
-* [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
-* [Respond to Submit PKI Material Request](Requirements-RespondtoSubmitPKIMaterialRequest.html)
+- [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
+- [Respond to Submit PKI Material Request](Requirements-RespondtoSubmitPKIMaterialRequest.html)
 
-#### XX.1.2.2 Retrieve Trust List with DID [ITI-YY2]
+#### 1:XX.1.2.2 Retrieve Trust List with DID [ITI-YY2]
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to retrieve a Trust List from a {{ linkta }} containing DID Documents with PKI material. The retrieved DID Documents include public keys and metadata necessary for verifying digital signatures and establishing trust relationships. Received key material should be distinguished by the participating jurisdiction, use case context, and key usage.
 
@@ -170,10 +166,10 @@ Actors that do not implement this transaction SHALL retrieve trust material thro
 For more details see the detailed [transaction description](ITI-YY2.html)
 
 This transaction is captured as the following requirements:
-* [Initiate Retrieve Trust List Request](Requirements-InitiateRetrieveTrustListRequest.html)
-* [Respond to Retrieve Trust List Request](Requirements-RespondtoRetrieveTrustListRequest.html)
+- [Initiate Retrieve Trust List Request](Requirements-InitiateRetrieveTrustListRequest.html)
+- [Respond to Retrieve Trust List Request](Requirements-RespondtoRetrieveTrustListRequest.html)
 
-#### XX.1.2.3 Generate VHL [ITI-YY3]
+#### 1:XX.1.2.3 Generate VHL [ITI-YY3]
 
 This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a QR code containing a VHL. The QR code is encoded as an HCERT/CWT structure.
 
@@ -187,10 +183,10 @@ A {{ linkvhls }} MAY:
 For more details see the detailed [transaction description](ITI-YY3.html)
 
 This transaction is captured as the following requirements:
-* [Initiate VHL Generation Request](Requirements-InitiateVHLGenerationRequest.html)
-* [Respond to VHL Generation Request](Requirements-RespondtoGenerateVHLRequest.html)
+- [Initiate VHL Generation Request](Requirements-InitiateVHLGenerationRequest.html)
+- [Respond to VHL Generation Request](Requirements-RespondtoGenerateVHLRequest.html)
 
-#### XX.1.2.4 Provide VHL [ITI-YY4]
+#### 1:XX.1.2.4 Provide VHL [ITI-YY4]
 
 This transaction is initiated by a {{ linkvhlh }} to transmit a VHL to a {{ linkvhlr }} by displaying or providing a QR code for scanning. 
 
@@ -205,10 +201,10 @@ The {{ linkvhlr }} scans the QR code using a camera-equipped device and processe
 For more details see the detailed [transaction description](ITI-YY4.html)
 
 This transaction is captured as the following requirements:
-* [Provide VHL](Requirements-ProvideVHL.html)
-* [Respond to Provide VHL](Requirements-RespondtoProvideVHL.html)
+- [Provide VHL](Requirements-ProvideVHL.html)
+- [Respond to Provide VHL](Requirements-RespondtoProvideVHL.html)
 
-#### XX.1.2.5 Retrieve Manifest [ITI-YY5]
+#### 1:XX.1.2.5 Retrieve Manifest [ITI-YY5]
 
 This transaction is initiated by a {{ linkvhlr }} to retrieve a document manifest from a {{ linkvhls }} using a previously validated VHL as authorization. The transaction uses standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists.
 
@@ -231,12 +227,11 @@ Client and server requirements are defined in:
 For more details see the detailed [transaction description](ITI-YY5.html)
 
 This transaction is captured as the following requirements:
-* [Request VHL Documents](Requirements-RequestVHLDocuments.html)
+- [Request VHL Documents](Requirements-RequestVHLDocuments.html)
 
 <a name="actor-options"> </a>
 
-
-## XX.2  Actor Options
+## 1:XX.2  Actor Options
 
 Options that may be selected for each actor in this implementation guide are listed in Table XX.2-1 below. Dependencies between options when applicable are specified in notes.
 
@@ -257,7 +252,7 @@ Options that may be selected for each actor in this implementation guide are lis
 {: .grid}
 
 
-### XX.2.1 Sign Manifest Request Option (VHL Receiver)
+### 1:XX.2.1 Sign Manifest Request Option (VHL Receiver)
 
 The Sign Manifest Request Option enables the {{ linkvhlr }} to digitally sign manifest requests sent to the {{ linkvhls }} and enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
 
@@ -271,7 +266,7 @@ This option provides:
 
 See ITI-YY5 Section [2:3.YY5.4.1.3 Authentication Option - HTTP Message Signatures](ITI-YY5.html#23yy5413-authentication-option---http-message-signatures) for detailed signature format.
 
-### XX.2.2 Include DocumentReference Option (VHL Sharer)
+### 1:XX.2.2 Include DocumentReference Option (VHL Sharer)
 
 The Include DocumentReference Option enables the {{ linkvhls }} to process the `_include=List:item` parameter in manifest requests and return DocumentReference resources along with the List resource in a single response.
 
@@ -284,16 +279,16 @@ The Include DocumentReference Option enables the {{ linkvhls }} to process the `
 
 See ITI-YY5 Section [2:3.YY5.4.2.2 Message Semantics](ITI-YY5.html#23yy5422-message-semantics) and [2:3.YY5.4.1.7 Expected Actions - VHL Sharer](ITI-YY5.html#23yy5417-expected-actions---vhl-sharer) for detailed behavior.
 
-### XX.2.3 Verify Document Signature Option (VHL Receiver)
+### 1:XX.2.3 Verify Document Signature Option (VHL Receiver)
 
 In this option the {{ linkvhlr }}, after receipt of a digitally signed document from a {{ linkvhls }}, shall verify the digital signature using previously retrieved PKI material. This key material may or may not be distributed under the same trust network under which the VHL was distributed. This key material may or may not be the same key material that was used to verify the VHL.
 
 See cross-profile considerations for a discussion of the relationship of this option to the IHE Document Signature profile.
 
 This option is captured in the following business requirement:
-* [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
+- [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
 
-### XX.2.4 OAuth with SSRAA Option
+### 1:XX.2.4 OAuth with SSRAA Option
 
 The OAuth with SSRAA Option enables the {{ linkvhlr }} and {{ linkvhls }} to use OAuth 2.0 access tokens for authentication during the ITI-YY5 Retrieve Manifest transaction, as an alternative to HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA).
 
@@ -302,7 +297,7 @@ The OAuth with SSRAA Option enables the {{ linkvhlr }} and {{ linkvhls }} to use
 
 See ITI-YY5 Section 2:3.YY5.4.1.4 for detailed OAuth flow and examples.
 
-### XX.2.5 Verifiable Credential Option
+### 1:XX.2.5 Verifiable Credential Option
 
 The Verifiable Credential Option enables the {{ linkvhlr }} to self-issue a JSON-LD Verifiable Credential (LDP-VC) per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) when sending a manifest request in the ITI-YY5 Retrieve Manifest transaction. The VC's `credentialSubject` is the manifest decoded from the QR code, and the VC contains an embedded **DataIntegrityProof** signed with the {{ linkvhlr }}'s key from the trust network.
 
@@ -324,7 +319,7 @@ The VC (with embedded proof) is sent directly as the HTTP POST body (`Content-Ty
 
 See ITI-YY5 Section 2:3.YY5.4.1.5 for detailed VC construction, request format, and verification process.
 
-### XX.2.6 VC Enveloped VHL Option (VHL Sharer)
+### 1:XX.2.6 VC Enveloped VHL Option (VHL Sharer)
 
 The VC Enveloped VHL Option enables the {{ linkvhls }} to return the VHL as a signed W3C Verifiable Credential (`application/vc+ld+json`) instead of a QR code in the ITI-YY3 Generate VHL transaction. The VC is subsequently transmitted to the {{ linkvhlr }} via ITI-YY4 Provide VHL as an alternative carrier to the HCERT/CWT QR code.
 
@@ -343,7 +338,7 @@ See ITI-YY3 Section [2:3.YY3.4.1.2.1 Output Carrier Options](ITI-YY3.html#output
 
 <a name="required-groupings"> </a>
 
-## XX.3 Required Actor Groupings
+## 1:XX.3 Required Actor Groupings
 
 The following actor groupings are required for secure operations within the VHL trust network:
 
@@ -365,87 +360,87 @@ Note: The {{ linkvhls }} SHALL be grouped with an MHD Document Responder so that
 
 <a name="overview"> </a>
 
-## XX.4 Overview
+## 1:XX.4 Overview
 
 This section shows how the transactions/content modules of the profile are combined to address the use cases.
 
-### XX.4.1 Concepts
+### 1:XX.4.1 Concepts
 
 A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to share access to health documents in a secure, auditable, and configurable manner. Sharing options may include **limited-time access**, **PIN-protected retrieval**, or **ongoing access** to a longitudinal dataset that may evolve over time. VHLs can be rendered as QR codes or downloaded to a user’s device, supporting patient-mediated data sharing and enhancing interoperability across healthcare systems.
 
-#### XX.4.2 Use Cases
+#### 1:XX.4.2 Use Cases
 
 <style>.usecase-purpose img { max-width: 100%; height: auto; }</style>
 
-#### XX.4.2.1 Use Case \#1: WHO Global Digital Health Certification Network
+#### 1:XX.4.2.1 Use Case \#1: WHO Global Digital Health Certification Network
 
 {% assign UseCaseGDHCN = site.data.ExampleScenario-UseCaseGDHCN %}
 
 <div class="usecase-purpose">{{ UseCaseGDHCN.purpose | markdownify }}</div>
 
 This use case has the following business requirements:
-* [Establish Trust](Requirements-EstablishTrust.html)
-* [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
-* [Initiate Retrieve Trust List Request](Requirements-InitiateRetrieveTrustListRequest.html)
+- [Establish Trust](Requirements-EstablishTrust.html)
+- [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
+- [Initiate Retrieve Trust List Request](Requirements-InitiateRetrieveTrustListRequest.html)
 
-##### XX.4.2.1.1 Hajj Pilgrimage Use Case Description
+##### 1:XX.4.2.1.1 Hajj Pilgrimage Use Case Description
 {% assign useCaseHajjPilgrimage = site.data.ExampleScenario-UseCaseHajjPilgrimage %}
 
 <div class="usecase-purpose">{{ useCaseHajjPilgrimage.purpose | markdownify }}</div>
 
 This use case has the following business requirement:
-* [Establish Trust](Requirements-EstablishTrust.html)
-* [Create Secure Channel](Requirements-CreateSecureChannel.html)
+- [Establish Trust](Requirements-EstablishTrust.html)
+- [Create Secure Channel](Requirements-CreateSecureChannel.html)
 
-##### XX.4.2.1.2 Pan-American Highway for Health Use Case Description
+##### 1:XX.4.2.1.2 Pan-American Highway for Health Use Case Description
 
 {% assign UseCasePH4H = site.data.ExampleScenario-UseCasePH4H %}
 
 <div class="usecase-purpose">{{ UseCasePH4H.purpose | markdownify }}</div>
 
 This use case has the following business requirement:
-* [Establish Trust](Requirements-EstablishTrust.html)
+- [Establish Trust](Requirements-EstablishTrust.html)
 
-#### XX.4.2.2 Use Case #2: EU Vaccination Card
+#### 1:XX.4.2.2 Use Case #2: EU Vaccination Card
 
 {% assign UseCaseEVAC = site.data.ExampleScenario-UseCaseEVAC %}
 
 <div class="usecase-purpose">{{ UseCaseEVAC.purpose | markdownify }}</div>
 
 This use case has the following business requirement:
-* [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
+- [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
 
-#### XX.4.2.3 Use Case \#3: US Trusted Exchange Framework and Common Agreement (TEFCA)
+#### 1:XX.4.2.3 Use Case \#3: US Trusted Exchange Framework and Common Agreement (TEFCA)
 
 {% assign UseCaseTEFCA = site.data.ExampleScenario-UseCaseTEFCA %}
 
 <div class="usecase-purpose">{{ UseCaseTEFCA.purpose | markdownify }}</div>
 
 This use case has the following business requirements:
-* [Establish Trust](Requirements-EstablishTrust.html)
-* [Create Secure Channel](Requirements-CreateSecureChannel.html)
-* [Request VHL Documents](Requirements-RequestVHLDocuments.html)
+- [Establish Trust](Requirements-EstablishTrust.html)
+- [Create Secure Channel](Requirements-CreateSecureChannel.html)
+- [Request VHL Documents](Requirements-RequestVHLDocuments.html)
 
 <a name = "security-considerations"></a>
-## XX.5 Security Considerations
+## 1:XX.5 Security Considerations
 
 VHL is a building block that is meant to be used together with added security measures, otherwise it is not suitable for exchange in environments where security and provenance cannot be reliably established by other means.
 
 Key security considerations include:
 
-### XX.5.1 Trust Network Security
+### 1:XX.5.1 Trust Network Security
 
 - All participants ({{ linkvhlr }}, {{ linkvhls }}) SHALL establish trust via the {{ linkta }}. ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions MAY be used to support this trust establishment.
 - PKI material SHALL be validated before use in signature verification or secure channel establishment.
 - Certificates and keys should be regularly updated and revocation status checked.
 
-### XX.5.2 Secure Channel Requirements
+### 1:XX.5.2 Secure Channel Requirements
 
 - ITI-YY5 (Retrieve Manifest) SHALL be conducted over a secure channel as defined by ATNA Authenticate Node [ITI-19].
 - Both {{ linkvhlr }} and {{ linkvhls }} SHALL present credentials validated against the {{ linkta }}.
 - Mutual authentication is required for all document retrieval operations.
 
-### XX.5.3 Cryptographic Algorithm Selection
+### 1:XX.5.3 Cryptographic Algorithm Selection
 
 The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic primitives for digital signatures, message authentication, and content encryption. This IG does not mandate a single algorithm suite for deployment. Implementers select algorithms consistent with the underlying specifications — for example, RFC 9421 (HTTP Message Signatures), RFC 7515/7516/7518 (JWS/JWE/JWA), RFC 8152 (COSE), W3C Data Integrity (Verifiable Credentials), the HL7 SSRAA IG (OAuth with SSRAA Option), and the WHO SMART Trust specification (HCERT). The preceding list is illustrative, not exhaustive.
 
@@ -458,14 +453,14 @@ The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic
 
 Algorithms named in examples, tables, and code blocks throughout this IG are illustrative. Except for the RS256 interoperability baseline stated above, they do not constrain deployment choices. Jurisdictions and trust networks MAY define additional profiles (permitted algorithm lists, minimum key lengths, deprecation schedules) consistent with this guidance.
 
-### XX.5.4 VHL Integrity and Authorization
+### 1:XX.5.4 VHL Integrity and Authorization
 
 - VHL signatures SHALL be verified before trusting VHL content.
 - VHL expiration timestamps should be enforced.
 - Passcodes (if used) should be communicated out-of-band and validated server-side.
 - VHL Sharers should implement rate limiting and account lockout for failed passcode attempts.
 
-### XX.5.5 Audit Requirements
+### 1:XX.5.5 Audit Requirements
 
 - The European Health Data Space (EHDS) requires detailed audit information on data access.
 - Provisions 8f) and 12a) outline requirements for auditability of data access.
@@ -475,7 +470,7 @@ Algorithms named in examples, tables, and code blocks throughout this IG are ill
   - Document retrieval attempts
   - Authentication/authorization failures
 
-### XX.5.6 Privacy Considerations
+### 1:XX.5.6 Privacy Considerations
 
 - VHL payloads do not contain PHI - only references to documents.
 - Actual health data is transmitted over secure channels (ITI-YY5).
@@ -483,12 +478,12 @@ Algorithms named in examples, tables, and code blocks throughout this IG are ill
 - VHL Holders retain the right to revoke access where supported.
 
 <a name="other-grouping"> </a>
-## XX.6 Cross-Profile Considerations
+## 1:XX.6 Cross-Profile Considerations
 
 This section is informative, not normative. It is intended to put this profile in context with other profiles. Any required groupings should have already been described above.
 
 <a name="atna-cross-profile"> </a>
-### XX.6.1 ATNA - Audit Trail and Node Authentication
+### 1:XX.6.1 ATNA - Audit Trail and Node Authentication
 
 The {{ linkvhlr }} and {{ linkvhls }} SHALL be grouped with ATNA Secure Node or Secure Application actors to support the secure channel requirements of ITI-YY5. This grouping ensures:
 - Mutual authentication via X.509 certificates or other ATNA-supported mechanisms
@@ -496,7 +491,7 @@ The {{ linkvhlr }} and {{ linkvhls }} SHALL be grouped with ATNA Secure Node or 
 - Audit logging capabilities for security events
 
 <a name="pcf-cross-profile"> </a>
-### XX.6.2 PCF - Privacy Consent on FHIR
+### 1:XX.6.2 PCF - Privacy Consent on FHIR
 
 The [IHE Privacy Consent on FHIR (PCF)](https://profiles.ihe.net/ITI/PCF/) profile is the recommended companion for capturing, storing, and enforcing patient consent alongside VHL. When the {{ linkvhls }} implements the Record Consent option, it acts as a Consent Recorder and initiates Access Consent [ITI-108] transactions to record consent declarations by the {{ linkvhlh }}.
 
@@ -507,15 +502,15 @@ Recommended groupings:
 
 The `$generate-vhl` operation (ITI-YY3) accepts an optional `purposeOfUse` input parameter bound (extensible) to the HL7 v3 [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) value set. The {{ linkvhls }} persists this value against the generated folder. When the {{ linkvhls }} is grouped with a PCF Consent Creator or Consent Recipient, the value populates `Consent.provision.purpose` on any `Consent` created for or bound to the folder. At ITI-YY5, the {{ linkvhls }} MAY reject manifest requests whose purpose claim (carried by the chosen authentication option — OAuth token, UDAP assertion, or Verifiable Credential) is inconsistent with the purpose recorded at generation time.
 
-### XX.6.3 MHD - Mobile Health Document Sharing
+### 1:XX.6.3 MHD - Mobile Health Document Sharing
 
 ITI-YY5 (Retrieve Manifest) reuses the FHIR search machinery of [MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html): the VHL manifest URL constructed at ITI-YY3 is a FHIR `List` search using the parameters the Document Responder is required to support per ITI-66, and the ITI-YY5 response is an ITI-66 `searchset` Bundle. Binary retrieval is delegated to [MHD ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html) per the required grouping in [Section XX.3 Required Actor Groupings](#required-groupings).
 
-### XX.6.4 mCSD - Mobile Care Services Discovery
+### 1:XX.6.4 mCSD - Mobile Care Services Discovery
 
 The {{ linkta }} may store DID (Decentralized Identifier) as endpoints for Jurisdictions. The mCSD Profile supports querying for Endpoint(s) for Organizations.
 
-### XX.6.5 DSG/DSGj - Document Digital Signature
+### 1:XX.6.5 DSG/DSGj - Document Digital Signature
 
 The Verify Document Signature option enables {{ linkvhlr }} to verify digital signatures on retrieved documents. This may use:
 - DSG (Document Digital Signature) profile for XML-based documents
