@@ -356,7 +356,7 @@ The following actor groupings are required for secure operations within the VHL 
 
 Note: The {{ linkvhlr }} and {{ linkvhls }} SHALL be grouped with ATNA Secure Node or Secure Application to support the secure channel requirements of the ITI-YY5 Retrieve Manifest transaction.
 
-Note: The {{ linkvhls }} SHALL be grouped with an MHD Document Responder so that the binary referenced from `DocumentReference.content.attachment.url` can be retrieved via [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). The {{ linkvhlr }} SHALL be grouped with an MHD Document Consumer to perform that retrieval. Document binaries are encrypted as JWE per RFC 7516/7518 using the `key` from the VHL payload decoded by the {{ linkvhlr }} in ITI-YY4; specific JWE algorithms are selected per [Cryptographic Algorithm Selection](#xx53-cryptographic-algorithm-selection).
+Note: The {{ linkvhls }} SHALL be grouped with an MHD Document Responder so that the binary referenced from `DocumentReference.content.attachment.url` can be retrieved via [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). The {{ linkvhlr }} SHALL be grouped with an MHD Document Consumer to perform that retrieval. Document binaries are encrypted as JWE per RFC 7516/7518 using the `key` from the VHL payload decoded by the {{ linkvhlr }} in ITI-YY4; specific JWE algorithms are selected per [Cryptographic Algorithm Selection](#1xx53-cryptographic-algorithm-selection).
 
 <a name="overview"> </a>
 
