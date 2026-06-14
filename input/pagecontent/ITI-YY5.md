@@ -86,7 +86,7 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY5.svg%}
   </div>
-  <p id="fX.X.X.X-5" class="figureTitle">Figure X.X.X.X-5: Retrieve Manifest Interaction Diagram</p>
+  <p id="f2:3.YY5.4-1" class="figureTitle">Figure 2:3.YY5.4-1: Retrieve Manifest Interaction Diagram</p>
 </figure>
 
 #### 2:3.YY5.4.1 Retrieve Manifest Request Message
