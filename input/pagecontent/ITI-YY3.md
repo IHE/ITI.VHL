@@ -53,7 +53,7 @@ The transaction also supports optional passcode protection, purpose-of-use autho
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY3.svg%}
   </div>
-  <p id="figure-2.3.YY3-1" class="figureTitle">Figure 2:3.YY3-1: Generate VHL Interaction Diagram</p>
+  <p id="figure-2:3.YY3.4-1" class="figureTitle">Figure 2:3.YY3.4-1: Generate VHL Interaction Diagram</p>
 </figure>
 <br clear="all">
 
