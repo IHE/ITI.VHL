@@ -11,7 +11,7 @@ description: Patient Mediated sharing of their health information using internet
 releaseLabel: ballot
 #releaseLabel: trial-use
 #releaseLabel: release
-status: draft
+status: active
 publisher:
   ## Find your domain contact on the https://www.ihe.net/ihe_domains page
   - name: IHE IT Infrastructure Technical Committee
