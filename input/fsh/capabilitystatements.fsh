@@ -5,23 +5,24 @@ Usage: #definition
 * title = "Trust Anchor"
 * description = "CapabilityStatement for Trust Anchor Actor in the IHE IT Infrastructure Technical Framework Supplement IHE VHL. An authorized organization in the trust framework that manages and distributes PKI material—such as public key certificates and revocation lists—to participants in the network. It ensures that this material is trustworthy and available, enabling VHL Sharers and VHL Receivers to verify digital signatures and authenticate the origin of shared data."
 * status = $pubStatus#active
+* date = "2024-12-31"
 * publisher = "IHE"
-* date = "2025-03-07"
-* kind = #capability
+* kind = #requirements
 * fhirVersion = #"4.0.1"
 * format[+] = #"application/fhir+xml"
 * format[+] = #"application/fhir+json"
+* rest
+  * mode = #server
+  * documentation = "Trust Anchor actor manages and distributes PKI material (public key certificates and revocation lists) via DID-based protocols defined in the ITI-YY1 Submit PKI Material with DID and ITI-YY2 Retrieve Trust List with DID transactions."
 
 Instance: VHLSharerCapabilityStatement
 InstanceOf: CapabilityStatement
 Usage: #definition
-* url = "http://profiles.ihe.net/ITI/VHL/CapabilityStatement/vhl-sharer-server"
-* version = "1.0.0"
 * name = "VHLSharerCapabilityStatement"
 * title = "VHL Sharer Server Capability Statement"
 * status = #active
+* date = "2024-12-31"
 * experimental = false
-* date = "2024-01-15"
 * publisher = "IHE ITI"
 * description = "Capability Statement for a VHL Sharer implementing the Retrieve Manifest [ITI-YY5] transaction as a server. This server supports FHIR search on List resources with _include parameter to retrieve document manifests authorized by Verified Health Links."
 * kind = #requirements
@@ -55,19 +56,18 @@ Usage: #definition
     
     * searchParam[+]
       * name = "identifier"
-      * definition = "http://hl7.org/fhir/SearchParameter/List-identifier"
+      * definition = "http://hl7.org/fhir/SearchParameter/clinical-identifier"
       * type = #token
       * documentation = "Business identifier for the List/folder. SHOULD be supported."
-    
+
     * searchParam[+]
       * name = "patient"
-      * definition = "http://hl7.org/fhir/SearchParameter/List-patient"
+      * definition = "http://hl7.org/fhir/SearchParameter/clinical-patient"
       * type = #reference
       * documentation = "The patient whose documents are referenced in the List. SHOULD be supported. The VHL Sharer SHALL accept chained searches on patient.identifier (e.g., patient.identifier=system|value) for List searches."
-    
+
     * searchParam[+]
       * name = "code"
-      * definition = "http://hl7.org/fhir/SearchParameter/List-code"
       * type = #token
       * documentation = "The type of List, typically 'folder' from MHD CodeSystem. SHOULD be supported."
     
@@ -93,13 +93,11 @@ Usage: #definition
 Instance: VHLReceiverCapabilityStatement
 InstanceOf: CapabilityStatement
 Usage: #definition
-* url = "http://profiles.ihe.net/ITI/VHL/CapabilityStatement/vhl-receiver-client"
-* version = "1.0.0"
 * name = "VHLReceiverCapabilityStatement"
 * title = "VHL Receiver Client Capability Statement"
 * status = #active
+* date = "2024-12-31"
 * experimental = false
-* date = "2024-01-15"
 * publisher = "IHE ITI"
 * description = "Capability Statement for a VHL Receiver implementing the Retrieve Manifest [ITI-YY5] transaction as a client. This client searches for List resources using VHL-authorized manifest URLs and can request inclusion of DocumentReference resources via the _include parameter."
 * kind = #requirements
@@ -133,19 +131,18 @@ Usage: #definition
     
     * searchParam[+]
       * name = "code"
-      * definition = "http://hl7.org/fhir/SearchParameter/List-code"
       * type = #token
       * documentation = "List type, typically 'folder'. SHALL be supported and SHALL be included in manifest URL from VHL payload."
-    
+
     * searchParam[+]
       * name = "status"
       * definition = "http://hl7.org/fhir/SearchParameter/List-status"
       * type = #token
       * documentation = "List status, typically 'current'. SHALL be supported and SHALL be included in manifest URL from VHL payload."
-    
+
     * searchParam[+]
       * name = "patient"
-      * definition = "http://hl7.org/fhir/SearchParameter/List-patient"
+      * definition = "http://hl7.org/fhir/SearchParameter/clinical-patient"
       * type = #reference
       * documentation = "Patient reference search parameter. SHALL be supported with FHIR chained search (patient.identifier=system|value) to identify the patient by identifier without requiring a direct Patient resource reference. SHALL be included in the manifest URL from the VHL payload."
     

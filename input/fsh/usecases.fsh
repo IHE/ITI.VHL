@@ -27,24 +27,28 @@ The GDHCN Trust Network Gateway (TNG) provides a federated architecture that ena
 
 The PKI operated by the WHO supports a variety of trust domains, two of which — the Hajj Pilgrimage and the Pan-American Highway for Health — are described below.
 
-<figure>
-  <img src="trust_network.png" caption="WHO GDHCN Trust Network" style="width:45em; max-width:100%;"/>
-  <p id="fX.X.X.X-TN" class="figureTitle">Figure X.X.X.X-TN: WHO GDHCN Trust Network</p>
-</figure>
+![WHO GDHCN Trust Network](trust_network.png)
 """
+* actor[+].actorId = "jurisdiction"
+* actor[=].type = #entity
+* actor[=].name = "Participating Jurisdiction"
+* actor[=].description = "A health jurisdiction participating in the GDHCN trust network, acting as a VHL Sharer or VHL Receiver."
+
+* actor[+].actorId = "trust-anchor"
+* actor[=].type = #entity
+* actor[=].name = "WHO Trust Anchor"
+* actor[=].description = "The WHO Trust Anchor that validates, publishes, and distributes PKI material for the GDHCN trust network."
+
 * process.title = "GDHCN Trust Establishment"
-* process.description = "Process for establishing trust within the WHO GDHCN trust network through PKI material submission and trust list distribution."
+* process.description = """Process for establishing trust within the WHO GDHCN trust network through PKI material submission and trust list distribution.
+
+**Step 1: Jurisdiction Onboarding** — A participating jurisdiction completes the GDHCN onboarding process and submits its Signing Certificate Authority (SCA) and Document Signer Certificates (DSCs) to the WHO Trust Anchor. The Trust Anchor validates the submitted certificates and onboards the jurisdiction into the trust network.
+
+**Step 2: Trust List Publication** — The WHO Trust Anchor publishes the jurisdiction's PKI material as DID Documents in the GDHCN trust list. Each DID Document contains verification methods with the jurisdiction's public keys, distributed as endpoints that can be discovered and retrieved by other trust network participants.
+
+**Step 3: Trust List Retrieval** — Participating jurisdictions (acting as VHL Sharers or VHL Receivers) retrieve the trust list from the Trust Anchor. The retrieved DID Documents provide the public keys needed to verify digital signatures on health certificates and to establish secure channels for document exchange."""
 * process.preConditions = "Jurisdiction has completed the GDHCN onboarding process and has generated SCA and DSC certificates."
 * process.postConditions = "Jurisdiction's PKI material is published in the GDHCN trust list and available for retrieval by other participants."
-* process.step[0].operation.number = "1"
-* process.step[0].operation.name = "Jurisdiction Onboarding"
-* process.step[0].operation.description = "A participating jurisdiction completes the GDHCN onboarding process and submits its Signing Certificate Authority (SCA) and Document Signer Certificates (DSCs) to the WHO Trust Anchor. The Trust Anchor validates the submitted certificates and onboards the jurisdiction into the trust network."
-* process.step[1].operation.number = "2"
-* process.step[1].operation.name = "Trust List Publication"
-* process.step[1].operation.description = "The WHO Trust Anchor publishes the jurisdiction's PKI material as DID Documents in the GDHCN trust list. Each DID Document contains verification methods with the jurisdiction's public keys, distributed as endpoints that can be discovered and retrieved by other trust network participants."
-* process.step[2].operation.number = "3"
-* process.step[2].operation.name = "Trust List Retrieval"
-* process.step[2].operation.description = "Participating jurisdictions (acting as VHL Sharers or VHL Receivers) retrieve the trust list from the Trust Anchor. The retrieved DID Documents provide the public keys needed to verify digital signatures on health certificates and to establish secure channels for document exchange."
 
 
 Instance: UseCaseHajjPilgrimage
@@ -68,14 +72,12 @@ Key Features:
 
 Some of the challenges faced during the pilot implementation, though not necessarily to be taken up in this profile, include:
 
-- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods)
+- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods). The **Verifiable Credential Option** (ITI-YY5 Section 2:3.YY5.4.1.5) addresses this by allowing the VHL Receiver to authenticate using a self-issued VC signed with its trust network key, eliminating reliance on a shared PIN for receiver authentication while retaining the passcode as an optional additional factor for the holder.
 - in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit
 - how to scale and automate some of the health checks (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS).
 
 
-<figure>
-  <img src="hajj-diagram.png" caption="Hajj Pilgrimage VHL Flow" style="width:42em; max-width:100%;"/>
-</figure>
+![Hajj Pilgrimage VHL Flow](hajj-diagram.png)
 """
 * process.title = "Hajj Pilgrimage VHL Flow"
 * process.description = "Process for sharing pilgrim health records during Hajj using VHL with WHO GDHCN trust infrastructure for cross-border verification."
@@ -125,9 +127,7 @@ The Pan-American Highway for Health (PH4H)  "aims to provide patients with bette
 
 While there currently there is no single legal framework that broadly enables data sharing across the region, there are sub-regional networks (e.g. COMISCA, CARPHA) that have policies that can be leveraged in the short term while necessary data sharing agreements are developed.   Thus, individuals in this region will need to be able to move through overlapping trust networks.
 
-<figure>
-  <img src="PH4H.png" caption="Pan-American Highway for Digital Health Goals" style="width:38em; max-width: 100%;"/>
-</figure>
+![Pan-American Highway for Digital Health Goals](PH4H.png)
 """
 
 
@@ -145,10 +145,7 @@ The EVC will allow "Member States to bilaterally verify the authenticity of digi
 
 The EVC will operate in the context of the European Health Data Spaces that requires detailed information on access the health data to be recorded.
 
-<figure >
-  <img src="ehds_legal.png" caption="Figure X.X.X.X-8: European Health Data Spaces" style="width:45em; max-width:100%"/>
-  <p id="fX.X.X.X-8" class="figureTitle">Figure X.X.X.X-8: European Health Data Spaces </p>
-</figure>
+![European Health Data Spaces](ehds_legal.png)
 
 For more information see Regulation (EU) 2025/327 of the European Parliament and of the Council of 11 February 2025 on the European Health Data Space and amending Directive 2011/24/EU and Regulation (EU) 2024/2847. Specifically:
 * [ANNEX II - Essential requirements for the harmonised software components of EHR systems and for products for which interoperability with EHR systems has been claimed](https://eur-lex.europa.eu/eli/reg/2025/327/oj#anx_II)
@@ -159,6 +156,8 @@ A critical privacy requirement for the EVC is unlinkability: Article 5a(16) of [
 > (a) not allow providers of electronic attestations of attributes or any other party, after the issuance of the attestation of attributes, to obtain data that allows transactions or user behaviour to be tracked, linked or correlated, or knowledge of transactions or user behaviour to be otherwise obtained, unless explicitly authorised by the user;
 
 > (b) enable privacy preserving techniques which ensure unlinkability, where the attestation of attributes does not require the identification of the user.
+
+The **Verifiable Credential Option** (ITI-YY5 Section 2:3.YY5.4.1.5) is relevant to the EUVAC context: the self-issued VC binds each manifest request cryptographically to the receiver's identity and the specific decoded manifest, ensuring the VHL Sharer can authenticate the receiver without maintaining a persistent session or correlating requests across VHL presentations — supporting the unlinkability requirements above when combined with appropriate key management practices.
 """
 
 

@@ -175,7 +175,7 @@ Usage: #definition
 * description = """
 Before participating in any Verified Health Link (VHL) transactions, the [VHL Sharer](ActorDefinition-VHLSharer.html) and [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL establish a trust relationship based on shared acceptance of a designated [Trust Anchor](ActorDefinition-TrustAnchor.html).
 
-Trust is established by referencing and accepting public key material published and distributed in accordance with this specification ( via [Retrieve Trust List Response](Requirements-RetrieveTrustListResponse.html)).
+Trust is established by referencing and accepting public key material published and distributed in accordance with this specification ( via [Retrieve Trust List Response](Requirements-RespondtoRetrieveTrustListRequest.html)).
 
 All participants SHALL validate digital signatures using keys that are anchored in the agreed trust framework.
 """
@@ -204,7 +204,7 @@ The submission MAY include metadata to support categorization of key usage (e.g.
 * statement[=].requirement = """
 Generate one or more private-public key pairs for use within the VHL trust network. Key pairs SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or secure channels) and MAY be categorized by business domain or participant role.
 """
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "prepare-submission-metadata"
 * statement[=].label = "Prepare Submission Metadata"
 * statement[=].requirement = """
@@ -214,18 +214,19 @@ Include relevant metadata to support validation and categorization. This MAY inc
 * Certificate validity period
 * Trust path information (e.g., issuing CA)
 """
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "submit-to-trust-anchor"
 * statement[=].label = "Submit to Trust Anchor"
 * statement[=].requirement = """
 Submit the public key material and associated metadata to the [Trust Anchor](ActorDefinition-TrustAnchor.html) using the designated secure channel for validation and trust list inclusion.
 """
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "support-future-distribution"
 * statement[=].label = "Support Future Distribution"
 * statement[=].requirement = """
-Ensure that the submitted PKI material can be validated, signed, and distributed by the Trust Anchor to other trust network participants through [Distribute PKI Material](Requirements-DistributePKIMaterial.html).
+Ensure that the submitted PKI material can be validated, signed, and distributed by the Trust Anchor to other trust network participants.
 """
+* statement[=].conformance = #SHALL
 
 Instance:   RespondtoSubmitPKIMaterialRequest
 InstanceOf: Requirements
@@ -297,18 +298,19 @@ Upon receipt of this response, participants SHALL process the trust list as desc
 * statement[+].key = "receive-pki-distribution-request"
 * statement[=].label = "Receive PKI Distribution Request"
 * statement[=].requirement = "Receive a PKI material submission from a VHL Sharer or VHL Receiver."
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "assemble-trust-list"
 * statement[=].label = "Assemble Trust List"
 * statement[=].requirement = "Organize validated PKI material into a structured trust list. The Trust Anchor SHOULD support categorization by submitting participant, key usage type (e.g., signing, encryption, secure channels), and operational context."
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "sign-trust-list"
 * statement[=].label = "Sign Trust List"
 * statement[=].requirement = "Digitally sign the assembled trust list using the Trust Anchor's private key, ensuring the integrity and authenticity of the distributed material."
-
+* statement[=].conformance = #SHALL
 * statement[+].key = "make-keys-available-at-distribution-endpoint"
 * statement[=].label = "Expose Trust List Distribution Endpoint"
 * statement[=].requirement = "Make the signed trust list available via one or more distribution endpoints accessible to authorized trust network participants."
+* statement[=].conformance = #SHALL
 
 Instance: ProvideVHL
 InstanceOf: Requirements
@@ -432,16 +434,19 @@ Participants SHOULD:
 * statement[=].requirement = """
 Cache the received trust list or certificate material to reduce network and server load
 """
+* statement[=].conformance = #SHALL
 * statement[+].key = "validate-digital-signatures"
 * statement[=].label = "Validate digital signatures"
 * statement[=].requirement = """
 Validate digital signatures or trust paths
 """
+* statement[=].conformance = #SHALL
 * statement[+].key = "monitor-certificate-expiration"
 * statement[=].label = "Monitor certificate expiration"
 * statement[=].requirement = """
 Monitor certificate expiration or revocation status where applicable
 """
+* statement[=].conformance = #SHALL
 
 Instance:   CreateSecureChannel
 InstanceOf: Requirements
@@ -490,14 +495,17 @@ Implementers SHOULD consult cross-profile guidance regarding interoperability wi
 * statement[=].requirement = """
 Upon receipt of a digitally signed health document, extract signature, key id, and participant code.
 """
+* statement[=].conformance = #SHALL
 * statement[+].key = "lookup-DSC"
 * statement[=].label = "Lookup DSC"
 * statement[=].requirement = """
 Lookup Document Signing Certificate (DSC) public key by key id and participant code"""
+* statement[=].conformance = #SHALL
 * statement[+].key = "verify-signature"
 * statement[=].label = "Verify Signature"
 * statement[=].requirement = """
-Verify signature using the public key""" 
+Verify signature using the public key"""
+* statement[=].conformance = #SHALL 
 
 
 

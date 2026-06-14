@@ -5,20 +5,7 @@ hide footbox
 participant "VHL Receiver" as Receiver
 participant "VHL Sharer" as Sharer
 
-Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]
-note right
-  POST signed request with:
-  - VHL token
-  - Search parameters
-  - Passcode (if required)
-  Over ATNA secure channel (optional)
-end note
-
-Sharer --> Receiver: Retrieve Manifest Response
-note left
-  FHIR Bundle (searchset)
-  with DocumentReference
-  resources
-end note
+Receiver -> Sharer: Retrieve Manifest Request [ITI-YY5]\nPOST /List/_search\n(authenticated)
+Sharer --> Receiver: Retrieve Manifest Response\nFHIR Bundle (searchset)
 
 @enduml

@@ -2,12 +2,10 @@
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
-
-> **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for Trust Anchor actors and **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors. Implementations that do not support this transaction must use alternative mechanisms (out of scope for this profile) to establish trust relationships with the Trust Anchor. Only implementations that claim support for this transaction can participate in IHE Connectathon testing for trust establishment. See Volume 1 Section XX.2.1 for details on trust establishment approaches.
+> **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for Trust Anchor actors and **OPTIONAL (O)** for VHL Sharer and VHL Receiver actors. Implementations that do not support this transaction must use alternative mechanisms (out of scope for this profile) to establish trust relationships with the Trust Anchor. Only implementations that claim support for this transaction can participate in IHE Connectathon testing for trust establishment. See Volume 1 Section [1:XX.5.1 Trust Network Security](volume-1.html#1xx51-trust-network-security) for details on trust establishment approaches.
 
 {% assign reqSubmitPKI = site.data.Requirements-InitiateSubmitPKIMaterialRequest %}
 {% assign reqDistributePKI = site.data.Requirements-RespondtoSubmitPKIMaterialRequest %}
-
 
 {% assign reqSubmitPKItitle = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
 {% assign reqDistributePKItitle = reqDistributePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.title" | first %}
@@ -16,15 +14,11 @@
 {% assign reqSubmitPKIdescription = reqSubmitPKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 {% assign reqDistributePKIdescription = reqDistributePKI.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 
-
-
 ### 2:3.YY1.1 Scope
 
 The Submit PKI Material with DID transaction enables entities within a trust network—specifically, {{ linkvhls }}s and {{ linkvhlr }}s—to submit their public key material to a designated {{ linkta }} using Decentralized Identifiers (DIDs). This transaction uses DID Documents conforming to the W3C DID Core specification to package and transmit cryptographic key material. The {{ linkta }} validates, catalogs, and makes this material available for retrieval, enabling participants to verify digital signatures and establish secure communications within the VHL ecosystem.
 
 ### 2:3.YY1.2 Actor Roles
-
-
 
 | Actor | Role |
 |-------|------|
@@ -45,10 +39,11 @@ The Submit PKI Material with DID transaction enables entities within a trust net
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY1.svg%}
   </div>
-  <p id="fX.X.X.X-2" class="figureTitle">Figure X.X.X.X-2: Submit PKI Material with DID Interaction Diagram</p>
+  <p id="f3:YY1.4-1" class="figureTitle">Figure 3:YY1.4-1: Submit PKI Material with DID Interaction Diagram</p>
 </figure>
 
 #### 2:3.YY1.4.1 Submit PKI Material Request Message
+
 ##### 2:3.YY1.4.1.1 Trigger Events
 {{ reqSubmitPKIdescription.valueMarkdown }}
 

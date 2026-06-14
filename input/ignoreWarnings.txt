@@ -3,4 +3,24 @@
 # IHE valueset that is not yet a real valueset
 Code System URI 'urn:ihe:event-type-code' is unknown so the code cannot be validated
 
+# The jurisdiction element of the R5 cross-version resources (ActorDefinition,
+# Requirements, TestPlan) used in this R4 IG binds to the R5 jurisdiction
+# ValueSet, which the validator flags as deprecated. The jurisdiction value
+# itself (m49 "World") is valid; this is inherent to using R5 resources in R4.
+Reference to deprecated ValueSet http://hl7.org/fhir/5.0/ValueSet/jurisdiction|5.0.0
+
+# The TestPlan.scope references nominate the ActorDefinitions under test. The
+# references (e.g. ActorDefinition/VHLReceiver) are valid and the actors are
+# registered in the IG, but the publisher's test-artifact linker does not
+# resolve ActorDefinition targets, producing these benign warnings.
+Unable to find artifact ActorDefinition/VHLReceiver nominated as the artifact for test resource /TestPlan/TestPlan-VHLReceiver
+Unable to find artifact ActorDefinition/VHLSharer nominated as the artifact for test resource /TestPlan/TestPlan-VHLSharer
+Unable to find artifact ActorDefinition/VHLHolder nominated as the artifact for test resource /TestPlan/TestPlan-QRCodeFlow
+Unable to find artifact ActorDefinition/VHLSharer nominated as the artifact for test resource /TestPlan/TestPlan-QRCodeFlow
+Unable to find artifact ActorDefinition/VHLReceiver nominated as the artifact for test resource /TestPlan/TestPlan-QRCodeFlow
+Unable to find artifact ActorDefinition/VHLSharer nominated as the artifact for test resource /TestPlan/TestPlan-TrustEstablishment
+Unable to find artifact ActorDefinition/TrustAnchor nominated as the artifact for test resource /TestPlan/TestPlan-TrustEstablishment
+Unable to find artifact ActorDefinition/VHLReceiver nominated as the artifact for test resource /TestPlan/TestPlan-TrustEstablishment
+Unable to find artifact ActorDefinition/TrustAnchor nominated as the artifact for test resource /TestPlan/TestPlan-TrustAnchor
+
 

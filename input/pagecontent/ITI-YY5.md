@@ -1,7 +1,6 @@
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
 
-## 2:3.YY5 Retrieve Manifest
 
 {% assign reqRequestVHLDocs = site.data.Requirements-RequestVHLDocuments %}
 
@@ -16,9 +15,14 @@ This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL H
 
 **FHIR Search Transaction:** This transaction uses a standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists. The manifest URL from the VHL payload contains all necessary FHIR search parameters. No custom operation is required.
 
-**Authentication:** Implementations SHALL support at least one of the following authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)** or **OAuth with SSRAA** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
+**Authentication:** Implementations SHALL support at least one of the following three authentication mechanisms. Participants MAY use **HTTP Message Signatures (RFC 9421)**, **OAuth with SSRAA**, or the **Verifiable Credential Option** depending on their deployment context. The VHL Sharer authenticates the requesting VHL Receiver before processing the request.
 
-**OAuth with SSRAA Option:** Implementations MAY support the **OAuth with SSRAA Option**, which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
+  1. **HTTP Message Signatures Option:** Implementations MAY support authentication via **HTTP Message Signatures (RFC 9421)**, in which the {{ linkvhlr }} signs selected components of the outgoing HTTP manifest request (e.g., `@method`, `@target-uri`, `content-digest`, `date`) using its trust-network key. The {{ linkvhls }} verifies the signature against the {{ linkvhlr }}'s public key from the trust network before processing the request. This option requires no additional token endpoint or credential exchange — authentication is carried entirely within the HTTP request itself.
+
+  2. **OAuth with SSRAA Option:** Implementations MAY support the **OAuth with SSRAA Option**, which uses OAuth 2.0 tokens for authentication as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). When this option is supported, implementations use OAuth Backend Services with JWT client assertions for system-to-system authentication.
+
+  3. **Verifiable Credential Option:** Implementations MAY support the **Verifiable Credential Option**, in which the {{ linkvhlr }} self-issues a JSON-LD Verifiable Credential (LDP-VC) whose subject is the manifest decoded from the VHL (received as a QR code or as a Verifiable Credential per [ITI-YY4](ITI-YY4.html)). The VC contains an embedded **DataIntegrityProof** signed with the {{ linkvhlr }}'s key from the trust network, and is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`). No additional HTTP-level signing is needed; the embedded proof is sufficient.
+
 
 **Include DocumentReference Option:** A {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL process the `_include=List:item` parameter to retrieve both the List and the referenced DocumentReference resources in a single response. This optimization reduces the number of round trips required by the {{ linkvhlr }}. If a {{ linkvhls }} does not support this option, it SHALL ignore the `_include` parameter, and the {{ linkvhlr }} SHALL retrieve each DocumentReference individually using separate read requests.
 
@@ -43,6 +47,9 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 - **RFC 9110**: HTTP Semantics
 - **RFC 9421**: HTTP Message Signatures
 - **RFC 6234**: SHA-256 Hash Function
+- **W3C VC Data Model v2**: [Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) - for Verifiable Credential Option
+- **W3C Data Integrity**: [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) - DataIntegrityProof for Verifiable Credential Option
+- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/)
 
 **FHIR Specifications:**
 - **FHIR R4**: [HL7 FHIR Release 4](http://hl7.org/fhir/R4/)
@@ -54,6 +61,7 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 
 **IHE Profiles:**
 - **ITI TF-2: Mobile Health Document Sharing (MHD)**: [ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html)
+- **ITI TF-2: Mobile Health Document Sharing (MHD)**: [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html) - used to retrieve the binary content referenced from `DocumentReference.content.attachment.url`
 - **ITI TF-1: Section 9**: ATNA Profile
 - **ITI TF-2: 3.19**: Authenticate Node transaction
 
@@ -66,6 +74,11 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
 
 **SHL Specifications:**
 - **SHL Manifest Request**: [SHL Manifest Request](http://hl7.org/fhir/uv/smart-health-cards-and-links/STU1/links-specification.html#smart-health-link-manifest-request)
+- **SHL Encrypting and Decrypting Files**: [SHL Encryption](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) - JWE `dir` + `A256GCM` convention used to encrypt document binaries
+
+**Encryption Standards:**
+- **RFC 7516**: JSON Web Encryption (JWE) - compact serialization used for document encryption
+- **RFC 7518**: JSON Web Algorithms (JWA) - `dir` key management and `A256GCM` content encryption
 
 ### 2:3.YY5.4 Messages
 
@@ -73,7 +86,7 @@ Both the {{ linkvhlr }} and {{ linkvhls }} SHALL authenticate each other's parti
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY5.svg%}
   </div>
-  <p id="fX.X.X.X-5" class="figureTitle">Figure X.X.X.X-5: Retrieve Manifest Interaction Diagram</p>
+  <p id="f2:3.YY5.4-1" class="figureTitle">Figure 2:3.YY5.4-1: Retrieve Manifest Interaction Diagram</p>
 </figure>
 
 #### 2:3.YY5.4.1 Retrieve Manifest Request Message
@@ -108,15 +121,13 @@ The following FHIR search parameters are extracted from the manifest URL:
 | _id | token | [1..1] | The folder ID (with 256-bit entropy) from the VHL - primary authorization mechanism | `_id=abc123def456` |
 | code | token | [1..1] | The type of List (typically "folder") | `code=folder` |
 | status | token | [1..1] | The status of the List (typically "current") | `status=current` |
-| patient | reference | [0..1] | The patient whose documents are referenced; either patient or patient.identifier SHALL be included | `patient=Patient/9876` |
-| patient.identifier | token (chained) | [0..1] | FHIR chained search on the patient reference parameter; resolves the patient by identifier (system\|value) without requiring a direct Patient resource reference; either patient or patient.identifier SHALL be included | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
-| identifier | token | [0..1] | Business identifier for the List | `identifier=folder-2024-001` |
+| patient.identifier | token (chained) | [1..1] | FHIR chained search on the patient reference parameter; resolves the patient by business identifier (`system\|value`) without requiring a direct Patient resource reference. | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
 | _include | special | [0..1] | Include referenced DocumentReference resources; SHALL be "List:item" if used. Only processed if VHL Sharer supports Include DocumentReference Option | `_include=List:item` |
 {: .grid}
 
 **SHL Manifest Request Parameters**
 
-In addition to the FHIR search parameters in the URL, the following SHL-specific parameters SHALL be included in the request body:
+In addition to the FHIR search parameters in the URL, the following SHL-defined manifest parameters (per the [SMART Health Links specification](http://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)) SHALL be included in the request body:
 
 | Parameter | Type | Cardinality | Description |
 |-----------|------|-------------|-------------|
@@ -156,7 +167,7 @@ _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.
    - Components signed: `@method`, `@path`, `@authority`, `content-type`, `content-digest`
    - `created`: Unix timestamp when signature was created
    - `keyid`: Identifier of receiver's public key (used to locate key in trust list)
-   - `alg`: Signature algorithm (ecdsa-p256-sha256, ecdsa-p384-sha384, rsa-pss-sha256, rsa-v1_5-sha256)
+   - `alg`: Signature algorithm — selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection)
 
 3. **Signature Header:**
    - Contains the actual cryptographic signature
@@ -176,56 +187,20 @@ The signature base is constructed per RFC 9421 from the signed components:
 "@signature-params": ("@method" "@path" "@authority" "content-type" "content-digest");created=1735689600;keyid="receiver-key-123";alg="ecdsa-p256-sha256"
 ```
 
-**Signing Process:**
-
-1. {{ linkvhlr }} constructs request body with FHIR search parameters and SHL parameters
-2. {{ linkvhlr }} computes Content-Digest (SHA-256 of body)
-3. {{ linkvhlr }} constructs signature base from HTTP components
-4. {{ linkvhlr }} signs signature base using their private key
-5. {{ linkvhlr }} includes Content-Digest, Signature-Input, and Signature headers in request
-
-**Verification Process:**
-
-1. {{ linkvhls }} extracts `keyid` from Signature-Input header
-2. {{ linkvhls }} retrieves receiver's public key from trust list using `keyid`
-3. {{ linkvhls }} reconstructs signature base from request components
-4. {{ linkvhls }} verifies signature using receiver's public key
-5. {{ linkvhls }} verifies Content-Digest matches request body
-6. {{ linkvhls }} checks `created` timestamp is within acceptable range (±2 minutes recommended)
-7. If valid, {{ linkvhls }} processes request and returns Bundle
-8. If invalid, {{ linkvhls }} returns 401 Unauthorized
-
 **Signature Algorithms:**
 
-The following signature algorithms SHALL be supported:
+Signature algorithms are selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection).
 
-| Algorithm | Key Type | Description |
-|-----------|----------|-------------|
-| ecdsa-p256-sha256 | ECDSA P-256 | Recommended - efficient and secure |
-| ecdsa-p384-sha384 | ECDSA P-384 | Higher security level |
-| rsa-pss-sha256 | RSA 2048+ | RSA with PSS padding |
-| rsa-v1_5-sha256 | RSA 2048+ | RSA with PKCS#1 v1.5 padding (legacy support) |
-{: .grid}
-
-**Security Considerations for HTTP Signatures:**
-
-- Private keys SHALL be stored securely (Hardware Security Module recommended)
-- Public keys SHALL be obtained from trust list (ITI-YY2)
-- `keyid` SHALL uniquely identify receiver's public key in trust list
-- Signatures SHALL include timestamp (`created`) to prevent replay attacks
-- Signature verification SHALL enforce timestamp freshness (±2 minutes recommended)
+> The {{ linkvhlr }} signing steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} verification steps are described in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations Section 2:3.YY5.5.2](#23yy552-http-message-signatures).
 
 ##### 2:3.YY5.4.1.4 Authentication option - OAuth with SSRAA Option
 
-Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 access tokens for authentication instead of HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA).
+Implementations that support the **OAuth with SSRAA Option** MAY use OAuth 2.0 access tokens for authentication instead of HTTP Message Signatures. This option provides interoperability with systems implementing the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA). The following workflow description is informative only, and does not take precedence over underlying requirements from the HL7 Security for Scalable Registration, Authentication, and Authorization IG.
 
 **Preconditions: SSRAA Discovery and Registration**
 
-Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} SHALL complete SSRAA Discovery and Registration. These steps SHALL take place at least once per {{ linkvhlr }} and {{ linkvhls }} pair. They MAY take place in advance or just in time.
-
-**Discovery (SSRAA Section 2):** Given the FHIR Base URL of the {{ linkvhls }} (included in the VHL payload), the {{ linkvhlr }} performs UDAP Discovery per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG. The {{ linkvhlr }} validates that the {{ linkvhls }} supports UDAP and determines the {{ linkvhls }}'s UDAP capabilities. If the {{ linkvhlr }} accepts the {{ linkvhls }}'s capabilities, it proceeds to Registration.
-
-**Registration (SSRAA Section 3):** The {{ linkvhlr }} performs UDAP Dynamic Client Registration per Section 3 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG. The {{ linkvhlr }} uses the X.509 certificate it obtained from the trust community PKI to register with the {{ linkvhls }} and obtain a client ID. This client ID is required when requesting OAuth access tokens.
+Before an access token can be obtained, the {{ linkvhlr }} and {{ linkvhls }} SHALL have completed SSRAA Discovery and Dynamic Client Registration (per SSRAA Sections 2 and 3) at least once per {{ linkvhlr }} 
+/ {{ linkvhls }} pair — the FHIR Base URL of the {{ linkvhls }} comes from the VHL payload. These steps MAY take place in advance or just in time; the {{ linkvhlr }} steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver).
 
 **Option Requirements:**
 
@@ -243,13 +218,15 @@ Host: authorization-server.example.org
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=client_credentials
-&scope=system/List.r system/DocumentReference.r system/Binary.r
+&scope=system/List.s system/DocumentReference.r system/Binary.r
 &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
-&client_assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InJlY2VpdmVyLWtleS0xMjMifQ.eyJpc3MiOiJodHRwczovL3ZobC1yZWNlaXZlci5leGFtcGxlLm9yZyIsInN1YiI6Imh0dHBzOi8vdmhsLXJlY2VpdmVyLmV4YW1wbGUub3JnIiwiYXVkIjoiaHR0cHM6Ly9hdXRob3JpemF0aW9uLXNlcnZlci5leGFtcGxlLm9yZyIsImV4cCI6MTczNTY4OTkwMCwiaWF0IjoxNzM1Njg5NjAwLCJqdGkiOiJyYW5kb20tdW5pcXVlLWlkIn0.signature-here
+&client_assertion=eyJhbGciOiJSUzI1NiIsIng1YyI6WyJNSUkuLi4iLCJNSUkuLi4iXX0.eyJpc3MiOiI2QjlFRkQ3NDg4MkM0RTZDQjVFNTYxOUU4MjFDNTBGQSIsInN1YiI6IjZCOUVGRDc0ODgyQzRFNkNCNUU1NjE5RTgyMUM1MEZBIiwiYXVkIjoiaHR0cHM6Ly9hdXRob3JpemF0aW9uLXNlcnZlci5leGFtcGxlLm9yZy90b2tlbiIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoxNzM1Njg5OTAwLCJqdGkiOiJyYW5kb20tdW5pcXVlLWlkIiwiZXh0ZW5zaW9ucyI6eyJobDctYjJiIjp7InZlcnNpb24iOiIxIiwib3JnYW5pemF0aW9uX2lkIjoiaHR0cHM6Ly9kaXJlY3RvcnkuZXhhbXBsZS5vcmcvT3JnYW5pemF0aW9uL3ZobC1yZWNlaXZlci1pZCIsInB1cnBvc2Vfb2ZfdXNlIjoidXJuOm9pZDoyLjE2Ljg0MC4xLjExMzg4My4zLjE4LjcuMSNTWVNERVYifX19.signature-here
+
+
 ```
 
 **JWT Client Assertion:**
-- Algorithm: RS256, ES256, or ES384
+- Algorithm: selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection); the interoperability baseline is RS256
 - Header: `{"alg":"RS256","typ":"JWT","x5c":["<base64-encoded-client-cert>","<base64-encoded-intermediate>"]}`
   - `x5c`: The receiver's X.509 certificate (and optionally the full chain) from the trust community PKI, per the HL7 Security for Scalable Registration, Authentication, and Authorization IG
 - Payload:
@@ -265,10 +242,10 @@ grant_type=client_credentials
 **Token Response:**
 ```json
 {
-  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2F1dGhvcml6YXRpb24tc2VydmVyLmV4YW1wbGUub3JnIiwic3ViIjoiaHR0cHM6Ly92aGwtcmVjZWl2ZXIuZXhhbXBsZS5vcmciLCJleHAiOjE3MzU2OTMyMDAsImlhdCI6MTczNTY4OTYwMCwic2NvcGUiOiJzeXN0ZW0vTGlzdC5yZWFkIHN5c3RlbS9Eb2N1bWVudFJlZmVyZW5jZS5yZWFkIHN5c3RlbS9CaW5hcnkucmVhZCJ9.token-signature-here",
+  "access_token": "eyJhbGciOiJSUzI1NiIsIng1YyI6WyJNSUkuLi4iLCJNSUkuLi4iXX0.eyJpc3MiOiI2QjlFRkQ3NDg4MkM0RTZDQjVFNTYxOUU4MjFDNTBGQSIsInN1YiI6IjZCOUVGRDc0ODgyQzRFNkNCNUU1NjE5RTgyMUM1MEZBIiwiYXVkIjoiaHR0cHM6Ly9hdXRob3JpemF0aW9uLXNlcnZlci5leGFtcGxlLm9yZy90b2tlbiIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoxNzM1Njg5OTAwLCJqdGkiOiJyYW5kb20tdW5pcXVlLWlkIiwiZXh0ZW5zaW9ucyI6eyJobDctYjJiIjp7InZlcnNpb24iOiIxIiwib3JnYW5pemF0aW9uX2lkIjoiaHR0cHM6Ly9kaXJlY3RvcnkuZXhhbXBsZS5vcmcvT3JnYW5pemF0aW9uL3ZobC1yZWNlaXZlci1pZCIsInB1cnBvc2Vfb2ZfdXNlIjoidXJuOm9pZDoyLjE2Ljg0MC4xLjExMzg4My4zLjE4LjcuMSNTWVNERVYifX19.signature-here",
   "token_type": "Bearer",
   "expires_in": 3600,
-  "scope": "system/List.r system/DocumentReference.r system/Binary.r"
+  "scope": "system/List.s system/DocumentReference.r system/Binary.r"
 }
 ```
 
@@ -284,36 +261,126 @@ Accept: application/fhir+json
 _id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.840.1.113883.2.4.6.3%7CPASSPORT123&_include=List%3Aitem&recipient=Dr.+Smith+Hospital&passcode=user-pin&embeddedLengthMax=10000
 ```
 
-**OAuth Process:**
-
-1. {{ linkvhlr }} creates JWT client assertion signed with the receiver's private key associated with the receiver's X.509 certificate within the trust community
-2. {{ linkvhlr }} requests access token from authorization server
-3. Authorization server validates the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community, then issues access token
-4. {{ linkvhlr }} includes access token in Authorization header
-5. {{ linkvhls }} validates token signature, expiration, and scope
-6. If valid, {{ linkvhls }} processes request and returns Bundle
-
 **OAuth Token Requirements:**
 
 - Grant Type: `client_credentials`
 - Client Authentication: `private_key_jwt` (JWT client assertion)
-- Required Scopes (SMART v2 vocabulary; specific scope requirements are determined by trust community policies per the HL7 Security for Scalable Registration, Authentication, and Authorization IG):
-  - `system/List.r` - Read List resources
+- Required Scopes (SMART v2 vocabulary use is illustrative; specific scope requirements are determined by trust community policies per the HL7 Security for Scalable Registration, Authentication, and Authorization IG):
+  - `system/List.s` - Search for List resources
   - `system/DocumentReference.r` - Read DocumentReference resources
   - `system/Binary.r` - Read Binary resources (document content)
 - Token Lifetime: Typically 1 hour (3600 seconds)
-- Token Reuse: Access token MAY be reused for multiple requests until expiration
+- Token Reuse: Access token MAY be reused for multiple requests until expiration, consistent with underlying requirements from the HL7 Security for Scalable Registration, Authentication, and Authorization IG.
 
-**Security Considerations for OAuth:**
+> The {{ linkvhlr }} side (SSRAA Discovery/Registration, JWT client assertion creation, access token acquisition, and Authorization-header inclusion) is described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} side (Bearer token validation) is in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations Section 2:3.YY5.5.3](#23yy553-oauth-with-ssraa-option).
 
-- JWT client assertions SHALL be signed with the receiver's private key associated with the receiver's X.509 certificate within the trust community
-- JWT `jti` claim SHOULD be checked to prevent replay attacks
-- Access tokens SHALL include appropriate FHIR scopes
-- Access tokens SHALL be validated for signature, expiration, and scope
-- Token lifetime SHOULD be limited (recommended: 1 hour maximum)
-- Authorization server SHALL validate the JWT signature and the associated certificate validity, including that the certificate chains to a trust anchor in the trust community
+##### 2:3.YY5.4.1.5 Authentication Option - Verifiable Credential Option
 
-##### 2:3.YY5.4.1.5 Expected Actions - VHL Receiver
+Implementations that support the **Verifiable Credential Option** MAY use a self-issued JSON-LD Verifiable Credential (LDP-VC) for authentication. In this option the {{ linkvhlr }} constructs a VC whose `credentialSubject` is the manifest decoded from the VHL (received as a QR code or as a Verifiable Credential per [ITI-YY4](ITI-YY4.html)), and whose embedded **DataIntegrityProof** is signed with the {{ linkvhlr }}'s key from the trust network. The VC is sent directly as the HTTP POST body with `Content-Type: application/vc+ld+json`. No additional HTTP-level signing is required; the DataIntegrityProof inside the VC document is the cryptographic proof of the receiver's identity and QR possession.
+
+**Preconditions:**
+
+Before using the Verifiable Credential Option, the {{ linkvhlr }} SHALL:
+- Hold a key pair registered in the trust network (obtained via ITI-YY2 Retrieve Trust List with DID)
+- Have decoded the VHL (from QR code or from a Verifiable Credential per the VC Enveloped VHL) and extracted the VHL payload (manifest URL, flags, label, etc.) via ITI-YY4
+
+**Self-Issued VC Construction:**
+
+The {{ linkvhlr }} SHALL construct the VC as a JSON-LD document per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) specification:
+
+```json
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2"
+  ],
+  "type": ["VerifiableCredential", "VHLManifestCredential"],
+  "issuer": "did:web:vhl-receiver.example.org",
+  "issuanceDate": "2024-01-15T10:00:00Z",
+  "expirationDate": "2024-01-15T10:05:00Z",
+  "credentialSubject": {
+    "id": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+    "manifest": {
+      "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+      "exp": 1735689600,
+      "flag": "LP",
+      "label": "Patient Health Summary",
+      "v": 1
+    },
+    "recipient": "Dr. Smith Hospital",
+    "passcode": "user-pin",
+    "embeddedLengthMax": 10000
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "ecdsa-2019",
+    "created": "2024-01-15T10:00:00Z",
+    "verificationMethod": "did:web:vhl-receiver.example.org#receiver-key-123",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3FD9sJ8kL2m9pQ7rT4vW5xY6zAb3cD4eF5gH6iJ7kL8mN9oP0qR1sT2uV3wX4yZ"
+  }
+}
+```
+
+**VC Fields:**
+
+| Field | Description |
+|-------|-------------|
+| `issuer` | The {{ linkvhlr }}'s DID or identifier corresponding to its trust network key |
+| `issuanceDate` | Timestamp when the VC was created |
+| `expirationDate` | Expiration (SHALL be short-lived; recommended: 5 minutes from `issuanceDate`) |
+| `credentialSubject.id` | The manifest URL — binds the VC to the specific manifest decoded from the QR code |
+| `credentialSubject.manifest` | VHL payload fields from the QR code: MUST include `url`; SHOULD include `exp`, `flag`, `label`, `v`; SHALL NOT include the encryption `key` |
+| `credentialSubject.recipient` | Identifier of the requesting organization or person (replaces SHL `recipient` body parameter) |
+| `credentialSubject.passcode` | User-provided passcode if the VHL is passcode-protected (replaces SHL `passcode` body parameter) |
+| `credentialSubject.embeddedLengthMax` | Optional size hint for embedded content (replaces SHL `embeddedLengthMax` body parameter) |
+| **`proof`** | **Embedded DataIntegrityProof — the cryptographic proof of the {{ linkvhlr }}'s identity** |
+| `proof.type` | `DataIntegrityProof` — W3C Data Integrity proof |
+| `proof.cryptosuite` | Cryptosuite used — selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection) |
+| `proof.created` | Timestamp when the proof was created (SHALL match `issuanceDate`) |
+| `proof.verificationMethod` | DID URL resolving to the {{ linkvhlr }}'s public key in the trust network (e.g., `did:web:receiver.example.org#key-id`) |
+| `proof.proofPurpose` | `assertionMethod` — the {{ linkvhlr }} is asserting this credential |
+| `proof.proofValue` | Multibase-encoded cryptographic signature over the VC document (computed with the {{ linkvhlr }}'s private key from the trust network) |
+{: .grid}
+
+> **Note:** The `proof.proofValue` is the sole cryptographic proof of the {{ linkvhlr }}'s identity. No outer JWT or HTTP Message Signature is needed. The `verificationMethod` resolves to the receiver's public key in the trust network (obtainable via ITI-YY2). The {{ linkvhls }} MUST verify this proof. The VHL payload encryption key (`key` field from the VHL payload) SHALL NOT appear anywhere in the VC.
+
+**Request Structure:**
+
+The {{ linkvhlr }} sends the VC as the POST body. FHIR search parameters are placed in the URL query string (since the body is `application/vc+ld+json`). The SHL parameters (`recipient`, `passcode`, `embeddedLengthMax`) are included in `credentialSubject`:
+
+```http
+POST /List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn%3Aoid%3A2.16.840.1.113883.2.4.6.3%7CPASSPORT123&_include=List%3Aitem HTTP/1.1
+Host: vhl-sharer.example.org
+Content-Type: application/vc+ld+json
+Accept: application/fhir+json
+
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": ["VerifiableCredential", "VHLManifestCredential"],
+  "issuer": "did:web:vhl-receiver.example.org",
+  "issuanceDate": "2024-01-15T10:00:00Z",
+  "expirationDate": "2024-01-15T10:05:00Z",
+  "credentialSubject": {
+    "id": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+    "manifest": { "url": "...", "exp": 1735689600, "flag": "LP", "label": "Patient Health Summary", "v": 1 },
+    "recipient": "Dr. Smith Hospital",
+    "passcode": "user-pin",
+    "embeddedLengthMax": 10000
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "ecdsa-2019",
+    "created": "2024-01-15T10:00:00Z",
+    "verificationMethod": "did:web:vhl-receiver.example.org#receiver-key-123",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3FD9sJ8kL2m9pQ7rT4vW5xY6zA..."
+  }
+}
+```
+
+> The {{ linkvhlr }} VC issuance steps are described in [Expected Actions - VHL Receiver](#23yy5416-expected-actions---vhl-receiver). The {{ linkvhls }} VC verification steps are in [Expected Actions - VHL Sharer](#23yy5417-expected-actions---vhl-sharer). Security requirements are in [Security Considerations Section 2:3.YY5.5.9](#23yy559-verifiable-credential-option).
+
+##### 2:3.YY5.4.1.6 Expected Actions - VHL Receiver
 
 The {{ linkvhlr }} SHALL:
 
@@ -330,16 +397,24 @@ The {{ linkvhlr }} SHALL:
      - embeddedLengthMax (optional) - size hint for embedded content
    - Encode parameters as `application/x-www-form-urlencoded`
 
-3. **Authenticate Request** (use one of the following options; neither is required):
+3. **Authenticate Request** (use atleast one of the following options):
    - **Option A - HTTP Message Signatures** (if supported):
      - Compute Content-Digest (SHA-256 of request body)
      - Construct signature base from HTTP components
      - Sign using receiver's private key
      - Include Content-Digest, Signature-Input, and Signature headers
    - **Option B - OAuth with SSRAA** (if supported):
-     - Obtain access token using JWT client assertion
-     - Include token in Authorization header
-     - Reuse token for subsequent requests until expiration
+     - **One-time setup:** if not already registered with this {{ linkvhls }}, perform UDAP Discovery and Dynamic Client Registration (per SSRAA Sections 2 and 3) using the FHIR Base URL from the VHL payload to obtain a client ID.
+     - Create a JWT client assertion (`private_key_jwt`) signed with the receiver's trust-network private key — the X.509 cert (or chain) goes in the `x5c` header; `iss` and `sub` are the registered client ID; `aud` is the authorization server token endpoint; include `jti` and the `hl7-b2b` extension per SSRAA Section 5.2.1
+     - Request an access token from the authorization server (`grant_type=client_credentials`) with appropriate scopes
+     - Include the returned Bearer access token in the `Authorization` header of the manifest request
+     - Reuse the access token across requests until expiration
+   - **Option C - Verifiable Credential Option** (if supported):
+     - Extract VHL payload fields from the decoded QR code (manifest URL, flags, label, expiration)
+     - Construct LDP-VC with `credentialSubject.id` = manifest URL, `credentialSubject.manifest` = VHL payload fields (excluding encryption key), SHL manifest parameters (`recipient`, `passcode`, `embeddedLengthMax`) in `credentialSubject`
+     - Compute `proof.proofValue` (DataIntegrityProof) over the VC document using trust network private key
+     - Set `proof.verificationMethod` to the DID URL of the receiver's trust network key
+     - POST the complete VC as `Content-Type: application/vc+ld+json` body; place FHIR search parameters in URL query string
 
 4. **Send Request**:
    - POST to `/List/_search` endpoint at VHL Sharer's base URL
@@ -359,9 +434,9 @@ The {{ linkvhlr }} SHALL:
 The {{ linkvhlr }} MAY:
 - Cache OAuth access tokens for reuse (OAuth with SSRAA Option)
 - Implement retry logic for transient failures
-- Support both HTTP Message Signatures and OAuth with SSRAA Option
+- Support multiple authentication options
 
-##### 2:3.YY5.4.1.6 Expected Actions - VHL Sharer
+##### 2:3.YY5.4.1.7 Expected Actions - VHL Sharer
 
 Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 
@@ -385,6 +460,15 @@ Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
      - Verify token expiration
      - Verify token scope authorizes access to the VHL
      - Reject if token invalid or expired (401 Unauthorized)
+   - **Verifiable Credential Option**:
+     - Parse `application/vc+ld+json` request body as JSON-LD VC document
+     - Resolve `proof.verificationMethod` DID URL to retrieve {{ linkvhlr }}'s public key from the trust network
+     - Verify the **`proof.proofValue`** (DataIntegrityProof) over the VC document using the retrieved trust network key
+     - Verify `proof.proofPurpose` is `assertionMethod`
+     - Verify VC `expirationDate` has not passed; verify `proof.created` freshness (±2 minutes recommended)
+     - Verify `credentialSubject.id` matches the `_id` URL query parameter
+     - Extract SHL params from `credentialSubject` (`recipient`, `passcode`, `embeddedLengthMax`)
+     - Reject if any verification fails (401 Unauthorized)
 
 3. **Authorize Request**:
    - Validate folder ID (_id parameter) corresponds to valid VHL
@@ -441,13 +525,10 @@ Per the [VHL Sharer Server Capability Statement](CapabilityStatement-VHLSharerCa
 - `_id` (token) - Required
 - `code` (token) - Required
 - `status` (token) - Required
-- `patient` (reference) OR `patient.identifier` (chained search on the patient reference parameter, token) - At least one required
+- `patient.identifier` (chained search on the patient reference parameter, token — `system|value`) - required. This is the same business identifier the VHL Holder supplied as `sourceIdentifier` at ITI-YY3. The direct `patient` reference parameter is not used in VHL manifest URLs.
 
 The {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL additionally support:
 - `_include=List:item` (special)
-
-The {{ linkvhls }} SHOULD support:
-- `identifier` (token) - Business identifier for List
 
 **Error Responses:**
 
@@ -485,11 +566,23 @@ This message is sent when the {{ linkvhls }} has successfully authenticated the 
 
 ##### 2:3.YY5.4.2.2 Message Semantics
 
-The response is a FHIR Bundle of type "searchset" containing:
-- List resource(s) matching the search criteria (search.mode="match")
-- DocumentReference resources if `_include=List:item` was used and supported (search.mode="include")
+Because the VHL manifest URL constructed at [ITI-YY3](ITI-YY3.html) is a FHIR search on `List` using the search parameters required by the Document Responder in [IHE MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html), the Retrieve Manifest response is — at the FHIR level — an [MHD ITI-66 response message](https://profiles.ihe.net/ITI/MHD/ITI-66.html#23662-message-semantics): a FHIR `searchset` Bundle. The shape of the Bundle depends on whether the {{ linkvhls }} supports the **Include DocumentReference Option** AND the {{ linkvhlr }} included `_include=List:item` in the request:
 
-**Bundle Structure:**
+| Case | Bundle contents | Receiver follow-up |
+|------|-----------------|--------------------|
+| **A. Include DocumentReference Option NOT used** (option unsupported, or `_include` not requested) | Standard MHD ITI-66 response: only `List` resource(s) with `search.mode="match"`. `List.entry[].item.reference` points to a DocumentReference on the {{ linkvhls }}. | Receiver SHALL FHIR-read each referenced DocumentReference (`GET /DocumentReference/<id>`) before retrieving binaries. |
+| **B. Include DocumentReference Option used** | `List` resource(s) with `search.mode="match"` PLUS the referenced `DocumentReference` resources with `search.mode="include"`. | Receiver proceeds directly to binary retrieval; no extra metadata round-trip. |
+{: .grid}
+
+In both cases the Receiver subsequently retrieves each binary via [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval) and decrypts it as described in [Document Encryption](#23yy5425-document-encryption).
+
+**Case A — Bundle without Include DocumentReference Option**
+
+The Bundle conforms to the standard MHD ITI-66 response. For Bundle structure, element semantics, and a worked example, see [ITI-66 Message Semantics](https://profiles.ihe.net/ITI/MHD/ITI-66.html#23662-message-semantics). The {{ linkvhlr }} SHALL resolve each `List.entry[].item.reference` via a separate FHIR read on the {{ linkvhls }} before retrieving binaries.
+
+**Case B — Bundle with Include DocumentReference Option**
+
+The Bundle extends the ITI-66 response by including each referenced DocumentReference resource (`search.mode="include"`) — this `_include=List:item` behaviour is not defined by ITI-66. The {{ linkvhlr }} can move directly to binary retrieval.
 
 ```json
 {
@@ -628,21 +721,88 @@ The response is a FHIR Bundle of type "searchset" containing:
 - `Bundle.entry[].search.mode`:
   - "match" for List resource(s) matching search criteria
   - "include" for DocumentReference resources included via `_include` parameter
-- List.entry[].item: References to DocumentReference resources
-- If Include DocumentReference Option not supported: Bundle contains only List resource
+- `List.entry[].item`: References to DocumentReference resources on the {{ linkvhls }}
+- `DocumentReference.content.attachment.url`: Absolute URL the {{ linkvhlr }} dereferences via [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval) to obtain the (encrypted) binary
+- `DocumentReference.content.attachment.contentType`: The **decrypted** content type (e.g. `application/fhir+json`, `application/pdf`). The transport content type observed during ITI-68 retrieval is `application/jose` whenever the binary is encrypted (see [Document Encryption](#23yy5425-document-encryption))
 
 ##### 2:3.YY5.4.2.3 Expected Actions
 
 The {{ linkvhlr }} SHALL:
-- Parse Bundle to identify List and DocumentReference resources
-- Distinguish between resources based on search.mode
-- Extract document metadata from DocumentReference resources
-- Use DocumentReference.content.attachment.url to retrieve document content (separate transaction)
+- Parse the Bundle and distinguish List vs. DocumentReference resources by `search.mode`.
+- **If the Bundle does NOT contain DocumentReference resources** (Example A): for each `List.entry[].item.reference`, perform a FHIR read against the {{ linkvhls }} to obtain the DocumentReference metadata.
+- For each DocumentReference, retrieve the binary by dereferencing `content.attachment.url` per [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval), reusing the same authentication option chosen for this ITI-YY5 session.
+- Decrypt the retrieved binary using the `key` from the VHL payload cached from ITI-YY4, per [Document Encryption](#23yy5425-document-encryption).
+- Verify that the decrypted payload's media type matches `DocumentReference.content.attachment.contentType`.
 
 The {{ linkvhlr }} MAY:
-- Display document list to user
-- Filter or sort documents based on metadata
-- Retrieve document content on demand
+- Display the document list to the user.
+- Filter or sort documents based on metadata.
+- Retrieve and decrypt document content on demand rather than eagerly.
+
+##### 2:3.YY5.4.2.4 Document Content Retrieval
+
+The {{ linkvhls }} returns FHIR `DocumentReference` metadata as part of (or referenced from) the manifest Bundle. The actual document binary is retrieved separately by dereferencing `DocumentReference.content.attachment.url`.
+
+The binary retrieval SHALL conform to the IHE MHD **[Retrieve Document [ITI-68]](https://profiles.ihe.net/ITI/MHD/ITI-68.html)** transaction:
+
+- **Method:** HTTP `GET` against `DocumentReference.content.attachment.url`.
+- **Transport:** Same ATNA secure channel used for ITI-YY5.
+- **Authentication:** The {{ linkvhlr }} SHALL reuse the same authentication option chosen for the originating ITI-YY5 request (HTTP Message Signatures, OAuth with SSRAA, or Verifiable Credential). A {{ linkvhlr }} SHALL NOT mix options across the manifest and binary retrievals of a single VHL session.
+- **Response Content-Type:**
+  - `application/jose` when the binary is encrypted per [Document Encryption](#23yy5425-document-encryption) (the default for VHL flows where the VHL payload carries a `key`).
+  - The `DocumentReference.content.attachment.contentType` value when the binary is not encrypted.
+
+A {{ linkvhls }} that supports ITI-YY5 SHALL be grouped with an MHD **Document Responder** so that ITI-68 GETs against `attachment.url` succeed. A {{ linkvhlr }} SHALL be grouped with an MHD **Document Consumer**.
+
+**Example — ITI-68 retrieval of an encrypted document (HTTP Message Signatures option):**
+
+```http
+GET /Binary/doc001-content HTTP/1.1
+Host: vhl-sharer.example.org
+Accept: application/jose
+Signature-Input: sig1=("@method" "@path" "@authority");created=1705315800;keyid="receiver-key-123";alg="ecdsa-p256-sha256"
+Signature: sig1=:MEUCIQD...:
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/jose
+
+eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..<base64url-iv>.<base64url-ciphertext>.<base64url-tag>
+```
+
+The five dot-separated segments are the JWE Compact Serialization (RFC 7516): protected header, empty encrypted key (because `alg=dir`), IV, ciphertext, and authentication tag.
+
+##### 2:3.YY5.4.2.5 Document Encryption
+
+VHL document binaries are encrypted following the [SMART Health Links — Encrypting and Decrypting Files](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) convention.
+
+**Algorithm:**
+- **Serialization:** JWE Compact Serialization per RFC 7516.
+- **Key management (`alg`) and content encryption (`enc`):** selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection), following the SMART Health Links convention referenced above.
+- **Symmetric key:** The 32-byte (256-bit) value carried as `key` in the VHL payload generated by [ITI-YY3](ITI-YY3.html) and decoded by the {{ linkvhlr }} in [ITI-YY4](ITI-YY4.html). The receiver caches this key for the duration of the VHL session.
+
+**Scope:**
+- Encryption SHALL be applied to the document binary at `DocumentReference.content.attachment.url`. It is independent of the **Include DocumentReference Option** — the option only controls whether DocumentReference *metadata* is bundled into the manifest response.
+- `DocumentReference.content.attachment.contentType` SHALL describe the **decrypted** payload (e.g. `application/fhir+json`, `application/pdf`). The encrypted transport representation is signalled by the `application/jose` Content-Type on the ITI-68 response.
+- An unencrypted variant is permitted only when the originating VHL payload was generated without a `key` (matching SHL payload format semantics). VHL flows generated per ITI-YY3 always include a `key` and therefore always encrypt.
+
+**Example — JWE Compact Serialization (illustrative, truncated):**
+
+```
+eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0
+.
+.
+48V1_ALb6US04U3b
+.
+5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A
+.
+XFBoMYUZodetZdvTiFvSkQ
+```
+
+The protected header decodes to `{"alg":"dir","enc":"A256GCM"}`. The empty second segment reflects `alg=dir` (no encrypted key).
+
+**Decryption (informative):** The {{ linkvhlr }} base64url-decodes the IV, ciphertext, and authentication tag, then applies AES-256-GCM with the cached VHL payload `key` and the protected header as Additional Authenticated Data (per RFC 7516 Section 5.1). The plaintext is the original document body whose media type is `DocumentReference.content.attachment.contentType`. See the [SHL spec](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files) for full algorithmic detail.
 
 ### 2:3.YY5.5 Security Considerations
 
@@ -651,10 +811,10 @@ The {{ linkvhlr }} MAY:
 Secure transport is required for all communications in this transaction. Implementations SHALL comply with the **IHE ATNA Profile** (ITI TF-1: Section 9) for transport security requirements
 
 #### 2:3.YY5.5.2 HTTP Message Signatures 
-All implementations SHALL support HTTP Message Signatures per RFC 9421:
+Implementations that support HTTP Message Signatures per RFC 9421:
 - Signature SHALL include `@method`, `@path`, `@authority`, `content-type`, `content-digest`
 - Content-Digest SHALL be SHA-256 or stronger
-- Signature algorithm: ECDSA P-256 SHA-256 (recommended) or RSA 2048+ with PSS or PKCS#1 v1.5
+- Signature algorithm and key strength — see [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection)
 - Private keys SHALL be stored securely (Hardware Security Module recommended)
 - Public keys SHALL be obtained from trust network
 - `keyid` SHALL uniquely identify receiver's public key in trust list
@@ -670,12 +830,13 @@ Implementations that support OAuth with SSRAA Option SHALL:
 - Limit token lifetime (recommended: 1 hour maximum)
 - Check JWT `jti` claim to prevent replay attacks
 - Obtain receiver's public key from trust list for JWT signature validation
+- The authorization server SHALL validate the JWT client assertion signature and verify that the X.509 certificate carried in the `x5c` JWT header chains to a trust anchor in the trust community before issuing an access token
 
 #### 2:3.YY5.5.4 VHL Authorization
 {{ linkvhls }} SHALL validate VHL before returning documents:
 - Verify folder ID (_id parameter) corresponds to valid VHL
 - Validate VHL signature (HCERT/CWT COSE signature from ITI-YY3)
-- Check VHL expiration (CWT exp claim)
+- Check VHL expiration (either exp in CWT or VHL payload)
 - Verify VHL not revoked (if revocation list maintained)
 - Validate passcode if VHL requires it (P flag present):
   - Compare against stored hash using constant-time comparison
@@ -693,7 +854,7 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHALL:
 #### 2:3.YY5.5.6 Audit Logging
 Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - All document access requests (successful and failed)
-- Authentication method used (HTTP signatures or OAuth)
+- Authentication method used (HTTP signatures, OAuth, or Verifiable Credential)
 - Receiver identity (from keyid or OAuth token)
 - VHL folder ID
 - Authorization decisions (approved/denied)
@@ -714,4 +875,15 @@ When VHL is passcode-protected (P flag):
 - Failed passcode attempts SHOULD be rate limited
 - Passcode SHOULD NOT be logged in audit trails
 - Consider lockout after repeated failed attempts
+
+#### 2:3.YY5.5.9 Verifiable Credential Option
+Implementations that support the Verifiable Credential Option SHALL:
+- Include a `proof` element of type `DataIntegrityProof` in the VC with `proofPurpose` = `assertionMethod`, a `verificationMethod` DID URL resolving to the {{ linkvhlr }}'s trust network key, and a `proofValue` computed over the VC document using the {{ linkvhlr }}'s private key per the W3C Data Integrity specification
+- Verify `proof.proofValue` before trusting any VC claim; reject the request if proof verification fails
+- Resolve `proof.verificationMethod` against the trust network (ITI-YY2); reject VCs whose `verificationMethod` cannot be resolved to a trusted key
+- Issue short-lived VCs (`expirationDate`; recommended: 5 minutes maximum)
+- Bind the VC to the specific manifest via `credentialSubject.id` (set to the manifest URL matching the `_id` URL query parameter)
+- Exclude the VHL payload encryption key from `credentialSubject.manifest`
+- Store private keys securely (Hardware Security Module recommended)
+- Reject VCs whose `credentialSubject.id` does not match the `_id` URL query parameter
 

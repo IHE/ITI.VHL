@@ -25,7 +25,10 @@
 {% endunless %}
 
 {% if _purpose %}
+<style>.usecase-purpose img { max-width: 100%; height: auto; }</style>
+<div class="usecase-purpose">
 {{ _purpose | markdownify }}
+</div>
 {% endif %}
 
 {% assign _process = scenario.process | first %}

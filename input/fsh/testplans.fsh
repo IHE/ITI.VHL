@@ -58,9 +58,7 @@ Source: section 2:3.YY1.4.1.2 (Message Semantics).
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 Trust Anchor Expected Actions** – Verifies structural and cryptographic validation,
@@ -71,9 +69,7 @@ Source: sections 2:3.YY1.4.1.3 (Responder) and 2:3.YY1.4.2 (Response Message).
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-responder.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – Trust Anchor Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-responder.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 Security Considerations** – Verifies §2:3.YY1.5 requirements: DID Document integrity
@@ -84,9 +80,7 @@ usage arrays), and revocation distribution controls.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-security.feature"
 
 
 // ── Suite 2 : ITI-YY2  Retrieve Trust List with DID (Responder) ──────────────
@@ -102,9 +96,7 @@ Source: section 2:3.YY2.4 (Request and Response Messages).
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY2 Trust Anchor Expected Actions** – Verifies active-document-only filtering (no
@@ -115,9 +107,7 @@ Source: sections 2:3.YY2.4.2 (Response Message) and 2:3.YY2.5 (Security Consider
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-responder.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – Trust Anchor Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-responder.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY2 Security Considerations** – Verifies TLS enforcement, response integrity
@@ -126,9 +116,7 @@ verification, access control restrictions, and revocation propagation requiremen
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-security.feature"
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -168,9 +156,7 @@ Verifies the DID Document structure the VHL Sharer must construct.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 VHL Sharer Initiator Expected Actions** – Verifies key pair generation, submission
@@ -181,9 +167,7 @@ Source: sections 2:3.YY1.4.1.2 (Message Semantics) and 2:3.YY1.4.1.3 (Initiator 
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-initiator.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – VHL Sharer Initiator Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-initiator.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 Security Considerations** – Shared security file (same as Trust Anchor suite 1).
@@ -191,9 +175,7 @@ Source: sections 2:3.YY1.4.1.2 (Message Semantics) and 2:3.YY1.4.1.3 (Initiator 
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-security.feature"
 
 
 // ── Suite 2 : ITI-YY2  Retrieve Trust List with DID (Initiator) ──────────────
@@ -206,9 +188,7 @@ Verifies the request/response format for the trust list retrieval.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY2 VHL Sharer Initiator Expected Actions** – Verifies that the VHL Sharer correctly
@@ -220,9 +200,7 @@ Source: sections 2:3.YY2.4.1 (Request Message) and 2:3.YY2.4.2.3 (Initiator Expe
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-initiator.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – VHL Sharer Initiator Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-initiator.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY2 Security Considerations** – Shared security file.
@@ -230,9 +208,7 @@ Source: sections 2:3.YY2.4.1 (Request Message) and 2:3.YY2.4.2.3 (Initiator Expe
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-security.feature"
 
 
 // ── Suite 3 : ITI-YY3  Generate VHL (Responder) ───────────────────────────────
@@ -246,14 +222,12 @@ Source: sections 2:3.YY2.4.1 (Request Message) and 2:3.YY2.4.2.3 (Initiator Expe
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY3-generate-vhl-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY3 Generate VHL – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY3-generate-vhl-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY3 VHL Sharer Responder Expected Actions** – Verifies the complete VHL generation
 pipeline: passcode hashing (bcrypt/Argon2/PBKDF2), folder ID (256-bit entropy) and 32-byte
-encryption key generation, SHL payload construction (url/key/flag/v), mandatory manifest URL
+encryption key generation, VHL payload construction (url/key/flag/v), mandatory manifest URL
 parameters, HCERT/CWT encoding (COSE signing → ZLIB → Base45 → HC1: prefix), QR code
 generation (ISO/IEC 18004:2015 Alphanumeric mode Q), and error OperationOutcome responses.
 Source: sections 2:3.YY3.4.1.3 (Responder Expected Actions) and 2:3.YY3.4.2 (Response Message).
@@ -261,9 +235,7 @@ Source: sections 2:3.YY3.4.1.3 (Responder Expected Actions) and 2:3.YY3.4.2 (Res
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY3-generate-vhl-responder.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY3 Generate VHL – VHL Sharer Responder Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY3-generate-vhl-responder.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY3 Security Considerations** – Verifies HTTPS enforcement, passcode security
@@ -272,9 +244,7 @@ Source: sections 2:3.YY3.4.1.3 (Responder Expected Actions) and 2:3.YY3.4.2 (Res
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY3-generate-vhl-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY3 Generate VHL – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY3-generate-vhl-security.feature"
 
 
 // ── Suite 4 : ITI-YY5  Retrieve Manifest (Responder) ─────────────────────────
@@ -288,9 +258,7 @@ headers) and response format (searchset Bundle structure, search.mode, error cod
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY5-retrieve-manifest-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY5-retrieve-manifest-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 VHL Sharer Responder Expected Actions** – Verifies HTTP Message Signature
@@ -304,9 +272,7 @@ and 2:3.YY5.5 (Security Considerations).
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY5-retrieve-manifest-responder.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest – VHL Sharer Responder Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY5-retrieve-manifest-responder.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 Security Considerations** – Verifies TLS requirements, replay prevention (signature
@@ -316,9 +282,7 @@ enforcement, and audit logging (no plaintext passcode in logs).
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY5-retrieve-manifest-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY5-retrieve-manifest-security.feature"
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -356,9 +320,7 @@ document manifest (ITI-YY5 initiator). Each test suite exercises three atomic fe
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 VHL Receiver Initiator Expected Actions** – The VHL Receiver shares the same
@@ -368,9 +330,7 @@ metadata, response handling, and private key retention.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-initiator.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – VHL Receiver Initiator Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-initiator.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 Security Considerations** – Shared security file.
@@ -378,9 +338,7 @@ metadata, response handling, and private key retention.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY1-submit-pki-material-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY1 Submit PKI Material – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY1-submit-pki-material-security.feature"
 
 
 // ── Suite 2 : ITI-YY2  Retrieve Trust List with DID (Initiator) ──────────────
@@ -392,9 +350,7 @@ metadata, response handling, and private key retention.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY2 VHL Receiver Initiator Expected Actions** – Verifies that the VHL Receiver correctly
@@ -405,9 +361,7 @@ Source: sections 2:3.YY2.4.1, 2:3.YY2.4.2.3, and 2:3.YY2.5.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-initiator.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – VHL Receiver Initiator Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-initiator.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY2 Security Considerations** – Shared security file.
@@ -415,9 +369,7 @@ Source: sections 2:3.YY2.4.1, 2:3.YY2.4.2.3, and 2:3.YY2.5.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY2-retrieve-trust-list-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY2 Retrieve Trust List – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY2-retrieve-trust-list-security.feature"
 
 
 // ── Suite 3 : ITI-YY4  Provide VHL (Responder / Decoder) ─────────────────────
@@ -426,20 +378,18 @@ Source: sections 2:3.YY2.4.1, 2:3.YY2.4.2.3, and 2:3.YY2.5.
 * testCase[=].testRun[+].narrative = """
 **ITI-YY4 Message Semantics** – Verifies the VHL QR code message format: ISO/IEC 18004:2015
 Alphanumeric mode, HC1: prefix, Base45 encoding, ZLIB/DEFLATE compression, CWT structure
-(protected header: alg/kid, claims: exp/iat/hcert), and SHL payload fields (url/key/flag/exp).
+(protected header: alg/kid, claims: exp/iat/hcert), and VHL payload fields (url/key/flag/exp).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY4-provide-vhl-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY4 Provide VHL – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY4-provide-vhl-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY4 VHL Receiver Responder Expected Actions** – Verifies the complete nine-step decode
 pipeline: QR scanning (ISO/IEC 18004:2015), HC1: verification, Base45 decoding, ZLIB
 decompression, CWT parsing (RFC 8392), COSE signature verification (RFC 8152) using the
-trust list, CWT claims validation (exp/iat), hcert extraction (claim key -260 / 5), and SHL
+trust list, CWT claims validation (exp/iat), hcert extraction (claim key -260 / 5), and VHL
 payload validation (url/key/flag/exp). Also covers post-decoding actions, all decode failure
 rejections, and optional acknowledgment.
 Source: sections 2:3.YY4.4.1.4 (Receiver Expected Actions) and 2:3.YY4.5 (Security).
@@ -447,9 +397,7 @@ Source: sections 2:3.YY4.4.1.4 (Receiver Expected Actions) and 2:3.YY4.5 (Securi
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY4-provide-vhl-responder.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY4 Provide VHL – VHL Receiver Responder Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY4-provide-vhl-responder.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY4 Security Considerations** – Verifies signature verification requirements, trust list
@@ -458,9 +406,7 @@ enforcement, expiry enforcement, PHI exclusion from the QR payload, and acknowle
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY4-provide-vhl-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY4 Provide VHL – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY4-provide-vhl-security.feature"
 
 
 // ── Suite 4 : ITI-YY5  Retrieve Manifest (Initiator) ─────────────────────────
@@ -472,9 +418,7 @@ enforcement, expiry enforcement, PHI exclusion from the QR payload, and acknowle
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY5-retrieve-manifest-message.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest – Message Semantics"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY5-retrieve-manifest-message.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 VHL Receiver Initiator Expected Actions** – Verifies request construction (HTTP POST
@@ -487,9 +431,7 @@ Source: sections 2:3.YY5.4.1 (Request Message) and 2:3.YY5.5.2 (HTTP Message Sig
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY5-retrieve-manifest-initiator.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest – VHL Receiver Initiator Expected Actions"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY5-retrieve-manifest-initiator.feature"
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 Security Considerations** – Shared security file.
@@ -497,9 +439,7 @@ Source: sections 2:3.YY5.4.1 (Request Message) and 2:3.YY5.5.2 (HTTP Message Sig
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/ITI-YY5-retrieve-manifest-security.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "ITI-YY5 Retrieve Manifest – Security Considerations"
+* testCase[=].testRun[=].script.sourceString = "ITI-YY5-retrieve-manifest-security.feature"
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -558,9 +498,7 @@ YY1 must be retrievable in YY2 in the same test execution).
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/integration-trust-establishment.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "Integration – Trust Establishment"
+* testCase[=].testRun[=].script.sourceString = "integration-trust-establishment.feature"
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -582,7 +520,7 @@ Verifiable Health Links (VHL) profile.
 
 Scope: validates multi-actor, cross-transaction scenarios that span ITI-YY3 (Generate VHL),
 ITI-YY4 (Provide VHL), and ITI-YY5 (Retrieve Manifest). Tests verify that the QR code
-generated in YY3 can be decoded in YY4, that the decoded SHL payload's manifest URL is used
+generated in YY3 can be decoded in YY4, that the decoded VHL payload's manifest URL is used
 correctly in YY5, and that the full end-to-end pipeline including passcode handling, signature
 verification, and VHL authorization succeeds.
 
@@ -602,7 +540,7 @@ Execute all scenarios in the Gherkin integration feature file
 
 Scenario groups:
 - **Group A – VHL Generation (YY3):** VHL Holder requests VHL; VHL Sharer generates a valid
-  HCERT-signed QR code; SHL payload URL is verifiable; passcode is retained by VHL Holder.
+  HCERT-signed QR code; VHL payload URL is verifiable; passcode is retained by VHL Holder.
 - **Group B – QR Presentation and Decoding (YY4):** VHL Receiver decodes the QR code
   generated in Group A using the trust list; COSE signature verified; decoded manifest URL
   matches the YY5 endpoint; passcode is obtained from VHL Holder when P flag is present.
@@ -620,6 +558,4 @@ payload from YY4 feeds YY5.
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
-* testCase[=].testRun[=].script.sourceReference.reference =
-    "https://build.fhir.org/ig/IHE/ITI.VHL/integration-qrcode-flow.feature"
-* testCase[=].testRun[=].script.sourceReference.display = "Integration – QR Code Generation and Validation Flow"
+* testCase[=].testRun[=].script.sourceString = "integration-qrcode-flow.feature"

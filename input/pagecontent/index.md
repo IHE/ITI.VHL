@@ -4,7 +4,7 @@
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
 
-The Verifiable Health Link (VHL) profile defines protocols and patterns that allow the sharing of health documents in a auditable and verfiable manner within and across jurisdictional boundaries.   The VHL profile describes mechanisms, the VHLs, that an individual, the VHL Holder, uses to provide authorize access to their health records from an issuer, the {{ linkvhls }}, to a third party, the {{ linkvhlr }}.  The means by which the VHL is held by the VHL Holder or shared by the VHL Holder to the {{ linkvhlr }} are beyond the scope of this profile.
+The Verifiable Health Links (VHL) profile defines protocols and patterns that allow the sharing of health documents in a auditable and verfiable manner within and across jurisdictional boundaries.   The VHL profile describes mechanisms, the VHLs, that an individual, the VHL Holder, uses to provide authorize access to their health records from an issuer, the {{ linkvhls }}, to a third party, the {{ linkvhlr }}.  The means by which the VHL is held by the VHL Holder or shared by the VHL Holder to the {{ linkvhlr }} are beyond the scope of this profile.
 
 <div markdown="1" class="stu-note">
 
@@ -25,28 +25,23 @@ This guide is organized into the following sections:
    1. [Overview](volume-1.html#overview)
    1. [Security Considerations](volume-1.html#security-considerations)
    1. [Cross Profile Considerations](volume-1.html#other-grouping)
-   1. **TODO: point to the Volume 1 Appendix if there is one**
 2. Volume 2: Transaction Detail
    1. [Submit PKI Material with DID [ITI-YY1]](ITI-YY1.html)
    1. [Retrieve Trust List with DID [ITI-YY2]](ITI-YY2.html)
    1. [Generate VHL [ITI-YY3]](ITI-YY3.html)
    1. [Provide VHL [ITI-YY4]](ITI-YY4.html)
    1. [Retrieve Manifest [ITI-YY5]](ITI-YY5.html)
-   1. **TODO: point to the Volume 2 Appendix if there is one**
-3. Volume 3: Metadata and Content
-   1. [Content Profiles](volume-3.html)
-4. Volume 4: National Extensions
-   1. **TODO: point at the National Extensions if there are any**
-5. Other
+3. Other
    1. [Test Plan](testplan.html)
    1. [Changes to Other IHE Specifications](other.html)
    1. [Download and Analysis](download.html)
+   1. [Appendix A: Comparison of VHL and SHL](vhl_vs_shl.html)
 
 See also the [Table of Contents](toc.html) and the index of [Artifacts](artifacts.html) defined as part of this implementation guide.
 
 ### Conformance Expectations
 
-IHE uses the normative words: Shall, Should, and May according to [standards conventions](https://profiles.ihe.net/GeneralIntro/ch-E.html).
+IHE uses the normative words: "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" according to [standards conventions](https://profiles.ihe.net/GeneralIntro/ch-E.html).
 
 #### Must Support
 
