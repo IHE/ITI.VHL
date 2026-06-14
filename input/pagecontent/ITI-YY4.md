@@ -45,7 +45,7 @@ The VHL is transmitted as a QR code containing an HCERT-encoded payload with the
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY4.svg%}
   </div>
-  <p id="fX.X.X.X-4" class="figureTitle">Figure X.X.X.X-4: Provide VHL Interaction Diagram</p>
+  <p id="f2:3.YY4.4-1" class="figureTitle">Figure 2:3.YY4.4-1: Provide VHL Interaction Diagram</p>
 </figure>
 
 #### 2:3.YY4.4.1 Provide VHL Request Message
