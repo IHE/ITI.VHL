@@ -4,7 +4,7 @@
     "path" : "https://profiles.ihe.net/ITI/VHL/1.0.0-comment",
     "mode" : "milestone",
     "status" : "ballot",
-    "sequence" : "Releases",
+    "sequence" : "Publication",
     "desc" : "Public Comment ballot of VHL",
     "descmd" : "Patient-mediated sharing of personal health information through verifiable health links across trusted networks.",
     "changes" : "issues.html",
