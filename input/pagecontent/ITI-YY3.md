@@ -113,7 +113,7 @@ The default carrier when `format` is omitted or set to `qrcode`. The VHL payload
 
 **VC Enveloped VHL Carrier (Option — `format=vc`)**
 
-Optional carrier. Available only when the {{ linkvhls }} supports the **VC Enveloped VHL Option** (see [Volume 1 Section XX.2.6 VC Enveloped VHL Option](volume-1.html#xx26-vc-enveloped-vhl-option-vhl-sharer)); if requested but unsupported, the {{ linkvhls }} SHALL return an `OperationOutcome` error. The same VHL payload is carried under `credentialSubject` of a JSON-LD W3C Verifiable Credential ([VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)) with an embedded `DataIntegrityProof` ([VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/)) signed by the {{ linkvhls }} using its trust-network key — no new trust framework is introduced. See [2:3.YY3.4.1.3 Expected Actions](#23yy3413-expected-actions) for the full construction steps and a worked example.
+Optional carrier. Available only when the {{ linkvhls }} supports the **VC Enveloped VHL Option** (see [Volume 1 Section 1:XX.2.6 VC Enveloped VHL Option](volume-1.html#1xx26-vc-enveloped-vhl-option-vhl-sharer)); if requested but unsupported, the {{ linkvhls }} SHALL return an `OperationOutcome` error. The same VHL payload is carried under `credentialSubject` of a JSON-LD W3C Verifiable Credential ([VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)) with an embedded `DataIntegrityProof` ([VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/)) signed by the {{ linkvhls }} using its trust-network key — no new trust framework is introduced. See [2:3.YY3.4.1.3 Expected Actions](#23yy3413-expected-actions) for the full construction steps and a worked example.
 
 > **Naming note:** This "VC Enveloped VHL Option" at ITI-YY3/YY4 carries the VHL itself. It is distinct from the "Verifiable Credential Option" at [ITI-YY5](ITI-YY5.html#23yy5415-authentication-option---verifiable-credential-option), which is a separate option for {{ linkvhlr }} authentication where the Receiver self-issues a VC as the manifest request body.
 
@@ -220,7 +220,7 @@ HC1:NCF3R0KLBBA...V8N8W.CE8WY
 
 **VC Envelope Generation (Option — `format=vc`)**
 
-When `format=vc` is requested and the {{ linkvhls }} supports the [VC Enveloped VHL Option](#vc-enveloped-vhl-carrier-option--formatvc), the {{ linkvhls }} SHALL construct a JSON-LD document per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification (cryptosuite selected per the central [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)). The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures — no new trust framework is introduced. The `credentialSubject` SHALL carry the VHL payload from step 4 (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`). The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the {{ linkvhlr }} per [ITI-YY4 Provide VHL](ITI-YY4.html).
+When `format=vc` is requested and the {{ linkvhls }} supports the [VC Enveloped VHL Option](#vc-enveloped-vhl-carrier-option--formatvc), the {{ linkvhls }} SHALL construct a JSON-LD document per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification (cryptosuite selected per the central [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection)). The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures — no new trust framework is introduced. The `credentialSubject` SHALL carry the VHL payload from step 4 (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`). The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the {{ linkvhlr }} per [ITI-YY4 Provide VHL](ITI-YY4.html).
 
 **Example VC carrying the VHL payload:**
 
@@ -301,7 +301,7 @@ The response SHALL include exactly one of the following output parameters, selec
 **Verifiable Credential Output (VC Enveloped VHL Option only):**
 - SHALL be a JSON-LD document per W3C VC Data Model v2 with `Content-Type: application/vc+ld+json`
 - SHALL carry the VHL payload under `credentialSubject` (same fields otherwise embedded at HCERT claim key 5)
-- SHALL be signed by the VHL Sharer using a `DataIntegrityProof` with its trust-network key (cryptosuite selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection))
+- SHALL be signed by the VHL Sharer using a `DataIntegrityProof` with its trust-network key (cryptosuite selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
 
 ##### 2:3.YY3.4.2.3 Expected Actions
 

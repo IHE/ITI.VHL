@@ -76,7 +76,7 @@ The VHL is transmitted via QR code with the following characteristics:
 When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc), the VHL MAY alternatively be transmitted as a signed JSON-LD Verifiable Credential:
 - Conveyed as `application/vc+ld+json` via any channel that preserves JSON (HTTPS, email attachment, file transfer, NFC with a capable reader)
 - Not imaged/scanned — conveyed as a file or blob
-- The VC carries the VHL payload under `credentialSubject` and is signed by the VHL Sharer with a `DataIntegrityProof` (cryptosuite per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection))
+- The VC carries the VHL payload under `credentialSubject` and is signed by the VHL Sharer with a `DataIntegrityProof` (cryptosuite per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
 - Suitable for machine-to-machine transfer and asynchronous delivery scenarios where QR presentation is impractical
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
@@ -132,7 +132,7 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
    - Parse the decompressed bytes as CBOR per RFC 8392
    - Extract the CWT structure containing protected header and claims
    - Protected header contains:
-     - `alg` (algorithm): selected per [Cryptographic Algorithm Selection](volume-1.html#xx53-cryptographic-algorithm-selection)
+     - `alg` (algorithm): selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection)
      - `kid` (key identifier): 8-byte truncated SHA-256 of DSC
    - Handle CBOR parsing errors
 
