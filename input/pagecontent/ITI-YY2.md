@@ -28,7 +28,7 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 
 <figure>
 {%include ITI-YY2.svg%}
-<p id="figure-2.3.YY2-1" class="figureTitle">Figure 2:3.YY2-1: Retrieve Trust List with DID Interaction Diagram</p>
+<p id="figure-2.3.YY2.1-1" class="figureTitle">Figure 2:3.YY2.1-1: Retrieve Trust List with DID Interaction Diagram</p>
 </figure>
 <br clear="all">
 
