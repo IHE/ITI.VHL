@@ -16,7 +16,7 @@
 {% assign reqGenerateVHLResponseDescription = reqGenerateVHLResponse.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 The Generate VHL transaction enables a {{ linkvhlh }} to request a Verifiable Health Link (VHL) from a {{ linkvhls }} for a Patient identified by a business identifier (e.g., MRN, passport number, national ID). The {{ linkvhls }} locates the Patient, authorizes the caller, assembles a folder of available health documents, and returns a VHL that the {{ linkvhlh }} can subsequently transmit to a {{ linkvhlr }} via [ITI-YY4 Provide VHL](ITI-YY4.html) for downstream document retrieval via [ITI-YY5 Retrieve Manifest](ITI-YY5.html).
 
-The VHL payload conforms to the [SMART Health Links payload format](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html) and carries the manifest URL, a symmetric decryption key, and optional metadata (expiration, flags, label, purpose-of-use bindings). By default the VHL is returned as a QR code encoded as an HCERT/CWT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html). When the {{ linkvhls }} supports the [VC Enveloped VHL Carrier Option](#vc-enveloped-vhl-carrier-option--formatvc), the caller MAY instead request the VHL as a signed W3C Verifiable Credential (`application/vc+ld+json`).
+The VHL payload conforms to the [SMART Health Links payload format](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html) and carries the manifest URL, a symmetric decryption key, and optional metadata (expiration, flags, label, purpose-of-use bindings). By default the VHL is returned as a QR code encoded as an HCERT/CWT structure per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html). When the {{ linkvhls }} supports the [VC Enveloped VHL Carrier Option](#vc-enveloped-vhl-carrier-option--formatvc), the caller MAY instead request the VHL as a signed W3C Verifiable Credential (`application/vc`).
 
 The transaction also supports optional passcode protection, purpose-of-use authorization metadata (which MAY populate an IHE PCF `Consent.provision.purpose` when the {{ linkvhls }} is grouped with a Consent Creator/Recipient), and the OAuth with SSRAA Option for downstream authenticated manifest retrieval.
 
@@ -44,7 +44,7 @@ The transaction also supports optional passcode protection, purpose-of-use autho
 **VC Enveloped VHL Option(Optional):**
 - **W3C VC Data Model v2**: [Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)
 - **W3C Data Integrity**: [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) — `DataIntegrityProof`
-- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-2019](https://www.w3.org/TR/vc-di-ecdsa/)
+- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-rdfc-2019 / ecdsa-jcs-2019](https://www.w3.org/TR/vc-di-ecdsa/)
 
 
 ### 2:3.YY3.4 Messages
@@ -93,11 +93,31 @@ Each `purposeOfUse` value is serialized in FHIR token form (`system|code`, e.g.,
 | -------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | sourceIdentifier     | [1..1]    | token  | A FHIR [Identifier](http://hl7.org/fhir/R4/datatypes.html#Identifier) (business identifier — e.g., MRN, passport number, national ID) that the VHL Sharer uses to locate the Patient record and that Patient's documents.|
 | exp      |  [0..1]  | postiveInt        | Optional. Number representing expiration time in Epoch seconds. |
-| flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required), U (direct file access). |
+| flag |  [0..1]  | string        | Optional. String created by concatenating single-character flags in alphabetical order. L (long-term use), P (Passcode required). See [Flags](#flags). |
 | label |  [0..1]  | string        | Optional. String no longer than 80 characters that provides a short description of the data behind the VHL. |
-| passcode |  [0..1]  | string        | Optional. User-supplied passcode for passcode-protected VHLs. If provided, the VHL Sharer SHALL securely hash and store this passcode for validation during manifest retrieval (ITI-YY5). The 'P' flag SHALL be included in the flag parameter when a passcode is set. |
+| passcode |  [0..1]  | string        | Optional. User-supplied passcode for passcode-protected VHLs. The 'P' flag SHALL be included in the flag parameter when a passcode is set. |
 | purposeOfUse | [0..*] | token | Optional. Purpose(s) of use the VHL Holder is authorizing for this share, bound (extensible) to [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) (e.g., `TREAT`, `HPAYMT`, `HRESCH`). Serialized as FHIR `system|code`. See [Purpose of Use Handling](#purpose-of-use-handling). |
 | format | [0..1] | token | Optional. Requested carrier for the returned VHL. Allowed values: `qrcode` (default) or `vc`. `vc` requires the VHL Sharer to support the [VC Enveloped VHL Carrier Option](#vc-enveloped-vhl-carrier-option--formatvc); if unsupported, the VHL Sharer SHALL return an OperationOutcome error. See [Output Carrier Options](#output-carrier-options) below. |
+
+<a name="flags"> </a>
+
+**Flags**
+
+This profile defines two flags:
+
+| Flag | Meaning |
+|------|---------|
+| L | Long-term use. The folder referenced by the VHL is expected to remain available and MAY change over time |
+| P | Passcode required. The {{ linkvhlr }} SHALL supply the passcode when retrieving the manifest — see [ITI-YY5](ITI-YY5.html) |
+{: .grid}
+
+Flags are concatenated in alphabetical order, so a VHL that is both long-term and passcode-protected carries `LP`.
+
+> **Note on the SHL `U` flag.** The [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html) defines a `U` flag indicating that the link resolves directly to a single file, which the receiver retrieves without a manifest request. **This profile does not define `U`, and a {{ linkvhls }} SHALL NOT set it.**
+>
+> A VHL always references a folder identified by a folder ID with 256-bit entropy, and access to its contents is always mediated by [Retrieve Manifest [ITI-YY5]](ITI-YY5.html). That transaction is where the {{ linkvhls }} authenticates the {{ linkvhlr }} against the trust network, validates the passcode where one is set, and applies any consent-based filtering. The folder ID itself is the authorization mechanism for the VHL. A direct-file link would bypass all of these, and the resulting artifact would not be verifiable in the sense this profile requires.
+>
+> Sharing a single document is supported by generating a VHL for a folder containing one entry; no separate mechanism is needed.
 
 <a name="output-carrier-options"></a>
 
@@ -113,7 +133,7 @@ The default carrier when `format` is omitted or set to `qrcode`. The VHL payload
 
 **VC Enveloped VHL Carrier (Option — `format=vc`)**
 
-Optional carrier. Available only when the {{ linkvhls }} supports the **VC Enveloped VHL Option** (see [Volume 1 Section 1:XX.2.6 VC Enveloped VHL Option](volume-1.html#1xx26-vc-enveloped-vhl-option-vhl-sharer)); if requested but unsupported, the {{ linkvhls }} SHALL return an `OperationOutcome` error. The same VHL payload is carried under `credentialSubject` of a JSON-LD W3C Verifiable Credential ([VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)) with an embedded `DataIntegrityProof` ([VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/)) signed by the {{ linkvhls }} using its trust-network key — no new trust framework is introduced. See [2:3.YY3.4.1.3 Expected Actions](#23yy3413-expected-actions) for the full construction steps and a worked example.
+Optional carrier. Available only when the {{ linkvhls }} supports the **VC Enveloped VHL Option** (see [Volume 1 Section 1:XX.2.6 VC Enveloped VHL Option](volume-1.html#1xx26-vc-enveloped-vhl-option-vhl-sharer)); if requested but unsupported, the {{ linkvhls }} SHALL return an `OperationOutcome` error. The same VHL payload is carried as the `credentialSubject.id` of a JSON-LD W3C Verifiable Credential ([VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)) with an embedded `DataIntegrityProof` ([VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/)) signed by the {{ linkvhls }} using its trust-network key — no new trust framework is introduced. See [2:3.YY3.4.1.3 Expected Actions](#23yy3413-expected-actions) for the full construction steps and a worked example.
 
 > **Naming note:** This "VC Enveloped VHL Option" at ITI-YY3/YY4 carries the VHL itself. It is distinct from the "Verifiable Credential Option" at [ITI-YY5](ITI-YY5.html#23yy5415-authentication-option---verifiable-credential-option), which is a separate option for {{ linkvhlr }} authentication where the Receiver self-issues a VC as the manifest request body.
 
@@ -123,7 +143,7 @@ Optional carrier. Available only when the {{ linkvhls }} supports the **VC Envel
 
 {% include requirements-list-statements.liquid req=reqGenerateVHLResponse site=site  %}
 
-Based on the requested `format`, the {{ linkvhls }} generates the VHL as either a QR code (HCERT/CWT-encoded per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html), with the VHL payload embedded at claim key 5) or a Verifiable Credential (JSON-LD per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with the VHL payload under `credentialSubject`). Both carriers share the same VHL payload construction.
+Based on the requested `format`, the {{ linkvhls }} generates the VHL as either a QR code (HCERT/CWT-encoded per the [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html), with the VHL payload embedded at claim key 5) or a Verifiable Credential (JSON-LD per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with the VHL payload carried as `credentialSubject.id`). Both carriers share the same VHL payload construction.
 
 The generation process is as follows:
 
@@ -153,11 +173,13 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
    - `url`: the manifest URL from step 3
    - `key`: the base64url-encoded encryption key from step 2 (43 characters). Used by the {{ linkvhlr }} as the symmetric key for JWE `dir`/`A256GCM` decryption of document binaries; see [ITI-YY5 Document Encryption](ITI-YY5.html#23yy5425-document-encryption).
    - `exp`: (optional) expiration time in Epoch seconds, as a hint to help the VHL Receiver determine if this QR is stale
-   - `flag`: (optional) flags string (e.g., 'P' for passcode, 'L' for long-term, 'U' for direct file access)
+   - `flag`: (optional) flags string — `L` for long-term, `P` for passcode, `LP` for both. See [Flags](#flags)
    - `label`: (optional) description string (max 80 characters)
    - `v`: version number (defaults to 1)
    - `extension`: (conditional) object containing implementation-defined extensions. Required when the {{ linkvhls }} supports the OAuth with SSRAA Option, in which case it SHALL include:
-     - `fhirBaseUrl`: the FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`). This enables the {{ linkvhlr }} to perform UDAP Discovery (per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG) and Dynamic Client Registration (per Section 3) with the {{ linkvhls }} before making an authenticated manifest request via ITI-YY5.
+     - `fhirBaseUrl`: (conditional) W3the FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`). This enables the {{ linkvhlr }} to perform UDAP Discovery (per Section 2 of the HL7 Security for Scalable Registration, Authentication, and Authorization IG) and Dynamic Client Registration (per Section 3) with the {{ linkvhls }} before making an authenticated manifest request via ITI-YY5.
+   
+   If the {{ linkvhls }} does NOT support the OAuth with SSRAA Option, `extension.fhirBaseUrl` SHALL NOT be present in the VHL payload, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily.
 
 5. The JSON Payload is then:
     - Minified
@@ -166,10 +188,13 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 
 **Example VHL Construction:**
 
+> The encoded values in steps 5b and 5c below are generated from the JSON in step 4. Any edit to
+> the payload requires them to be regenerated; they are not to be modified by hand.
+
 ```json
 // Step 4: VHL Payload JSON (SHL payload format, with OAuth with SSRAA extension)
 {
-  "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+  "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
   "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
   "exp": 1735689600,
   "flag": "LP",
@@ -185,13 +210,13 @@ The VHL payload SHALL be constructed in alignment with the [SMART Health Links s
 // Step 5: Minify, Base64url-encode, and prefix with vhlink:/
 
 // Step 5a – Minified JSON:
-{"url":"https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item","key":"86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk","exp":1735689600,"flag":"LP","label":"Patient Health Summary","v":1,"extension":{"fhirBaseUrl":"https://vhl-sharer.example.org"}}
+{"url":"https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item","key":"86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk","exp":1735689600,"flag":"LP","label":"Patient Health Summary","v":1,"extension":{"fhirBaseUrl":"https://vhl-sharer.example.org"}}
 
 // Step 5b – Base64url-encoded:
-eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
+eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiODZGOExZNUxsV0FhMS1PU19GZ3JUbllOcUZISlAyZXk1UlNLTEpCTjlqayIsImV4cCI6MTczNTY4OTYwMCwiZmxhZyI6IkxQIiwibGFiZWwiOiJQYXRpZW50IEhlYWx0aCBTdW1tYXJ5IiwidiI6MSwiZXh0ZW5zaW9uIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
 
 // Step 5c – Final VHL link (prefixed with vhlink:/):
-vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
+vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiODZGOExZNUxsV0FhMS1PU19GZ3JUbllOcUZISlAyZXk1UlNLTEpCTjlqayIsImV4cCI6MTczNTY4OTYwMCwiZmxhZyI6IkxQIiwibGFiZWwiOiJQYXRpZW50IEhlYWx0aCBTdW1tYXJ5IiwidiI6MSwiZXh0ZW5zaW9uIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19
 
 // NOTE: extension.fhirBaseUrl is only present when the VHL Sharer supports the OAuth with SSRAA Option
 // The VHL link (step 5c) will be embedded in the HCERT structure (see QR Code Generation below)
@@ -210,7 +235,7 @@ After constructing the VHL payload (steps 1–4 above), the {{ linkvhls }} SHALL
   "4": 1735689600,              // exp: expiration timestamp
   "6": 1704067200,              // iat: issued at timestamp
   "-260": {                     // hcert: health certificate claim
-    "5": "vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdC9fc2VhcmNoP19pZD1hYmMxMjNkZWY0NTYmY29kZT1mb2xkZXImc3RhdHVzPWN1cnJlbnQmcGF0aWVudC5pZGVudGlmaWVyPXVybjpvaWQ6Mi4xNi44NDAuMS4xMTM4ODMuMi40LjYuM3xQQVNTUE9SVDEyMyZfaW5jbHVkZT1MaXN0Oml0ZW0iLCJrZXkiOiI4NkY4TFk1TGxXQWExLU9TX0ZnclRuWU5xRkhKUDJleTVSU0tMSkJOOWprIiwiZXhwIjoxNzM1Njg5NjAwLCJmbGFnIjoiTFAiLCJsYWJlbCI6IlBhdGllbnQgSGVhbHRoIFN1bW1hcnkiLCJ2IjoxLCJleHRlbnNpb25zIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19"
+    "5": "vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiODZGOExZNUxsV0FhMS1PU19GZ3JUbllOcUZISlAyZXk1UlNLTEpCTjlqayIsImV4cCI6MTczNTY4OTYwMCwiZmxhZyI6IkxQIiwibGFiZWwiOiJQYXRpZW50IEhlYWx0aCBTdW1tYXJ5IiwidiI6MSwiZXh0ZW5zaW9uIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19"
   }
 }
 
@@ -220,31 +245,25 @@ HC1:NCF3R0KLBBA...V8N8W.CE8WY
 
 **VC Envelope Generation (Option — `format=vc`)**
 
-When `format=vc` is requested and the {{ linkvhls }} supports the [VC Enveloped VHL Option](#vc-enveloped-vhl-carrier-option--formatvc), the {{ linkvhls }} SHALL construct a JSON-LD document per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification (cryptosuite selected per the central [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection)). The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures — no new trust framework is introduced. The `credentialSubject` SHALL carry the VHL payload from step 4 (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`). The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the {{ linkvhlr }} per [ITI-YY4 Provide VHL](ITI-YY4.html).
+When `format=vc` is requested and the {{ linkvhls }} supports the [VC Enveloped VHL Option](#vc-enveloped-vhl-carrier-option--formatvc), the {{ linkvhls }} SHALL construct a JSON-LD document per the [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/) with an embedded `proof` of type `DataIntegrityProof` per the [W3C VC Data Integrity 1.0](https://www.w3.org/TR/vc-di-ecdsa/) specification (cryptosuite selected per the central [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection)). The `issuer` SHALL identify the {{ linkvhls }} using a key from the same trust network used for HCERT/CWT signatures — no new trust framework is introduced.
+
+The `credentialSubject.id` SHALL be the `vhlink:` URI produced by step 5c — the same value that the QR carrier embeds at HCERT claim key 5. Carrying the VHL in its already-canonical serialized form means the two carriers convey byte-identical payloads, and the {{ linkvhlr }} decodes both with the same routine. The VC is delivered to the {{ linkvhlh }} and subsequently transmitted to the {{ linkvhlr }} per [ITI-YY4 Provide VHL](ITI-YY4.html).
 
 **Example VC carrying the VHL payload:**
 
 ```json
 {
   "@context": ["https://www.w3.org/ns/credentials/v2"],
-  "type": ["VerifiableCredential", "VHLEnvelopeCredential"],
+  "type": ["VerifiableCredential"],
   "issuer": "did:web:vhl-sharer.example.org",
-  "issuanceDate": "2024-01-01T00:00:00Z",
-  "expirationDate": "2025-01-01T00:00:00Z",
+  "validFrom": "2024-01-01T00:00:00Z",
+  "validUntil": "2025-01-01T00:00:00Z",
   "credentialSubject": {
-    "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
-    "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
-    "exp": 1735689600,
-    "flag": "LP",
-    "label": "Patient Health Summary",
-    "v": 1,
-    "extension": {
-      "fhirBaseUrl": "https://vhl-sharer.example.org"
-    }
+    "id": "vhlink:/eyJ1cmwiOiJodHRwczovL3ZobC1zaGFyZXIuZXhhbXBsZS5vcmcvTGlzdD9faWQ9YWJjMTIzZGVmNDU2JmNvZGU9Zm9sZGVyJnN0YXR1cz1jdXJyZW50JnBhdGllbnQuaWRlbnRpZmllcj11cm46b2lkOjIuMTYuODQwLjEuMTEzODgzLjIuNC42LjN8UEFTU1BPUlQxMjMmX2luY2x1ZGU9TGlzdDppdGVtIiwia2V5IjoiODZGOExZNUxsV0FhMS1PU19GZ3JUbllOcUZISlAyZXk1UlNLTEpCTjlqayIsImV4cCI6MTczNTY4OTYwMCwiZmxhZyI6IkxQIiwibGFiZWwiOiJQYXRpZW50IEhlYWx0aCBTdW1tYXJ5IiwidiI6MSwiZXh0ZW5zaW9uIjp7ImZoaXJCYXNlVXJsIjoiaHR0cHM6Ly92aGwtc2hhcmVyLmV4YW1wbGUub3JnIn19"
   },
   "proof": {
     "type": "DataIntegrityProof",
-    "cryptosuite": "ecdsa-2019",
+    "cryptosuite": "ecdsa-rdfc-2019",
     "created": "2024-01-01T00:00:00Z",
     "verificationMethod": "did:web:vhl-sharer.example.org#sharer-key-1",
     "proofPurpose": "assertionMethod",
@@ -289,7 +308,7 @@ The response SHALL include exactly one of the following output parameters, selec
 | Parameter | Type | Cardinality | Description |
 |-----------|------|-------------|-------------|
 | qrcode | Binary | [0..1] | QR code image containing HCERT-encoded VHL. Populated when `format=qrcode` or when format is absent, as the default format. |
-| verifiableCredential | Binary | [0..1] | A Verifiable Credential (`application/vc+ld+json`) carrying the VHL. Populated when `format=vc` and the VHL Sharer supports the [VC Enveloped VHL Carrier Option](#vc-enveloped-vhl-carrier-option--formatvc). |
+| verifiableCredential | Binary | [0..1] | A Verifiable Credential (`application/vc`) carrying the VHL. Populated when `format=vc` and the VHL Sharer supports the [VC Enveloped VHL Carrier Option](#vc-enveloped-vhl-carrier-option--formatvc). |
 {: .grid}
 
 **QR Code Output:**
@@ -299,8 +318,8 @@ The response SHALL include exactly one of the following output parameters, selec
 - SHALL be in PNG or SVG format
 
 **Verifiable Credential Output (VC Enveloped VHL Option only):**
-- SHALL be a JSON-LD document per W3C VC Data Model v2 with `Content-Type: application/vc+ld+json`
-- SHALL carry the VHL payload under `credentialSubject` (same fields otherwise embedded at HCERT claim key 5)
+- SHALL be a JSON-LD document per W3C VC Data Model v2 with `Content-Type: application/vc`
+- SHALL carry the VHL payload as `credentialSubject.id`, in the `vhlink:` form that the QR carrier embeds at HCERT claim key 5
 - SHALL be signed by the VHL Sharer using a `DataIntegrityProof` with its trust-network key (cryptosuite selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
 
 ##### 2:3.YY3.4.2.3 Expected Actions
@@ -321,40 +340,29 @@ The VHL Holder MAY:
 ### 2:3.YY3.5 Security Considerations 
 
 #### 2:3.YY3.5.1 Encryption Key Security
-- The 32-byte encryption key SHALL be generated using a cryptographically secure random number generator
-- The key is embedded in the VHL payload within the QR code and SHALL be kept confidential
+- The key is embedded in the VHL payload within the QR code and SHOULD be kept confidential
 - Loss of the key means loss of access to encrypted documents
 - The encryption key is not directly visible in the QR code as it is embedded within the signed and compressed HCERT structure
 
 #### 2:3.YY3.5.2 QR Code Security
 - QR codes contain the complete VHL including the encryption key
 - QR codes can be photographed or copied - use time-limited expiration
-- QR codes SHALL be encoded as HCERT with digital signatures for authenticity
 - Display QR codes in controlled environments when possible
 - Consider short expiration times (minutes to hours) for high-security scenarios
 
 #### 2:3.YY3.5.3 Passcode Security
-- If a passcode is provided, it SHALL be securely hashed before storage using industry-standard algorithms (bcrypt, Argon2, PBKDF2)
-- The plaintext passcode SHALL NOT be included in the VHL URL or QR code
-- The plaintext passcode SHALL NOT be stored by the VHL Sharer
 - The VHL Holder SHOULD securely store the plaintext passcode for sharing with authorized VHL Receivers
 - During ITI-YY5 Retrieve Manifest, the VHL Receiver provides the passcode which the VHL Sharer validates against the stored hash
 - Use of passcode adds an additional authentication factor beyond VHL possession
 
 #### 2:3.YY3.5.4 Manifest URL Construction
-- The manifest URL SHALL include all mandatory FHIR search parameters
 - The `_include` parameter SHOULD only be included if the VHL Sharer supports the Include DocumentReference Option
 - This ensures VHL Receivers can successfully retrieve the manifest using ITI-YY5
 
 #### 2:3.YY3.5.5 OAuth with SSRAA Option — FHIR Base URL Extension
-When the {{ linkvhls }} supports the OAuth with SSRAA Option, it SHALL include `extension.fhirBaseUrl` in the VHL payload:
-- The `fhirBaseUrl` value SHALL be the canonical FHIR base URL of the {{ linkvhls }} (e.g., `https://vhl-sharer.example.org`)
-- This URL is used by the {{ linkvhlr }} to perform UDAP Discovery (`{fhirBaseUrl}/.well-known/udap`) and, if not already registered, Dynamic Client Registration with the {{ linkvhls }} before initiating ITI-YY5
+- The `fhirBaseUrl` field is used by the {{ linkvhlr }} to perform UDAP Discovery (`{fhirBaseUrl}/.well-known/udap`) and, if not already registered, Dynamic Client Registration with the {{ linkvhls }} before initiating ITI-YY5
 - The `fhirBaseUrl` value is typically derivable from the `url` field (manifest URL) by stripping the path, but including it explicitly avoids ambiguity when the authorization server is hosted separately
-- The `fhirBaseUrl` field SHALL NOT be present if the {{ linkvhls }} does not support the OAuth with SSRAA Option, to avoid misleading {{ linkvhlr }}s into attempting UDAP Discovery unnecessarily
 
 #### 2:3.YY3.5.6 VC Enveloped VHL Option
-- The VC's `DataIntegrityProof` SHALL chain to a trust anchor in the trust list (same framework used for HCERT/CWT verification).
-- The VC `expirationDate` SHOULD be consistent with the VHL payload `exp`; the VHL Receiver SHALL reject the VHL if either has passed.
-- Confidentiality considerations are equivalent to the QR form: the VC carries the `key` and MUST be treated as sensitive.
+- Confidentiality considerations are equivalent to the QR form: the VC carries the `key` and SHOULD be treated as sensitive.
 - VHL Sharers MAY issue single-use VCs; short lifetimes are RECOMMENDED for high-security scenarios.

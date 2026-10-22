@@ -40,13 +40,13 @@ Testing of actor options includes:
 - **Include DocumentReference Option** - VHL Receiver requests and VHL Sharer returns DocumentReference resources in the manifest response using `_include=List:item`.
 - **Verify Document Signature Option** - VHL Receiver verifies digital signatures on retrieved documents using previously obtained PKI material.
 - **OAuth with SSRAA Option** - VHL Receiver and VHL Sharer use OAuth 2.0 access tokens as an alternative authentication mechanism for ITI-YY5.
-- **Verifiable Credential Option** - VHL Receiver self-issues a JSON-LD LDP-VC (W3C VC Data Model v2) whose `credentialSubject` is the manifest decoded from the QR code, with an embedded `DataIntegrityProof` signed with its trust network key. The VC is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`) with FHIR search parameters in the URL. VHL Sharer verifies the `proof.proofValue` using the receiver's public key from the trust network and confirms that `credentialSubject.id` matches the `_id` URL parameter. Testing SHALL include:
-  - Correct LDP-VC construction: `@context` = `https://www.w3.org/ns/credentials/v2`, required `type`, `issuer`, `issuanceDate`, `expirationDate`, `credentialSubject`, and `proof` fields
-  - Correct `proof` element: `type` = `DataIntegrityProof`, valid `cryptosuite` (`ecdsa-2019` or `eddsa-2022`), `proofPurpose` = `assertionMethod`, `verificationMethod` DID URL, and correct `proofValue` computed over the VC document
-  - Correct `credentialSubject` binding: `id` = manifest URL, `manifest` = VHL payload fields (excluding encryption key), `recipient`, `passcode` (if applicable), `embeddedLengthMax`
-  - Correct request format: FHIR search parameters in URL query string; VC as `application/vc+ld+json` body
+- **Verifiable Credential Option** - VHL Receiver self-issues a JSON-LD LDP-VC (W3C VC Data Model v2) whose `credentialSubject` is the manifest decoded from the QR code, with an embedded `DataIntegrityProof` signed with its trust network key. The VC is sent directly as the HTTP POST body (`Content-Type: application/vc`) with the FHIR search parameters carried in `credentialSubject.id`. VHL Sharer verifies the `proof.proofValue` using the receiver's public key from the trust network and confirms that `credentialSubject.id` matches the `_id` URL parameter. Testing SHALL include:
+  - Correct LDP-VC construction: `@context` begins with `https://www.w3.org/ns/credentials/v2` and defines every term used; required `type`, `issuer`, `validFrom`, `validUntil`, `credentialSubject`, and `proof` fields
+  - Correct `proof` element: `type` = `DataIntegrityProof`, a registered `cryptosuite` (`ecdsa-rdfc-2019` or `ecdsa-jcs-2019`), `proofPurpose` = `assertionMethod`, `verificationMethod` DID URL, and correct `proofValue` computed over the VC document
+  - Correct `credentialSubject` binding: `id` = manifest URL, plus `recipient`, `passcode` (if applicable) and `embeddedLengthMax`; the VHL encryption `key` SHALL NOT appear anywhere in the VC
+  - Correct request format: VC as `application/vc` body; FHIR search parameters carried in `credentialSubject.id` and not repeated in the request line
   - VHL Sharer acceptance of a valid VC with valid `proof.proofValue` from a receiver whose key is in the trust network
-  - VHL Sharer rejection of VCs with: invalid `proof.proofValue`, unresolvable `proof.verificationMethod`, expired `expirationDate`, `credentialSubject.id` mismatch with URL `_id`
+  - VHL Sharer rejection of VCs with: invalid `proof.proofValue`, unresolvable `proof.verificationMethod`, expired `validUntil`, a `credentialSubject.id` whose folder ID is not one the VHL Sharer issued
 
 
 

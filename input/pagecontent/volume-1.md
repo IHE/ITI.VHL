@@ -175,7 +175,7 @@ This transaction is captured as the following requirements:
 
 #### 1:XX.1.2.3 Generate VHL [ITI-YY3]
 
-This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a QR code containing a VHL. The QR code is encoded as an HCERT/CWT structure.
+This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a VHL. By default the VHL is carried as a QR code encoded as an HCERT/CWT structure; where the {{ linkvhls }} supports the VC Enveloped VHL Option it MAY instead be carried as a signed Verifiable Credential.
 
 A {{ linkvhls }} MAY:
 - Record consent of the individual
@@ -317,7 +317,7 @@ When the {{ linkvhlr }} decodes the QR code (ITI-YY4), it extracts the VHL paylo
 - The `credentialSubject` contains the manifest metadata from the VHL payload (excluding the encryption key), with `id` set to the manifest URL; the SHL-defined manifest parameters (`recipient`, `passcode`, `embeddedLengthMax`) are also included in `credentialSubject`
 - An embedded **`proof`** element of type `DataIntegrityProof` is included with a `verificationMethod` resolving to the {{ linkvhlr }}'s key in the trust network, `proofPurpose` = `assertionMethod`, and a `proofValue` signature over the VC document — this is the cryptographic proof of the receiver's identity
 
-The VC (with embedded proof) is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`), with FHIR search parameters in the URL query string. No additional HTTP-level signing is required. The {{ linkvhls }} verifies the `proof.proofValue` using the {{ linkvhlr }}'s public key from the trust network before processing the request.
+The VC (with embedded proof) is sent directly as the HTTP POST body (`Content-Type: application/vc`), with the FHIR search parameters carried inside the credential at `credentialSubject.id`. No additional HTTP-level signing is required. The {{ linkvhls }} verifies the `proof.proofValue` using the {{ linkvhlr }}'s public key from the trust network before processing the request.
 
 **Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} SHALL support this option for VC-based authentication to be used.
 
@@ -325,7 +325,7 @@ See ITI-YY5 Section 2:3.YY5.4.1.5 for detailed VC construction, request format, 
 
 ### 1:XX.2.6 VC Enveloped VHL Option (VHL Sharer)
 
-The VC Enveloped VHL Option enables the {{ linkvhls }} to return the VHL as a signed W3C Verifiable Credential (`application/vc+ld+json`) instead of a QR code in the ITI-YY3 Generate VHL transaction. The VC is subsequently transmitted to the {{ linkvhlr }} via ITI-YY4 Provide VHL as an alternative carrier to the HCERT/CWT QR code.
+The VC Enveloped VHL Option enables the {{ linkvhls }} to return the VHL as a signed W3C Verifiable Credential (`application/vc`) instead of a QR code in the ITI-YY3 Generate VHL transaction. The VC is subsequently transmitted to the {{ linkvhlr }} via ITI-YY4 Provide VHL as an alternative carrier to the HCERT/CWT QR code.
 
 This option provides:
 - An alternative carrier for the VHL payload, suitable for machine-to-machine transfer and asynchronous delivery where QR presentation is impractical
@@ -334,7 +334,7 @@ This option provides:
 
 **How It Works:**
 
-When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} supports this option, the {{ linkvhls }} returns the VHL payload under `credentialSubject` of a VC issued per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with an embedded `DataIntegrityProof` (cryptosuite `ecdsa-2019`) signed by the {{ linkvhls }} using its trust-network key. The same fields otherwise embedded at HCERT claim key 5 (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`) are carried in `credentialSubject`. If the option is not supported and `format=vc` is requested, the {{ linkvhls }} SHALL return an OperationOutcome error.
+When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} supports this option, the {{ linkvhls }} returns the VHL as the `credentialSubject.id` of a VC issued per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with an embedded `DataIntegrityProof` signed by the {{ linkvhls }} using its trust-network key. The value carried is the `vhlink:` URI that the QR carrier embeds at HCERT claim key 5, so both carriers convey byte-identical payloads. If the option is not supported and `format=vc` is requested, the {{ linkvhls }} SHALL return an OperationOutcome error.
 
 **Naming Note:** This option (a Sharer option carrying the VHL) is distinct from the **Verifiable Credential Option** (a Receiver authentication option at ITI-YY5 where the Receiver self-issues a VC as the manifest request body).
 

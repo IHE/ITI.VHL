@@ -16,7 +16,7 @@
 
 The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
-The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc+ld+json`). VHL Receivers scan the QR code or parse the VC to extract the VHL payload for subsequent document retrieval.
+The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc`). VHL Receivers scan the QR code or parse the VC to extract the VHL payload for subsequent document retrieval.
 
 ### 2:3.YY4.2 Actor Roles
 
@@ -74,9 +74,9 @@ The VHL is transmitted via QR code with the following characteristics:
 **Verifiable Credential Transmission (VC Enveloped VHL)**
 
 When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc), the VHL MAY alternatively be transmitted as a signed JSON-LD Verifiable Credential:
-- Conveyed as `application/vc+ld+json` via any channel that preserves JSON (HTTPS, email attachment, file transfer, NFC with a capable reader)
+- Conveyed via any channel that preserves JSON (HTTPS, email attachment, file transfer, NFC with a capable reader). Where the channel carries a media type, it SHALL be `application/vc`; some channels — a file on removable media, or a blob read from NFC — carry none, in which case the document is identified by its content
 - Not imaged/scanned — conveyed as a file or blob
-- The VC carries the VHL payload under `credentialSubject` and is signed by the VHL Sharer with a `DataIntegrityProof` (cryptosuite per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
+- The VC carries the VHL as the `vhlink:` URI at `credentialSubject.id` — the same value the QR carrier embeds at HCERT claim key 5 — and is signed by the VHL Sharer with a `DataIntegrityProof` (cryptosuite per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
 - Suitable for machine-to-machine transfer and asynchronous delivery scenarios where QR presentation is impractical
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
@@ -92,8 +92,8 @@ The VHL Holder SHALL:
 **Verifiable Credential Transmission (VC Enveloped VHL Option):**
 
 When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc), the VHL Holder SHALL:
-1. Verify the VC is valid (not expired, `DataIntegrityProof` intact)
-2. Transmit the `application/vc+ld+json` document to the VHL Receiver via an agreed channel (HTTPS, email attachment, file transfer, or NFC)
+1. Verify the VC is valid (`validUntil` not passed, `DataIntegrityProof` intact)
+2. Transmit the `application/vc` document to the VHL Receiver via an agreed channel (HTTPS, email attachment, file transfer, or NFC)
 3. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
 
 The VHL Holder MAY:
@@ -140,8 +140,9 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
    - Extract `kid` from CWT protected header
    - Retrieve corresponding Document Signing Certificate (DSC) from trust list
    - Verify the COSE signature (RFC 8152) using DSC public key
+   - Check the DSC's revocation status where applicable
    - Confirm signature is valid and CWT has not been tampered with
-   - Reject if signature invalid or DSC not trusted
+   - Reject if signature invalid, DSC not trusted, or DSC revoked
 
 7. **Extract and Validate CWT Claims**:
    - Extract CWT claims:
@@ -157,7 +158,7 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
    - Claim key 5 contains the VHL payload (conforming to the SHL payload format) with:
      - `url`: manifest URL (required) - includes all mandatory FHIR search parameters
      - `key`: base64url-encoded decryption key, 43 characters (required). The {{ linkvhlr }} caches this key for the VHL session and uses it as the symmetric key for JWE `dir`/`A256GCM` decryption of document binaries retrieved via [ITI-68](https://profiles.ihe.net/ITI/MHD/ITI-68.html); see [ITI-YY5 Document Encryption](ITI-YY5.html#23yy5425-document-encryption).
-     - `flag`: flags such as "L" for long-term, "P" for passcode (optional)
+     - `flag`: flags such as "L" for long-term, "P" for passcode (optional). See [ITI-YY3 Flags](ITI-YY3.html#flags)
      - `label`: human-readable description (optional)
      - `exp`: expiration timestamp in seconds since epoch (optional)
      - `v`: version number (optional)
@@ -171,16 +172,17 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
      - "L" indicates long-term use
      - "P" indicates passcode required (obtain from VHL Holder)
      - "LP" indicates both long-term and passcode-protected
+     - Any other flag value is not defined by this profile and SHALL be ignored
    - Validate `url` contains expected manifest endpoint format with mandatory parameters
 
 **Verifiable Credential Decoding (VC Enveloped VHL Option):**
 
 When the VHL is received as a Verifiable Credential instead of a QR code, the VHL Receiver SHALL instead:
 
-1. **Parse VC**: Parse the received bytes as a JSON-LD document per [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/). Reject if the media type is not `application/vc+ld+json` or parsing fails.
+1. **Parse VC**: Parse the received bytes as a JSON-LD document per [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/). Where the channel carries a media type, the {{ linkvhlr }} SHALL reject a document whose media type is not `application/vc`. Where the channel carries no media type, the {{ linkvhlr }} SHALL identify the document by its content: a JSON object whose `@context` begins with `https://www.w3.org/ns/credentials/v2`. Reject if parsing fails or the document does not conform to the VC Data Model.
 2. **Verify DataIntegrityProof**: Resolve the `proof.verificationMethod` to the VHL Sharer's key via the trust list (same DSC/trust framework used for CWT verification), then verify the `DataIntegrityProof` per [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/). Reject if the proof is invalid or the issuer is untrusted.
-3. **Validate Dates**: Reject if `expirationDate` has passed or `issuanceDate` is in the future.
-4. **Extract VHL Payload**: Read the VHL payload fields (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`) directly from `credentialSubject` — these are the same fields otherwise embedded at HCERT claim key 5.
+3. **Validate Dates**: Reject if `validUntil` has passed or `validFrom` is in the future.
+4. **Extract the VHL**: Read the `vhlink:` URI from `credentialSubject.id`. This is the same value the QR carrier embeds at HCERT claim key 5, so the {{ linkvhlr }} strips the `vhlink:/` prefix, base64url-decodes the remainder, and parses the result as the VHL payload — identical to steps 8 and 9 of the QR code path.
 5. **Validate VHL Payload**: Apply the same validation as step 9 above (valid HTTPS `url`, 43-character `key`, `exp` not passed, flag handling).
 
 The VHL Receiver then continues with Post-Decoding Actions below as in the QR code path.
@@ -218,28 +220,31 @@ The VHL Receiver MAY:
 Input QR Code Content:
 HC1:NCF3R0KLBBA...V8N8W.CE8WY
 
-Step 1: Verify and remove HC1: prefix → NCF3R0KLBBA...V8N8W.CE8WY
-Step 2: Base45 decode → [compressed bytes]
-Step 3: ZLIB/DEFLATE decompress → [CBOR bytes]
-Step 4: Parse CBOR as CWT → Extract protected header (alg: ES256, kid: 8-byte SHA-256)
-Step 5: Verify COSE signature using DSC from trust list based on kid
-Step 6: Extract CWT claims:
+Step 1: Scan the QR code → HC1:NCF3R0KLBBA...V8N8W.CE8WY
+Step 2: Verify and remove HC1: prefix → NCF3R0KLBBA...V8N8W.CE8WY
+Step 3: Base45 decode → [compressed bytes]
+Step 4: ZLIB/DEFLATE decompress → [CBOR bytes]
+Step 5: Parse CBOR as CWT → Extract protected header (alg: ES256, kid: 8-byte SHA-256)
+Step 6: Verify COSE signature using DSC from trust list based on kid
+Step 7: Extract CWT claims:
   - iss (claim 1): "US"
   - iat (claim 6): 1704067200
   - exp (claim 4): 1735689600
   - hcert (claim -260): {...}
-Step 7: Within hcert (claim -260), extract claim key 5 (VHL payload):
+Step 8: Within hcert (claim -260), extract claim key 5, strip the vhlink:/ prefix,
+        and base64url-decode to obtain the VHL payload:
   {
-    "url": "https://vhl-sharer.example.org/List/_search?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
-    "key": "dGhpcyBpcyBhIHNlY3JldCBrZXkgdXNlZCBmb3IgZW5j",
+    "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+    "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
     "flag": "LP",
     "exp": 1735689600,
     "label": "Patient Health Summary",
     "v": 1
   }
-Step 8: Validate VHL payload fields
-Step 9: Parse manifest URL to extract FHIR search parameters
-Step 10: Prepare for ITI-YY5 Retrieve Manifest
+Step 9: Validate VHL payload fields (HTTPS url, 43-character key, exp not passed, flags)
+
+Then, as Post-Decoding Actions: parse the manifest URL to extract the FHIR search
+parameters, cache the key, and prepare for ITI-YY5 Retrieve Manifest.
 ```
 
 **Manifest URL Parsing:**
@@ -317,7 +322,6 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 
 #### 2:3.YY4.5.1 VHL Integrity and Authenticity
 - Digital signature ensures VHL issued by trusted VHL Sharer
-- VHL Receivers SHALL verify COSE signatures before trusting content
 - CWT signature provides end-to-end trust verification
 
 #### 2:3.YY4.5.2 VHL Confidentiality
@@ -337,14 +341,7 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 - Passcode validated during manifest retrieval (ITI-YY5 Part 2)
 - VHL Sharers SHOULD implement rate limiting on passcode attempts
 
-#### 2:3.YY4.5.5 Trust Network Validation
-VHL Receivers SHALL:
-- Validate VHL Sharer is current participant in trust network
-- Retrieve DSC from trust list using kid from CWT protected header
-- Check certificate revocation status where applicable
-- Reject VHLs from untrusted participants
-
-#### 2:3.YY4.5.6 QR Code Security
+#### 2:3.YY4.5.5 QR Code Security
 
 **QR Code Characteristics:**
 - Can be photographed/copied - use time-limited expiration
@@ -359,11 +356,9 @@ VHL Receivers SHALL:
 - Avoid printing QR codes for long-term use unless necessary
 - Implement single-use VHLs where appropriate
 
-#### 2:3.YY4.5.7 VC Enveloped VHL Option Security
+#### 2:3.YY4.5.6 VC Enveloped VHL Option Security
 When the VHL is carried as a Verifiable Credential:
-- The `DataIntegrityProof` SHALL chain to a trust anchor in the trust list (same framework used for CWT/HCERT verification)
-- The VC `expirationDate` and the VHL payload's `exp` SHALL both be honored — VHL Receivers SHALL reject if either has passed
-- Confidentiality is equivalent to the QR form: the VC carries the decryption `key` and MUST be treated as sensitive
+- Confidentiality is equivalent to the QR form: the VC carries the decryption `key` and SHOULD be treated as sensitive
 - VHL Sharers SHOULD issue VCs with short lifetimes; single-use VCs are RECOMMENDED for high-security scenarios
 
 
