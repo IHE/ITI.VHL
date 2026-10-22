@@ -123,6 +123,8 @@ The transactions in this profile are summarized in the sections below.
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }} using Decentralized Identifiers (DIDs). The submitted material is formatted as DID Documents containing public keys and associated metadata for validation and inclusion in the Trust List.
 
+Key material may be self-generated or issued by a Certificate Authority. Where the participant is enrolled under a Signing Certificate Authority it does not generate its own trust network signing key. In either case the key material is carried within the DID Document as a certificate chain — the issued certificate and its issuers, or, where self-generated, a single self-signed certificate. The transaction constrains the content of the DID Document; the mechanism by which that content reaches the {{ linkta }} is determined by the implementing jurisdiction.
+
 **Transaction Optionality:**
 
 This transaction is:
@@ -143,6 +145,8 @@ This transaction is captured as the following requirements:
 #### 1:XX.1.2.2 Retrieve Trust List with DID [ITI-YY2]
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to retrieve a Trust List from a {{ linkta }} containing DID Documents with PKI material. The retrieved DID Documents include public keys and metadata necessary for verifying digital signatures and establishing trust relationships. Received key material should be distinguished by the participating jurisdiction, use case context, and key usage.
+
+Retrieved key material is not trusted by virtue of appearing in the Trust List. The recipient verifies the cryptographic proof over the retrieved document and, where the key material is Certificate Authority issued, validates the accompanying certificate chain to a certificate authority recognized by the governing trust framework before the key is used.
 
 **Transaction Optionality:**
 
