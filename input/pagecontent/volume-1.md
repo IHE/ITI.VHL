@@ -157,7 +157,7 @@ This transaction is:
 **When to Implement:**
 
 VHL Sharer and VHL Receiver actors SHALL implement this transaction when:
-- They do not have pre-established mechanisms to retrieve PKI material from the {{ linkta }}, OR
+- They do not have jurisdiction-specific mechanisms to retrieve PKI material from the {{ linkta }}, OR
 - They wish to demonstrate interoperability at IHE Connectathons
 
 **Alternative Implementations:**
@@ -261,7 +261,7 @@ Options that may be selected for each actor in this implementation guide are lis
 The Sign Manifest Request Option enables the {{ linkvhlr }} to digitally sign manifest requests sent to the {{ linkvhls }} and enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
 
 This option provides:
-- Mutual authentication between VHL Receiver and VHL Sharer
+- Enables authentication of VHL Receiver by the VHL Sharer
 - Non-repudiation of manifest requests
 - Protection against request forgery
 - Enhanced audit trail

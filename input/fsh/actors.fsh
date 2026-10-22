@@ -36,7 +36,7 @@ InstanceOf: ActorDefinition
 Usage: #definition
 * name = "VHLSharer"
 * title = "VHL Sharer"
-* description = "The VHL Sharer generates a VHL, provides the VHL to a VHL Holder, and responds to requests from a VHL Sharer to utilize the VHL."
+* description = "The VHL Sharer generates a VHL, provides the VHL to a VHL Holder, and responds to requests from a VHL Receiver to utilize the VHL."
 * status = $pubStatus#active
 * publisher = "IHE"
 * type = $actorType#system
