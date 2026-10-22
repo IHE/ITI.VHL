@@ -435,27 +435,40 @@ Key security considerations include:
 ### 1:XX.5.1 Trust Network Security
 
 - All participants ({{ linkvhlr }}, {{ linkvhls }}) SHALL establish trust via the {{ linkta }}. ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions MAY be used to support this trust establishment.
-- PKI material SHALL be validated before use in signature verification or secure channel establishment.
 - Certificates and keys should be regularly updated and revocation status checked.
+- Onboarding establishes key material in both directions: the participant's own certificate authority material is pre-shared with the trust network, and the {{ linkta }}'s public key is shared with the participant. Neither can be obtained over the channel it secures, so both are established through the verified, out-of-band process the trust framework defines.
+- A public key SHALL NOT be treated as trusted merely because it appears in a retrieved trust list. Where the governing trust framework operates a certificate authority, authority for a key derives from its certificate chain, and that chain SHALL resolve back to a certificate verifiable against one of the public keys pre-shared with the trust network at onboarding. How the path is constructed, which algorithms and key strengths are permitted, and how revocation status is obtained are defined by the trust framework.
+- Trust lists are commonly published as static, cacheable documents. Recipients should verify the cryptographic proof over a retrieved trust list against the {{ linkta }} key established at onboarding, check its freshness, and not accept a trust list older than one already held, so that withdrawn key material cannot be reinstated by serving an earlier validly signed version.
 
 ### 1:XX.5.2 Secure Channel Requirements
 
 - ITI-YY5 (Retrieve Manifest) SHALL be conducted over a secure channel as defined by ATNA Authenticate Node [ITI-19].
-- Both {{ linkvhlr }} and {{ linkvhls }} SHALL present credentials validated against the {{ linkta }}.
-- Mutual authentication is required for all document retrieval operations.
 
 ### 1:XX.5.3 Cryptographic Algorithm Selection
 
 The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic primitives for digital signatures, message authentication, and content encryption. This IG does not mandate a single algorithm suite for deployment. Implementers select algorithms consistent with the underlying specifications — for example, RFC 9421 (HTTP Message Signatures), RFC 7515/7516/7518 (JWS/JWE/JWA), RFC 8152 (COSE), W3C Data Integrity (Verifiable Credentials), the HL7 SSRAA IG (OAuth with SSRAA Option), and the WHO SMART Trust specification (HCERT). The preceding list is illustrative, not exhaustive.
 
-**Interoperability baseline:** For the purpose of interoperability testing, implementations SHALL support **RS256** (RSASSA-PKCS1-v1_5 using SHA-256, per RFC 7518) as a common baseline across signature operations where a JWS/JWT algorithm is applicable. This baseline ensures that two independent conformant implementations can always interoperate during testing. It does not preclude support for — or preferred deployment use of — other algorithms (ECDSA families, EdDSA, RSA-PSS, COSE equivalents, or future post-quantum algorithms).
+**Interoperability baseline:** For the purpose of interoperability testing, implementations SHALL support **ECDSA using curve P-256 and SHA-256** as a common baseline across signature operations. This is `ES256` in the JOSE and COSE registries and `ecdsa-p256-sha256` in the HTTP Message Signatures registry. A single baseline is possible because this algorithm is expressible in every signature container this profile uses — JWS/JWT, COSE, HTTP Message Signatures, and the W3C Data Integrity ECDSA cryptosuites — and because it is the algorithm the trust networks this profile targets already distribute.
+
+This baseline ensures that two independent conformant implementations can always interoperate during testing. It does not preclude support for — or preferred deployment use of — other algorithms (other ECDSA curves, EdDSA, RSA-PSS, or future post-quantum algorithms).
+
+Where an underlying specification sets its own algorithm requirements, those requirements govern:
+
+| Signature operation | Governed by |
+|---------------------|-------------|
+| HCERT/CWT signature on the VHL ([ITI-YY3](ITI-YY3.html), [ITI-YY4](ITI-YY4.html)) | [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html), which defines a primary and a secondary algorithm and requires both to be implemented |
+| JWT client assertions and access tokens under the OAuth with SSRAA Option ([ITI-YY5](ITI-YY5.html)) | the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/), which operates on its own X.509 credentials rather than on trust network key material |
+| `DataIntegrityProof` on Verifiable Credentials | the declared `cryptosuite`, which determines both the canonicalization and the signature algorithm |
+{: .grid}
+
+Note that a signature algorithm is constrained by the key it is made with: a participant whose trust network key material is an elliptic-curve key cannot produce an RSA signature with it. Implementers selecting algorithms for operations that use trust network keys should begin from the key types their trust framework issues.
 
 **Deployment considerations:** Implementers SHOULD take into account additional considerations beyond the interoperability baseline when selecting algorithms for production deployments, including but not limited to:
 - **Jurisdictional policies and regulatory requirements** (e.g., national cryptographic agency guidance, healthcare-sector rules, data-protection law);
 - **Post-quantum / quantum-safe cryptography** as standards mature (e.g., NIST PQC) and migration guidance evolves;
 - **Evolving industry guidance** on algorithm deprecation, minimum key strengths, and cryptosuite lifecycle (e.g., updates from IETF, W3C, NIST, ENISA).
 
-Algorithms named in examples, tables, and code blocks throughout this IG are illustrative. Except for the RS256 interoperability baseline stated above, they do not constrain deployment choices. Jurisdictions and trust networks MAY define additional profiles (permitted algorithm lists, minimum key lengths, deprecation schedules) consistent with this guidance.
+Algorithms named in examples, tables, and code blocks throughout this IG are illustrative. Except for the interoperability baseline stated above, and for the requirements of the underlying specifications listed above, they do not constrain deployment choices. Jurisdictions and trust networks MAY define additional profiles (permitted algorithm lists, minimum key lengths, deprecation schedules) consistent with this guidance.
 
 ### 1:XX.5.4 VHL Integrity and Authorization
 
@@ -476,7 +489,7 @@ Algorithms named in examples, tables, and code blocks throughout this IG are ill
 
 ### 1:XX.5.6 Privacy Considerations
 
-- VHL payloads do not contain PHI - only references to documents.
+- VHL payloads do not contain clinical content - only a reference to a document folder. They do carry the patient business identifier supplied at generation time and a free-text label, both of which are readable by anyone holding the VHL; see [ITI-YY5 Privacy of Request Metadata](ITI-YY5.html#23yy556-privacy-of-request-metadata).
 - Actual health data is transmitted over secure channels (ITI-YY5).
 - Consent may be recorded during VHL generation (Record Consent option).
 - VHL Holders retain the right to revoke access where supported.
