@@ -19,6 +19,7 @@ This guide is organized into the following sections:
 
 1. Volume 1:
    1. [Introduction](volume-1.html)
+   1. [Background Knowledge and Reading](volume-1.html#background-knowledge-and-reading)
    1. [Actors, Transactions, and Content](volume-1.html#actors-and-transactions)
    1. [Actor Options](volume-1.html#actor-options)
    1. [Actor Required Groupings](volume-1.html#required-groupings)

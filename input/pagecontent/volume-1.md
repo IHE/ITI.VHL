@@ -35,6 +35,22 @@ As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} ar
 > - **SHL-defined manifest parameters** — `recipient`, `passcode`, `embeddedLengthMax`, etc., as defined by the SHL specification and reused here.
 > - Actors in this IG are always the {{ linkvhlh }}, {{ linkvhls }}, and {{ linkvhlr }} — never "SHL Receiver" or "SHL Sharer" (those terms only appear in the comparison at Appendix A).
 
+## Background Knowledge and Reading
+
+This profile assumes the reader is familiar with the [IHE Technical Frameworks General Introduction](https://profiles.ihe.net/GeneralIntro/) and with [HL7 FHIR R4](http://hl7.org/fhir/R4/). Beyond that, VHL builds on the concepts below. Readers new to any of them should consult the referenced specification before reading Volume 2.
+
+| Topic | Why it matters in VHL | Reference |
+| ----- | --------------------- | --------- |
+| **SMART Health Links (SHL)** | A patient-mediated sharing pattern in which a link — typically carried in a QR code — points to a manifest of health documents. VHL adopts the SHL payload format and manifest-request parameters, but replaces the SHL trust model with one anchored in PKI. | [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html); [Appendix A: Comparison of VHL and SHL](vhl_vs_shl.html) |
+| **Public Key Infrastructure (PKI)** | The system of key pairs, X.509 certificates, certification authorities, and revocation lists used to bind a public key to an organization. VHL uses PKI to decide whether a {{ linkvhls }} or {{ linkvhlr }} is an authorized participant in the trust network. | [RFC 5280](https://datatracker.ietf.org/doc/html/rfc5280) — X.509 Certificate and CRL Profile |
+| **Digital Signatures** | A signature computed with a private key that lets a relying party verify the origin and integrity of an artifact. VHL requires signature verification on the VHL itself, and offers signature verification on retrieved documents through the Verify Document Signature Option. | [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515) — JSON Web Signature (JWS); [IHE Document Digital Signature (DSG)](https://profiles.ihe.net/ITI/DSG/) |
+| **Trust Anchors and Trust Lists** | A trust anchor is a root key or certificate that a relying party accepts as authoritative; a trust list is the signed, published set of PKI material for a community. The {{ linkta }} publishes trust lists that VHL participants retrieve and use to validate one another. | [Trust Network glossary entry](other.html#ihe-technical-frameworks-general-introduction-appendix-d-glossary); [Retrieve Trust List with DID [ITI-YY2]](ITI-YY2.html) |
+| **Decentralized Identifiers (DID)** | A globally resolvable identifier that resolves to a DID Document containing verification methods (public keys) and service endpoints, without depending on a central registry. VHL uses DIDs to locate and publish trust list material, and requires support for the `did:web` method, in which a DID resolves deterministically to an HTTPS URL. | [W3C Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/did-core/); [did:web Method Specification](https://w3c-ccg.github.io/did-method-web/); [Submit PKI Material with DID [ITI-YY1]](ITI-YY1.html) |
+| **Verifiable Credentials (VC)** | A tamper-evident credential with a `credentialSubject` and an embedded cryptographic proof. VHL uses VCs in two distinct places: a self-issued VC that authenticates a manifest request (Verifiable Credential Option), and a VC that envelopes the VHL payload itself (VC Enveloped VHL Option). | [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/); [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) |
+| **CBOR Web Token (CWT) and COSE** | The binary, CBOR-based counterparts to JWT and JWS. Their compactness is what allows a signed VHL payload to fit inside a QR code. | [RFC 8392](https://datatracker.ietf.org/doc/html/rfc8392) — CBOR Web Token; [RFC 8152](https://datatracker.ietf.org/doc/html/rfc8152) — CBOR Object Signing and Encryption |
+| **Health Certificate (HCERT)** | The WHO SMART Trust CWT claim structure for carrying health content in a signed, QR-encodable certificate. VHL uses HCERT as one of the carriers for the VHL payload. | [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html) |
+{:.grid}
+
 <a name="actors-and-transactions"> </a>
 
 ## 1:XX.1 Actors, Transactions, and Content Modules

@@ -131,6 +131,7 @@ menu:
   Home: index.html
   Volume 1:
     Introduction: volume-1.html
+    Background Knowledge and Reading: volume-1.html#background-knowledge-and-reading
     Actors and Transactions: volume-1.html#actors-and-transactions
     Actor Options: volume-1.html#actor-options
     Required Actor Groupings: volume-1.html#required-groupings
