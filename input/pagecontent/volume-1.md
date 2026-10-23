@@ -388,11 +388,22 @@ This section shows how the transactions/content modules of the profile are combi
 
 A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to share access to health documents in a secure, auditable, and configurable manner. Sharing options may include **limited-time access**, **PIN-protected retrieval**, or **ongoing access** to a longitudinal dataset that may evolve over time. VHLs can be rendered as QR codes or downloaded to a user’s device, supporting patient-mediated data sharing and enhancing interoperability across healthcare systems.
 
-#### 1:XX.4.2 Use Cases
+### 1:XX.4.2 Use Cases
 
 <style>.usecase-purpose img { max-width: 100%; height: auto; }</style>
 
-#### 1:XX.4.2.1 Use Case \#1: WHO Global Digital Health Certification Network
+The use cases below are **illustrative**. Each describes a programme or deployment that exists independently of this profile, and is presented to show where the VHL transactions apply — not as a statement that the deployment implements this profile as specified here.
+
+Across these use cases the transactions combine in the common pattern shown in Figure 1:XX.4.2-1. The {{ linkvhls }} and the {{ linkvhlr }} first onboard to a {{ linkta }}, submitting their own PKI material with {{ linksubmitpki }} and obtaining the trust list with {{ linkretrievepki }}. A {{ linkvhlh }} then obtains a VHL from the {{ linkvhls }} with {{ linkgeneratevhl }}, and presents it to the {{ linkvhlr }} with {{ linkprovidevhl }}. The {{ linkvhlr }} verifies the VHL against the trust list before redeeming it with {{ linkretrievemanifest }}, then retrieves the documents the manifest references using [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). Individual use cases exercise different subsets of this pattern.
+
+<figure >
+  <div style="width:35em; max-width:100%;">
+  {%include usecase-processflow.svg%}
+  </div>
+  <p id="f1:XX.4.2-1" class="figureTitle">Figure 1:XX.4.2-1: VHL Transactions Applicable Across the Use Cases</p>
+</figure>
+
+#### 1:XX.4.2.1 Use Case #1: WHO Global Digital Health Certification Network
 
 {% assign UseCaseGDHCN = site.data.ExampleScenario-UseCaseGDHCN %}
 
@@ -430,7 +441,7 @@ This use case has the following business requirement:
 This use case has the following business requirement:
 - [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
 
-#### 1:XX.4.2.3 Use Case \#3: US Trusted Exchange Framework and Common Agreement (TEFCA)
+#### 1:XX.4.2.3 Use Case #3: US Trusted Exchange Framework and Common Agreement (TEFCA)
 
 {% assign UseCaseTEFCA = site.data.ExampleScenario-UseCaseTEFCA %}
 
