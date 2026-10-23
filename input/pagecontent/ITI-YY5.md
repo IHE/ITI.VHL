@@ -837,7 +837,7 @@ The protected header decodes to `{"alg":"dir","enc":"A256GCM"}`. The empty secon
 
 #### 2:3.YY5.5.1 Transport Security
 
-Secure transport is required for all communications in this transaction. See [Volume 1 Section XX.5.2 Secure Channel Requirements](volume-1.html#xx52-secure-channel-requirements) for the applicable ATNA baseline.
+Secure transport is required for all communications in this transaction. See [Volume 1 Section XX.5.2 Secure Channel Requirements](volume-1.html#1xx52-secure-channel-requirements) for the applicable ATNA baseline.
 
 #### 2:3.YY5.5.2 HTTP Message Signatures
 

@@ -277,7 +277,7 @@ Options that may be selected for each actor in this implementation guide are lis
 The Sign Manifest Request Option enables the {{ linkvhlr }} to digitally sign manifest requests sent to the {{ linkvhls }} and enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
 
 This option provides:
-- Enables authentication of VHL Receiver by the VHL Sharer
+- Authentication of the VHL Receiver by the VHL Sharer
 - Non-repudiation of manifest requests
 - Protection against request forgery
 - Enhanced audit trail

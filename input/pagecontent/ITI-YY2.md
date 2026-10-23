@@ -269,7 +269,7 @@ Upon receiving the Trust List response, the {{ linkvhlr }} or {{ linkvhls }} SHA
 
 #### 2:3.YY2.5.1 Secure Retrieval
 
-Trust list retrieval is subject to the secure channel requirements in [Volume 1 Section XX.5.2 Secure Channel Requirements](volume-1.html#xx52-secure-channel-requirements). The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
+Trust list retrieval is subject to the secure channel requirements in [Volume 1 Section XX.5.2 Secure Channel Requirements](volume-1.html#1xx52-secure-channel-requirements). The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
 
 #### 2:3.YY2.5.2 DID Document Validation
 
