@@ -181,6 +181,30 @@ The following example carries Certificate Authority issued material. It illustra
          "keyusage":{
             "code":"#DSC"
          }
+      },
+      {
+         "id":"did:web:some.exampledomain.of.participant.int:customId#TmQxTTlaamQ=",
+         "type":"JsonWebKey2020",
+         "controller":"did:web:some.exampledomain.of.participant.int:customId",
+         "publicKeyJwk":{
+            "kty":"EC",
+            "kid":"TmQxTTlaamQ=",
+            "x5c":[
+               "MIICMDCCAdWgAwIBAgIUFqWc0xbrcpAettDF8gEymTzDtSkwCgYIKoZIzj0EAwIwdDELMAkGA1UEBhMCWEExFDASBgNVBAgMC1hYQSBDb3VudHJ5..."
+            ],
+            "crv":"P-256",
+            "x":"AMsx3ULDTCFYLIuBKWFpsrLhxpTCRfhQZXUQwQZLBPcx",
+            "y":"AJSNjJmVxUPTfhLBHLFQTFYQvGgCHhKQKZpMXSHnrBYJ"
+         },
+         "domain":{
+            "code":"#DCC"
+         },
+         "participant":{
+            "code":"#XA"
+         },
+         "keyusage":{
+            "code":"#SCA"
+         }
       }
    ],
    "proof":{
@@ -198,11 +222,26 @@ Reading the example:
 
 - `id` and `controller` are the same `did:web` DID, so the document declares itself as the authority over its own content.
 - The verification method fragment (`#XPjhL9Znd1M=`) matches the JWK `kid`, so a verifier that has extracted a key identifier from a signed artifact can dereference directly to the corresponding key.
-- `x5c` carries two certificates: the Document Signer Certificate holding the public key, followed by the Signing Certificate Authority that issued it. A verifier validates this chain to a trust anchor before using the key.
+- On the first method, `x5c` carries two certificates: the Document Signer Certificate holding the public key, followed by the Signing Certificate Authority that issued it. A verifier validates this chain to a trust anchor before using the key.
+- The document carries **two** verification methods: the Document Signer Certificate the participant signs with, and the Signing Certificate Authority under which that certificate was issued, distinguished by `keyusage`. Each is a separate entry with its own `kid` and its own `x5c`.
 - `domain`, `participant` and `keyusage` are defined by the trust framework context declared in `@context` — they are not DID Core members.
 - The `proof` is a detached JWS (`"b64":false`) over the document, created by the key identified in `proof.verificationMethod` — a key the recipient obtained at onboarding.
 
 **Where the key material is self-generated**, the structure is unchanged: `x5c` carries a chain of one — the submitter's self-signed certificate — and that certificate is the material pre-shared with the trust network at onboarding.
+
+<a name="multiple-verification-methods"> </a>
+
+**Multiple Verification Methods**
+
+`verificationMethod` is an array, and a participant publishing more than one entry is the ordinary case rather than an exception. A participant publishes distinct keys for distinct usages, as declared in `keyusage`, and publishes overlapping keys across a rotation so that artifacts signed with the outgoing key stay verifiable while the incoming key comes into use.
+
+A verifier therefore SHALL resolve a specific verification method rather than assuming the first entry:
+
+- Where the signed artifact identifies the key it was made with — a `kid` in a JWS or COSE header, or the DID URL in a `proof.verificationMethod` — the verifier dereferences that identifier to the matching entry. The fragment of `verificationMethod.id` and the `publicKeyJwk.kid` carry the same value for this reason.
+- Where the operation implies a usage rather than naming a key, the verifier selects among the entries whose `keyusage` corresponds to that operation.
+- Where neither identifies a single entry, the document does not establish which key applies and the artifact SHALL NOT be treated as verified.
+
+Each entry is validated on its own. The presence of one valid verification method says nothing about the others, so a document is only as trustworthy as the particular method a verifier resolves from it.
 
 **Submission Pathways**
 
@@ -210,7 +249,7 @@ This profile does not define an API for submission. The pathway by which the DID
 
 The following pathways are informative examples of mechanisms in use:
 
-- **Direct submission over a network connection**: The DID Document is transferred to an endpoint designated by the {{ linkta }} — for example, an HTTP POST to a jurisdiction-defined endpoint, or an upload over a mutually authenticated connection with the submission itself signed by the submitting organization.
+- **Direct submission over a network connection**: The DID Document is transferred to an endpoint designated by the {{ linkta }}. Where that endpoint is an HTTP API, the submission is an **HTTP PUT** of the DID Document to the resource representing the submitting participant. PUT rather than POST, because a DID Document is a single resource identified by its own DID: publishing it replaces whatever the {{ linkta }} currently holds for that participant, so re-submitting an unchanged document leaves the trust list as it was instead of creating a second entry. The connection is mutually authenticated, or the submission is itself signed by the submitting organization.
 
 - **Indirect Publication**: The DID Document is published at a well-known URL under the control of the submitting organization and the {{ linkta }} is notified of the location. Where the DID is a `did:web` DID, that URL is already determined by the DID itself.
 
@@ -250,9 +289,9 @@ Upon receiving a DID Document submission, the {{ linkta }} SHALL:
    - Public keys are properly formatted (JWK)
    - Key types and curves are acceptable per trust framework policy
    - Key sizes meet minimum security requirements
-3. **Validate the Certificate Chain**: Validate the `x5c` chain:
+3. **Validate the Certificate Chain of Each Verification Method**: For every entry in `verificationMethod`, validate its `x5c` chain:
    - Verify that the chain resolves back to a certificate that is verifiable against one of the public keys pre-shared with the trust network at the time of onboarding
-   - Verify that the public key expressed in the JWK is the key certified by the first certificate in the chain
+   - Verify that the public key expressed in that entry's JWK is the key certified by the first certificate in its chain
    - Verify that each certificate in the path is within its validity period and has not been revoked
 
    The onboarded key material is what makes this check conclusive: a chain that validates only to an arbitrary certificate authority establishes nothing about membership of this trust network. How the path is constructed, which algorithms and key strengths are permitted, and how revocation status is obtained are defined by the governing trust framework. Trust frameworks commonly distribute revocation status as certificate revocation lists (CRLs); some frameworks discourage the use of the Online Certificate Status Protocol (OCSP) because a status request reveals which certificate is being verified, and by whom, at the time of use.
@@ -260,7 +299,7 @@ Upon receiving a DID Document submission, the {{ linkta }} SHALL:
    - secure connection
    - Verification of proof/signature on the DID Document
    - Validation against pre-registered organizational identifiers
-   - Confirmation that the subject of the first certificate in `x5c` corresponds to the authenticated identity of the submitting participant, so that a participant cannot publish key material on behalf of another
+   - Confirmation that the subject of the first certificate in each `x5c` corresponds to the authenticated identity of the submitting participant, so that a participant cannot publish key material on behalf of another
 5. **Catalog DID Document**: Store the validated DID Document in the Trust Anchor's registry
 6. **Make Available for Retrieval**: Ensure the DID Document is accessible via the retrieval endpoint(s)
 

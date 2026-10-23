@@ -51,8 +51,9 @@ considerations.
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 Message Semantics** – Verifies the DID Document message format that the Trust Anchor
 must validate: mandatory @context / id / verificationMethod fields, verification method structure,
+a verificationMethod array carrying more than one entry with each validated independently,
 public key format (JWK/RFC 7517), private key exclusion, accepted cryptographic suites, key
-strength (P-256+), and HTTP POST / Content-Type requirements.
+strength (P-256+), and HTTP PUT / Content-Type requirements.
 Source: section 2:3.YY1.4.1.2 (Message Semantics).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
@@ -160,7 +161,7 @@ Verifies the DID Document structure the VHL Sharer must construct.
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 VHL Sharer Initiator Expected Actions** – Verifies key pair generation, submission
-pathways (direct HTTP POST, indirect publication, offline), provenance metadata, response
+pathways (direct HTTP PUT, indirect publication, offline), provenance metadata, response
 handling (201/400/401/403/422), and secure private key retention.
 Source: sections 2:3.YY1.4.1.2 (Message Semantics) and 2:3.YY1.4.1.3 (Initiator Expected Actions).
 """
