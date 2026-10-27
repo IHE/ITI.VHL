@@ -151,7 +151,7 @@ The generation process is as follows:
 
 **VHL Payload Construction**
 
-The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html). The VHL Sharer SHALL:
+The VHL payload SHALL be constructed in alignment with the [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html). The structure described in the steps below is also recorded as the [VHL Payload](StructureDefinition-VHLPayload.html) logical model. The VHL Sharer SHALL:
 
 1. Generate a unique folder ID with 256-bit entropy to serve as the List resource identifier
 

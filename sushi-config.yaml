@@ -85,8 +85,12 @@ resources:
 
 
 dependencies:
-hl7.fhir.uv.testing : 0.1.0-SNAPSHOT
-hl7.fhir.uv.extensions : 5.2.0 
+  # hl7.fhir.uv.testing: disabled. This entry never loaded - the block below was
+  # unindented, so SUSHI ignored it entirely. The version it named (0.1.0-SNAPSHOT)
+  # does not exist, and the only published version (0.1.0-snapshot1) is built for
+  # FHIR 6.0.0-ballot3, whose TestPlan differs from the R5 shape testplans.fsh uses.
+  hl7.fhir.uv.extensions.r4: 5.3.0
+  hl7.fhir.uv.smart-health-cards-and-links: 1.0.0
 
 pages:
 # itemize here each narrative page. Include assigned section numbers when appropriate. The order they appear here is the order they will appear in the TOC and on the next/prev navigation.
