@@ -35,6 +35,22 @@ As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} ar
 > - **SHL-defined manifest parameters** — `recipient`, `passcode`, `embeddedLengthMax`, etc., as defined by the SHL specification and reused here.
 > - Actors in this IG are always the {{ linkvhlh }}, {{ linkvhls }}, and {{ linkvhlr }} — never "SHL Receiver" or "SHL Sharer" (those terms only appear in the comparison at Appendix A).
 
+## Background Knowledge and Reading
+
+This profile assumes the reader is familiar with the [IHE Technical Frameworks General Introduction](https://profiles.ihe.net/GeneralIntro/) and with [HL7 FHIR R4](http://hl7.org/fhir/R4/). Beyond that, VHL builds on the concepts below. Readers new to any of them should consult the referenced specification before reading Volume 2.
+
+| Topic | Why it matters in VHL | Reference |
+| ----- | --------------------- | --------- |
+| **SMART Health Links (SHL)** | A patient-mediated sharing pattern in which a link — typically carried in a QR code — points to a manifest of health documents. VHL adopts the SHL payload format and manifest-request parameters, but replaces the SHL trust model with one anchored in PKI. | [SMART Health Links specification](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html); [Appendix A: Comparison of VHL and SHL](vhl_vs_shl.html) |
+| **Public Key Infrastructure (PKI)** | The system of key pairs, X.509 certificates, certification authorities, and revocation lists used to bind a public key to an organization. VHL uses PKI to decide whether a {{ linkvhls }} or {{ linkvhlr }} is an authorized participant in the trust network. | [RFC 5280](https://datatracker.ietf.org/doc/html/rfc5280) — X.509 Certificate and CRL Profile |
+| **Digital Signatures** | A signature computed with a private key that lets a relying party verify the origin and integrity of an artifact. VHL requires signature verification on the VHL itself, and offers signature verification on retrieved documents through the Verify Document Signature Option. | [RFC 7515](https://datatracker.ietf.org/doc/html/rfc7515) — JSON Web Signature (JWS); [IHE Document Digital Signature (DSG)](https://profiles.ihe.net/ITI/DSG/) |
+| **Trust Anchors and Trust Lists** | A trust anchor is a root key or certificate that a relying party accepts as authoritative; a trust list is the signed, published set of PKI material for a community. The {{ linkta }} publishes trust lists that VHL participants retrieve and use to validate one another. | [Trust Network glossary entry](other.html#ihe-technical-frameworks-general-introduction-appendix-d-glossary); [Retrieve Trust List with DID [ITI-YY2]](ITI-YY2.html) |
+| **Decentralized Identifiers (DID)** | A globally resolvable identifier that resolves to a DID Document containing verification methods (public keys) and service endpoints, without depending on a central registry. VHL uses DIDs to locate and publish trust list material, and requires support for the `did:web` method, in which a DID resolves deterministically to an HTTPS URL. | [W3C Decentralized Identifiers (DIDs) v1.0](https://www.w3.org/TR/did-core/); [did:web Method Specification](https://w3c-ccg.github.io/did-method-web/); [Submit PKI Material with DID [ITI-YY1]](ITI-YY1.html) |
+| **Verifiable Credentials (VC)** | A tamper-evident credential with a `credentialSubject` and an embedded cryptographic proof. VHL uses VCs in two distinct places: a self-issued VC that authenticates a manifest request (Verifiable Credential Option), and a VC that envelopes the VHL payload itself (VC Enveloped VHL Option). | [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/); [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) |
+| **CBOR Web Token (CWT) and COSE** | The binary, CBOR-based counterparts to JWT and JWS. Their compactness is what allows a signed VHL payload to fit inside a QR code. | [RFC 8392](https://datatracker.ietf.org/doc/html/rfc8392) — CBOR Web Token; [RFC 8152](https://datatracker.ietf.org/doc/html/rfc8152) — CBOR Object Signing and Encryption |
+| **Health Certificate (HCERT)** | The WHO SMART Trust CWT claim structure for carrying health content in a signed, QR-encodable certificate. VHL uses HCERT as one of the carriers for the VHL payload. | [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html) |
+{:.grid}
+
 <a name="actors-and-transactions"> </a>
 
 ## 1:XX.1 Actors, Transactions, and Content Modules
@@ -123,6 +139,8 @@ The transactions in this profile are summarized in the sections below.
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }} using Decentralized Identifiers (DIDs). The submitted material is formatted as DID Documents containing public keys and associated metadata for validation and inclusion in the Trust List.
 
+Key material may be self-generated or issued by a Certificate Authority. Where the participant is enrolled under a Signing Certificate Authority it does not generate its own trust network signing key. In either case the key material is carried within the DID Document as a certificate chain — the issued certificate and its issuers, or, where self-generated, a single self-signed certificate. The transaction constrains the content of the DID Document; the mechanism by which that content reaches the {{ linkta }} is determined by the implementing jurisdiction.
+
 **Transaction Optionality:**
 
 This transaction is:
@@ -144,6 +162,8 @@ This transaction is captured as the following requirements:
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to retrieve a Trust List from a {{ linkta }} containing DID Documents with PKI material. The retrieved DID Documents include public keys and metadata necessary for verifying digital signatures and establishing trust relationships. Received key material should be distinguished by the participating jurisdiction, use case context, and key usage.
 
+Retrieved key material is not trusted by virtue of appearing in the Trust List. The recipient verifies the cryptographic proof over the retrieved document and, where the key material is Certificate Authority issued, validates the accompanying certificate chain to a certificate authority recognized by the governing trust framework before the key is used.
+
 **Transaction Optionality:**
 
 This transaction is:
@@ -153,7 +173,7 @@ This transaction is:
 **When to Implement:**
 
 VHL Sharer and VHL Receiver actors SHALL implement this transaction when:
-- They do not have pre-established mechanisms to retrieve PKI material from the {{ linkta }}, OR
+- They do not have jurisdiction-specific mechanisms to retrieve PKI material from the {{ linkta }}, OR
 - They wish to demonstrate interoperability at IHE Connectathons
 
 **Alternative Implementations:**
@@ -171,7 +191,7 @@ This transaction is captured as the following requirements:
 
 #### 1:XX.1.2.3 Generate VHL [ITI-YY3]
 
-This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a QR code containing a VHL. The QR code is encoded as an HCERT/CWT structure.
+This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a VHL. By default the VHL is carried as a QR code encoded as an HCERT/CWT structure; where the {{ linkvhls }} supports the VC Enveloped VHL Option it MAY instead be carried as a signed Verifiable Credential.
 
 A {{ linkvhls }} MAY:
 - Record consent of the individual
@@ -257,7 +277,7 @@ Options that may be selected for each actor in this implementation guide are lis
 The Sign Manifest Request Option enables the {{ linkvhlr }} to digitally sign manifest requests sent to the {{ linkvhls }} and enables the {{ linkvhls }} to verify digital signatures on manifest requests from the {{ linkvhlr }}.
 
 This option provides:
-- Mutual authentication between VHL Receiver and VHL Sharer
+- Authentication of the VHL Receiver by the VHL Sharer
 - Non-repudiation of manifest requests
 - Protection against request forgery
 - Enhanced audit trail
@@ -313,7 +333,7 @@ When the {{ linkvhlr }} decodes the QR code (ITI-YY4), it extracts the VHL paylo
 - The `credentialSubject` contains the manifest metadata from the VHL payload (excluding the encryption key), with `id` set to the manifest URL; the SHL-defined manifest parameters (`recipient`, `passcode`, `embeddedLengthMax`) are also included in `credentialSubject`
 - An embedded **`proof`** element of type `DataIntegrityProof` is included with a `verificationMethod` resolving to the {{ linkvhlr }}'s key in the trust network, `proofPurpose` = `assertionMethod`, and a `proofValue` signature over the VC document — this is the cryptographic proof of the receiver's identity
 
-The VC (with embedded proof) is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`), with FHIR search parameters in the URL query string. No additional HTTP-level signing is required. The {{ linkvhls }} verifies the `proof.proofValue` using the {{ linkvhlr }}'s public key from the trust network before processing the request.
+The VC (with embedded proof) is sent directly as the HTTP POST body (`Content-Type: application/vc`), with the FHIR search parameters carried inside the credential at `credentialSubject.id`. No additional HTTP-level signing is required. The {{ linkvhls }} verifies the `proof.proofValue` using the {{ linkvhlr }}'s public key from the trust network before processing the request.
 
 **Complementary Option:** Both the {{ linkvhlr }} and {{ linkvhls }} SHALL support this option for VC-based authentication to be used.
 
@@ -321,7 +341,7 @@ See ITI-YY5 Section 2:3.YY5.4.1.5 for detailed VC construction, request format, 
 
 ### 1:XX.2.6 VC Enveloped VHL Option (VHL Sharer)
 
-The VC Enveloped VHL Option enables the {{ linkvhls }} to return the VHL as a signed W3C Verifiable Credential (`application/vc+ld+json`) instead of a QR code in the ITI-YY3 Generate VHL transaction. The VC is subsequently transmitted to the {{ linkvhlr }} via ITI-YY4 Provide VHL as an alternative carrier to the HCERT/CWT QR code.
+The VC Enveloped VHL Option enables the {{ linkvhls }} to return the VHL as a signed W3C Verifiable Credential (`application/vc`) instead of a QR code in the ITI-YY3 Generate VHL transaction. The VC is subsequently transmitted to the {{ linkvhlr }} via ITI-YY4 Provide VHL as an alternative carrier to the HCERT/CWT QR code.
 
 This option provides:
 - An alternative carrier for the VHL payload, suitable for machine-to-machine transfer and asynchronous delivery where QR presentation is impractical
@@ -330,7 +350,7 @@ This option provides:
 
 **How It Works:**
 
-When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} supports this option, the {{ linkvhls }} returns the VHL payload under `credentialSubject` of a VC issued per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with an embedded `DataIntegrityProof` (cryptosuite `ecdsa-2019`) signed by the {{ linkvhls }} using its trust-network key. The same fields otherwise embedded at HCERT claim key 5 (`url`, `key`, `flag`, `label`, `exp`, `v`, `extension`) are carried in `credentialSubject`. If the option is not supported and `format=vc` is requested, the {{ linkvhls }} SHALL return an OperationOutcome error.
+When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} supports this option, the {{ linkvhls }} returns the VHL as the `credentialSubject.id` of a VC issued per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with an embedded `DataIntegrityProof` signed by the {{ linkvhls }} using its trust-network key. The value carried is the `vhlink:` URI that the QR carrier embeds at HCERT claim key 5, so both carriers convey byte-identical payloads. If the option is not supported and `format=vc` is requested, the {{ linkvhls }} SHALL return an OperationOutcome error.
 
 **Naming Note:** This option (a Sharer option carrying the VHL) is distinct from the **Verifiable Credential Option** (a Receiver authentication option at ITI-YY5 where the Receiver self-issues a VC as the manifest request body).
 
@@ -368,11 +388,22 @@ This section shows how the transactions/content modules of the profile are combi
 
 A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to share access to health documents in a secure, auditable, and configurable manner. Sharing options may include **limited-time access**, **PIN-protected retrieval**, or **ongoing access** to a longitudinal dataset that may evolve over time. VHLs can be rendered as QR codes or downloaded to a user’s device, supporting patient-mediated data sharing and enhancing interoperability across healthcare systems.
 
-#### 1:XX.4.2 Use Cases
+### 1:XX.4.2 Use Cases
 
 <style>.usecase-purpose img { max-width: 100%; height: auto; }</style>
 
-#### 1:XX.4.2.1 Use Case \#1: WHO Global Digital Health Certification Network
+The use cases below are **illustrative**. Each describes a programme or deployment that exists independently of this profile, and is presented to show where the VHL transactions apply — not as a statement that the deployment implements this profile as specified here.
+
+Across these use cases the transactions combine in the common pattern shown in Figure 1:XX.4.2-1. The {{ linkvhls }} and the {{ linkvhlr }} first onboard to a {{ linkta }}, submitting their own PKI material with {{ linksubmitpki }} and obtaining the trust list with {{ linkretrievepki }}. A {{ linkvhlh }} then obtains a VHL from the {{ linkvhls }} with {{ linkgeneratevhl }}, and presents it to the {{ linkvhlr }} with {{ linkprovidevhl }}. The {{ linkvhlr }} verifies the VHL against the trust list before redeeming it with {{ linkretrievemanifest }}, then retrieves the documents the manifest references using [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). Individual use cases exercise different subsets of this pattern.
+
+<figure >
+  <div style="width:35em; max-width:100%;">
+  {%include usecase-processflow.svg%}
+  </div>
+  <p id="f1:XX.4.2-1" class="figureTitle">Figure 1:XX.4.2-1: VHL Transactions Applicable Across the Use Cases</p>
+</figure>
+
+#### 1:XX.4.2.1 Use Case #1: WHO Global Digital Health Certification Network
 
 {% assign UseCaseGDHCN = site.data.ExampleScenario-UseCaseGDHCN %}
 
@@ -410,7 +441,7 @@ This use case has the following business requirement:
 This use case has the following business requirement:
 - [Record Access To Health Data](Requirements-RecordAccessToHealthData.html)
 
-#### 1:XX.4.2.3 Use Case \#3: US Trusted Exchange Framework and Common Agreement (TEFCA)
+#### 1:XX.4.2.3 Use Case #3: US Trusted Exchange Framework and Common Agreement (TEFCA)
 
 {% assign UseCaseTEFCA = site.data.ExampleScenario-UseCaseTEFCA %}
 
@@ -431,27 +462,40 @@ Key security considerations include:
 ### 1:XX.5.1 Trust Network Security
 
 - All participants ({{ linkvhlr }}, {{ linkvhls }}) SHALL establish trust via the {{ linkta }}. ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions MAY be used to support this trust establishment.
-- PKI material SHALL be validated before use in signature verification or secure channel establishment.
 - Certificates and keys should be regularly updated and revocation status checked.
+- Onboarding establishes key material in both directions: the participant's own certificate authority material is pre-shared with the trust network, and the {{ linkta }}'s public key is shared with the participant. Neither can be obtained over the channel it secures, so both are established through the verified, out-of-band process the trust framework defines.
+- A public key SHALL NOT be treated as trusted merely because it appears in a retrieved trust list. Where the governing trust framework operates a certificate authority, authority for a key derives from its certificate chain, and that chain SHALL resolve back to a certificate verifiable against one of the public keys pre-shared with the trust network at onboarding. How the path is constructed, which algorithms and key strengths are permitted, and how revocation status is obtained are defined by the trust framework.
+- Trust lists are commonly published as static, cacheable documents. Recipients should verify the cryptographic proof over a retrieved trust list against the {{ linkta }} key established at onboarding, check its freshness, and not accept a trust list older than one already held, so that withdrawn key material cannot be reinstated by serving an earlier validly signed version.
 
 ### 1:XX.5.2 Secure Channel Requirements
 
 - ITI-YY5 (Retrieve Manifest) SHALL be conducted over a secure channel as defined by ATNA Authenticate Node [ITI-19].
-- Both {{ linkvhlr }} and {{ linkvhls }} SHALL present credentials validated against the {{ linkta }}.
-- Mutual authentication is required for all document retrieval operations.
 
 ### 1:XX.5.3 Cryptographic Algorithm Selection
 
 The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic primitives for digital signatures, message authentication, and content encryption. This IG does not mandate a single algorithm suite for deployment. Implementers select algorithms consistent with the underlying specifications — for example, RFC 9421 (HTTP Message Signatures), RFC 7515/7516/7518 (JWS/JWE/JWA), RFC 8152 (COSE), W3C Data Integrity (Verifiable Credentials), the HL7 SSRAA IG (OAuth with SSRAA Option), and the WHO SMART Trust specification (HCERT). The preceding list is illustrative, not exhaustive.
 
-**Interoperability baseline:** For the purpose of interoperability testing, implementations SHALL support **RS256** (RSASSA-PKCS1-v1_5 using SHA-256, per RFC 7518) as a common baseline across signature operations where a JWS/JWT algorithm is applicable. This baseline ensures that two independent conformant implementations can always interoperate during testing. It does not preclude support for — or preferred deployment use of — other algorithms (ECDSA families, EdDSA, RSA-PSS, COSE equivalents, or future post-quantum algorithms).
+**Interoperability baseline:** For the purpose of interoperability testing, implementations SHALL support **ECDSA using curve P-256 and SHA-256** as a common baseline across signature operations. This is `ES256` in the JOSE and COSE registries and `ecdsa-p256-sha256` in the HTTP Message Signatures registry. A single baseline is possible because this algorithm is expressible in every signature container this profile uses — JWS/JWT, COSE, HTTP Message Signatures, and the W3C Data Integrity ECDSA cryptosuites — and because it is the algorithm the trust networks this profile targets already distribute.
+
+This baseline ensures that two independent conformant implementations can always interoperate during testing. It does not preclude support for — or preferred deployment use of — other algorithms (other ECDSA curves, EdDSA, RSA-PSS, or future post-quantum algorithms).
+
+Where an underlying specification sets its own algorithm requirements, those requirements govern:
+
+| Signature operation | Governed by |
+|---------------------|-------------|
+| HCERT/CWT signature on the VHL ([ITI-YY3](ITI-YY3.html), [ITI-YY4](ITI-YY4.html)) | [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html), which defines a primary and a secondary algorithm and requires both to be implemented |
+| JWT client assertions and access tokens under the OAuth with SSRAA Option ([ITI-YY5](ITI-YY5.html)) | the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/), which operates on its own X.509 credentials rather than on trust network key material |
+| `DataIntegrityProof` on Verifiable Credentials | the declared `cryptosuite`, which determines both the canonicalization and the signature algorithm |
+{: .grid}
+
+Note that a signature algorithm is constrained by the key it is made with: a participant whose trust network key material is an elliptic-curve key cannot produce an RSA signature with it. Implementers selecting algorithms for operations that use trust network keys should begin from the key types their trust framework issues.
 
 **Deployment considerations:** Implementers SHOULD take into account additional considerations beyond the interoperability baseline when selecting algorithms for production deployments, including but not limited to:
 - **Jurisdictional policies and regulatory requirements** (e.g., national cryptographic agency guidance, healthcare-sector rules, data-protection law);
 - **Post-quantum / quantum-safe cryptography** as standards mature (e.g., NIST PQC) and migration guidance evolves;
 - **Evolving industry guidance** on algorithm deprecation, minimum key strengths, and cryptosuite lifecycle (e.g., updates from IETF, W3C, NIST, ENISA).
 
-Algorithms named in examples, tables, and code blocks throughout this IG are illustrative. Except for the RS256 interoperability baseline stated above, they do not constrain deployment choices. Jurisdictions and trust networks MAY define additional profiles (permitted algorithm lists, minimum key lengths, deprecation schedules) consistent with this guidance.
+Algorithms named in examples, tables, and code blocks throughout this IG are illustrative. Except for the interoperability baseline stated above, and for the requirements of the underlying specifications listed above, they do not constrain deployment choices. Jurisdictions and trust networks MAY define additional profiles (permitted algorithm lists, minimum key lengths, deprecation schedules) consistent with this guidance.
 
 ### 1:XX.5.4 VHL Integrity and Authorization
 
@@ -472,7 +516,7 @@ Algorithms named in examples, tables, and code blocks throughout this IG are ill
 
 ### 1:XX.5.6 Privacy Considerations
 
-- VHL payloads do not contain PHI - only references to documents.
+- VHL payloads do not contain clinical content - only a reference to a document folder. They do carry the patient business identifier supplied at generation time and a free-text label, both of which are readable by anyone holding the VHL; see [ITI-YY5 Privacy of Request Metadata](ITI-YY5.html#23yy556-privacy-of-request-metadata).
 - Actual health data is transmitted over secure channels (ITI-YY5).
 - Consent may be recorded during VHL generation (Record Consent option).
 - VHL Holders retain the right to revoke access where supported.

@@ -191,7 +191,12 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-When a [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html) generates a new public-private key pair for use within the VHL trust network, they SHALL submit the corresponding public key material to the [Trust Anchor](ActorDefinition-TrustAnchor.html) for validation and inclusion in the trust list.
+When a [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html) obtains new key material for use within the VHL trust network, they SHALL submit the corresponding public key material to the [Trust Anchor](ActorDefinition-TrustAnchor.html) for validation and inclusion in the trust list.
+
+Key material is obtained by one of two paths, as determined by the governing trust framework:
+
+* **Self-generated** — the participant generates its own public-private key pair and a self-signed certificate over it; or
+* **Certificate Authority (CA) issued** — the participant is enrolled under a Signing Certificate Authority (SCA) and does not generate its own trust network signing key. The CA issues a certificate (e.g., a Document Signer Certificate) to the participant, and the participant submits that certificate together with the chain of certificates linking it to the issuing authority.
 
 The submission MAY include metadata to support categorization of key usage (e.g., digital signatures, encryption, secure channels) and business or operational context.
 """
@@ -200,9 +205,9 @@ The submission MAY include metadata to support categorization of key usage (e.g.
 * actor[+] = Canonical(VHLReceiver)
 
 * statement[+].key = "generate-private-public-key-pair"
-* statement[=].label = "Generate Private-Public Key Pair"
+* statement[=].label = "Obtain Trust Network Key Material"
 * statement[=].requirement = """
-Generate one or more private-public key pairs for use within the VHL trust network. Key pairs SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or secure channels) and MAY be categorized by business domain or participant role.
+Obtain one or more sets of key material for use within the VHL trust network, either by generating private-public key pairs directly or by obtaining certificates issued under a Certificate Authority recognized by the trust framework. Key material SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or secure channels) and MAY be categorized by business domain or participant role.
 """
 * statement[=].conformance = #SHALL
 * statement[+].key = "prepare-submission-metadata"
@@ -243,7 +248,12 @@ Upon receipt of public key material from a [VHL Sharer](ActorDefinition-VHLShare
 
 * statement[+].key = "validate-pki-material"
 * statement[=].label = "Validate PKI Material"
-* statement[=].requirement = "Validate submitted PKI material in accordance with the certificate governance policies of the Trust Anchor. Validation SHALL include checks on cryptographic algorithm conformity, expiration dates, and valid certificate chains to a trusted authority."
+* statement[=].requirement = "Validate submitted PKI material in accordance with the certificate governance policies of the Trust Anchor. Validation SHALL include checks on cryptographic algorithm conformity, expiration dates, and certificate chains that resolve back to a certificate verifiable against one of the public keys pre-shared with the trust network at the time of onboarding."
+* statement[=].conformance = #SHALL
+
+* statement[+].key = "validate-submitter-identity"
+* statement[=].label = "Validate Submitter Identity"
+* statement[=].requirement = "Where the submitted material is issued by a Certificate Authority, validate that the certificate subject corresponds to the authenticated identity of the submitting participant, so that a participant cannot publish key material on behalf of another. The means of authenticating the submitting participant are determined by the governing trust framework."
 * statement[=].conformance = #SHALL
 
 Instance:   InitiateRetrieveTrustListRequest
@@ -268,6 +278,7 @@ Participants SHOULD cache the received trust list to reduce network and server l
 
 **Preconditions:**
 * The requesting participant knows in advance the endpoint from which to retrieve PKI material, as published or distributed by the Trust Anchor.
+* The requesting participant holds the Trust Anchor's public key, shared with the participant at the time of onboarding, with which to verify the cryptographic proof over the retrieved trust list.
 """
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(VHLSharer)
@@ -421,6 +432,10 @@ Usage: #definition
 * description = """
 A [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html), after receiving PKI material from a [Trust Anchor](ActorDefinition-TrustAnchor.html), SHALL validate and process the trust information for subsequent cryptographic operations.
 
+A participant SHALL NOT treat a public key as trusted solely because it appears in a retrieved trust list. The certificate chain accompanying the key SHALL resolve back to a certificate verifiable against one of the public keys pre-shared with the trust network at the time of onboarding, before the key is used. Where the key material is self-generated, that chain is a single self-signed certificate, which is itself the material pre-shared at onboarding.
+
+The participant verifies the cryptographic proof over a retrieved trust list using the Trust Anchor's public key, which is shared with the participant at the time of onboarding.
+
 Participants SHOULD:
 * Cache the received trust list or certificate material to reduce network and server load
 * Validate digital signatures or trust paths before use in VHL validation or secure channel sessions
@@ -438,7 +453,7 @@ Cache the received trust list or certificate material to reduce network and serv
 * statement[+].key = "validate-digital-signatures"
 * statement[=].label = "Validate digital signatures"
 * statement[=].requirement = """
-Validate digital signatures or trust paths
+Validate digital signatures using the Trust Anchor public key established at onboarding, and validate that the certificate chain accompanying each key resolves back to a certificate verifiable against key material pre-shared with the trust network at onboarding, before the key is used.
 """
 * statement[=].conformance = #SHALL
 * statement[+].key = "monitor-certificate-expiration"

@@ -70,13 +70,6 @@ Key Features:
 - PIN protection for additional security on printed cards
 - Support for both physical and digital VHL provisioning
 
-Some of the challenges faced during the pilot implementation, though not necessarily to be taken up in this profile, include:
-
-- while not the main point of security, leveraging the PIN is a weakness, need to enable better options for future consideration (e.g. biometrics, other authorization methods). The **Verifiable Credential Option** (ITI-YY5 Section 2:3.YY5.4.1.5) addresses this by allowing the VHL Receiver to authenticate using a self-issued VC signed with its trust network key, eliminating reliance on a shared PIN for receiver authentication while retaining the passcode as an optional additional factor for the holder.
-- in planning for expansion to umrah and general tourism, there will not in general be a health check which presents some process challenges such as not having a encounter point to record consent prior to a visit
-- how to scale and automate some of the health checks (e.g. are vaccinations sufficient) using verifiable health documents (e.g. the IPS).
-
-
 ![Hajj Pilgrimage VHL Flow](hajj-diagram.png)
 """
 * process.title = "Hajj Pilgrimage VHL Flow"
