@@ -7,11 +7,16 @@ Title:      "VHL Payload"
 Description: """
 The payload carried by a Verifiable Health Link.
 
-This model specializes the [SMART Health Link Payload](http://hl7.org/fhir/uv/smart-health-cards-and-links/StructureDefinition-ShlPayload.html) rather than restating it: `url`, `key`, `exp`, `flag`, `label` and `v` are inherited unchanged in shape, which is what it means for a VHL to adopt the SHL payload format. The difference between a VHL and an SHL is the trust model, not the payload structure.
+This model specializes the [SMART Health Link Payload](http://hl7.org/fhir/uv/smart-health-cards-and-links/StructureDefinition-ShlPayload.html).
 
-A populated instance is minified, base64url-encoded, prefixed with `vhlink:/`, and then carried either inside an HCERT structure at claim key 5 and signed as a CWT (the QR carrier), or as the `credentialSubject.id` of a signed Verifiable Credential under the VC Enveloped VHL Option.
+Two things distinguish this model from its parent: the `U` flag is not used, and `extension.fhirBaseUrl` is defined for the OAuth with SSRAA mechanism of the Sign Manifest Request Option. See [Generate VHL [ITI-YY3]](ITI-YY3.html) for the construction steps.
 
-Two things distinguish this model from its parent, both narrowing rather than extending the SHL format: the `U` flag is not used, and `extension.fhirBaseUrl` is defined for the OAuth with SSRAA Option. See [Generate VHL [ITI-YY3]](ITI-YY3.html) for the construction steps.
+**Carriers.** This model defines the payload's fields, not its serialization, and the two carriers in this profile encode it differently:
+
+* **HCERT/CWT QR code** — the payload is a **CBOR map with text keys** at HCERT claim key 5, with values in their CBOR-native types, so `exp` and `v` are integers. The map is the payload; it is neither base64url-encoded nor prefixed. Claim key 5 identifies the content as a VHL, so no type discriminator is carried in the payload. A `vhlink:/` string at claim key 5, as earlier drafts specified, SHOULD still be accepted on decode.
+* **VC Enveloped VHL Option** — the payload is minified, base64url-encoded and prefixed with `vhlink:/` to form the `credentialSubject.id` URI, because a JSON-LD `id` cannot be a map.
+
+The WHO SMART Trust HCERT specification types claim key 5 against this model; see [WorldHealthOrganization/smart-trust#130](https://github.com/WorldHealthOrganization/smart-trust/pull/130).
 """
 * ^status = $pubStatus#active
 * ^publisher = "IHE"
@@ -27,11 +32,11 @@ Two things distinguish this model from its parent, both narrowing rather than ex
 // Added by this profile.
 
 * extension 0..1 BackboneElement "Implementation-defined extensions" """
-Object carrying implementation-defined extensions. Required when the VHL Sharer supports the OAuth with SSRAA Option.
+Object carrying implementation-defined extensions. Required when the VHL Sharer supports the OAuth with SSRAA mechanism of the Sign Manifest Request Option.
 """
 
 * extension.fhirBaseUrl 0..1 string "FHIR base URL of the VHL Sharer" """
 The FHIR base URL of the VHL Sharer, for example `https://vhl-sharer.example.org`. It lets the VHL Receiver perform UDAP Discovery and Dynamic Client Registration with the VHL Sharer before making an authenticated manifest request through ITI-YY5.
 
-Where the VHL Sharer does not support the OAuth with SSRAA Option this element SHALL NOT be present, so that VHL Receivers are not led into attempting UDAP Discovery unnecessarily.
+Where the VHL Sharer does not support the OAuth with SSRAA mechanism this element SHALL NOT be present, so that VHL Receivers are not led into attempting UDAP Discovery unnecessarily.
 """

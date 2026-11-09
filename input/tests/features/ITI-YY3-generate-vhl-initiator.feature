@@ -13,10 +13,13 @@ Feature: ITI-YY3 Generate VHL – VHL Holder Expected Actions
   @initiator-actions @SHALL
   Scenario: VHL Holder constructs a well-formed request with only the required parameter
     Given the patient identifier is "urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123"
-    When the request URL is constructed with only the required parameter
-    Then the URL SHALL be:
+    When the request is constructed with only the required parameter
+    Then the request SHALL be:
       """
-      GET [base]/Patient/$generate-vhl?sourceIdentifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123
+      POST [base]/Patient/$generate-vhl
+      Content-Type: application/x-www-form-urlencoded
+
+      sourceIdentifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123
       """
 
   @initiator-actions @SHALL

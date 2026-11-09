@@ -1,18 +1,24 @@
 @startuml
-title VHL Trust Actor Diagram
-
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 55
+skinparam defaultFontSize 12
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #2B2B2B
+  FontColor #000000
+}
 top to bottom direction
-skinparam nodesep 75
 
-agent "Trust Anchor" as TA
-agent "VHL Sharer" as VHLS
-agent "VHL Receiver" as VHLR
+rectangle "VHL Sharer" as VHLS
+rectangle "Trust Anchor" as TA
+rectangle "VHL Receiver" as VHLR
 
 url of TA is [[ActorDefinition-TrustAnchor.html]]
 url of VHLR is [[ActorDefinition-VHLReceiver.html]]
 url of VHLS is [[ActorDefinition-VHLSharer.html]]
 
-
-TA -- VHLS  : -"Submit PKI Material\nRetrieve Trust List"
-TA -- VHLR : "Submit PKI Material\nRetrieve Trust List"
+VHLS -- TA : "  Submit PKI Material with DID [ITI-YY1]\n  Retrieve Trust List with DID [ITI-YY2]"
+TA -- VHLR : "  Submit PKI Material with DID [ITI-YY1]\n  Retrieve Trust List with DID [ITI-YY2]"
 @enduml

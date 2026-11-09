@@ -21,7 +21,7 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Receiver Expected Actions
     When the connection to the VHL Sharer is established
     Then the implementation SHALL comply with the IHE ATNA Profile (ITI TF-1: Section 9) for transport security requirements
 
-  # ─── Authentication: HTTP Message Signatures (Option A) ─────────────────────
+  # ─── Authentication: HTTP Message Signatures (Mechanism A) ─────────────────────
 
   @initiator-actions @MAY
   Scenario: VHL Receiver may authenticate using HTTP Message Signatures per RFC 9421
@@ -42,18 +42,18 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Receiver Expected Actions
     When the "created" parameter of Signature-Input is set
     Then the value SHALL be the current Unix timestamp at time of signing
 
-  # ─── Authentication: OAuth with SSRAA Option (Option B) ─────────────────────
+  # ─── Authentication: OAuth with SSRAA (Mechanism B) ─────────────────────
 
   @initiator-actions @MAY
   Scenario: VHL Receiver may use OAuth client_credentials grant when SSRAA Option is supported
-    Given both the VHL Receiver and VHL Sharer support the OAuth with SSRAA Option
+    Given both the VHL Receiver and VHL Sharer support the OAuth with SSRAA mechanism of the Sign Manifest Request Option
     When the VHL Receiver authenticates using OAuth
     Then the grant type SHALL be "client_credentials"
     And the client authentication method SHALL be "private_key_jwt"
 
   @initiator-actions @SHALL
   Scenario: SSRAA Discovery and Registration are completed before requesting access tokens
-    Given the VHL Receiver supports the OAuth with SSRAA Option
+    Given the VHL Receiver supports the OAuth with SSRAA mechanism of the Sign Manifest Request Option
     When the VHL Receiver needs to obtain an access token
     Then SSRAA Discovery and Registration SHALL be completed before requesting access tokens
 

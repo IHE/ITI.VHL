@@ -265,7 +265,7 @@ headers) and response format (searchset Bundle structure, search.mode, error cod
 **ITI-YY5 VHL Sharer Responder Expected Actions** – Verifies HTTP Message Signature
 verification (keyid lookup, RFC 9421 signature base, Content-Digest), OAuth FAST Option
 token validation, VHL authorisation (folder ID, expiry, revocation, passcode hash comparison),
-FHIR search execution (_include support), Bundle construction, error codes (400/401/403/404/422/429/500),
+FHIR search execution (_include support), Bundle construction, error codes (400/401/403/404/429/500),
 rate limiting, and audit logging.
 Source: sections 2:3.YY5.4.1.5 (Responder Expected Actions), 2:3.YY5.4.2 (Response Message),
 and 2:3.YY5.5 (Security Considerations).
@@ -547,7 +547,7 @@ Scenario groups:
   matches the YY5 endpoint; passcode is obtained from VHL Holder when P flag is present.
 - **Group C – Manifest Retrieval (YY5):** VHL Receiver uses the decoded folder ID and URL
   to send an authenticated HTTP POST; VHL Sharer verifies the receiver's signature using the
-  trust list; correct passcode results in HTTP 200 Bundle; incorrect passcode results in 422.
+  trust list; correct passcode results in HTTP 200 Bundle; incorrect passcode results in 401 with remaining attempt count.
 - **Group D – Full End-to-End:** Complete flow from YY3 generation through YY4 decode to YY5
   manifest retrieval succeeds; passcode-protected variant succeeds end-to-end.
 - **Group E – Expired and Revoked VHL Rejection:** VHL Receiver rejects an expired QR code at

@@ -76,7 +76,7 @@ The VHL is transmitted via QR code with the following characteristics:
 When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc), the VHL MAY alternatively be transmitted as a signed JSON-LD Verifiable Credential:
 - Conveyed via any channel that preserves JSON (HTTPS, email attachment, file transfer, NFC with a capable reader). Where the channel carries a media type, it SHALL be `application/vc`; some channels — a file on removable media, or a blob read from NFC — carry none, in which case the document is identified by its content
 - Not imaged/scanned — conveyed as a file or blob
-- The VC carries the VHL as the `vhlink:` URI at `credentialSubject.id` — the same value the QR carrier embeds at HCERT claim key 5 — and is signed by the VHL Sharer with a `DataIntegrityProof` (cryptosuite per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
+- The VC carries the VHL as the `vhlink:` URI at `credentialSubject.id` — the same payload the QR carrier places at HCERT claim key 5, though encoded as a URI rather than as a CBOR map — and is signed by the VHL Sharer with a `DataIntegrityProof` (cryptosuite per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
 - Suitable for machine-to-machine transfer and asynchronous delivery scenarios where QR presentation is impractical
 
 ##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
@@ -182,7 +182,7 @@ When the VHL is received as a Verifiable Credential instead of a QR code, the VH
 1. **Parse VC**: Parse the received bytes as a JSON-LD document per [W3C VC Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/). Where the channel carries a media type, the {{ linkvhlr }} SHALL reject a document whose media type is not `application/vc`. Where the channel carries no media type, the {{ linkvhlr }} SHALL identify the document by its content: a JSON object whose `@context` begins with `https://www.w3.org/ns/credentials/v2`. Reject if parsing fails or the document does not conform to the VC Data Model.
 2. **Verify DataIntegrityProof**: Resolve the `proof.verificationMethod` to the VHL Sharer's key via the trust list (same DSC/trust framework used for CWT verification), then verify the `DataIntegrityProof` per [W3C Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/). Reject if the proof is invalid or the issuer is untrusted.
 3. **Validate Dates**: Reject if `validUntil` has passed or `validFrom` is in the future.
-4. **Extract the VHL**: Read the `vhlink:` URI from `credentialSubject.id`. This is the same value the QR carrier embeds at HCERT claim key 5, so the {{ linkvhlr }} strips the `vhlink:/` prefix, base64url-decodes the remainder, and parses the result as the VHL payload — identical to steps 8 and 9 of the QR code path.
+4. **Extract the VHL**: Read the `vhlink:` URI from `credentialSubject.id`, strip the `vhlink:/` prefix, base64url-decode the remainder, and parse the result as the VHL payload. This yields the same payload the QR carrier conveys as a CBOR map at HCERT claim key 5, so validation proceeds as in step 9 of the QR code path; only the decoding differs.
 5. **Validate VHL Payload**: Apply the same validation as step 9 above (valid HTTPS `url`, 43-character `key`, `exp` not passed, flag handling).
 
 The VHL Receiver then continues with Post-Decoding Actions below as in the QR code path.
@@ -231,8 +231,10 @@ Step 7: Extract CWT claims:
   - iat (claim 6): 1704067200
   - exp (claim 4): 1735689600
   - hcert (claim -260): {...}
-Step 8: Within hcert (claim -260), extract claim key 5, strip the vhlink:/ prefix,
-        and base64url-decode to obtain the VHL payload:
+Step 8: Within hcert (claim -260), read claim key 5. It is a CBOR map with text keys,
+        which is the VHL payload itself — no prefix to strip and nothing to decode.
+        Where key 5 is instead a vhlink:/ string, as earlier drafts specified, strip
+        the prefix and base64url-decode it. Either way the payload is:
   {
     "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
     "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
