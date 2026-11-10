@@ -19,6 +19,29 @@
 // ║  Feature files live under input/tests/features/                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  TEMPORARILY DISABLED — DO NOT DELETE                                        ║
+// ║                                                                              ║
+// ║  Everything below is commented out so the ci-build on build.fhir.org can     ║
+// ║  complete. TestPlan is an R5-and-later resource and this IG is published     ║
+// ║  at fhirVersion 4.0.1 (sushi-config.yaml). The build.fhir.org publisher      ║
+// ║  (6.0.0-snapshot1) aborts while parsing the generated resources with:        ║
+// ║                                                                              ║
+// ║      Error parsing .../TestPlan-TestPlan-QRCodeFlow:                         ║
+// ║      The resource TestPlan cannot be converted from R5 to RN                 ║
+// ║                                                                              ║
+// ║  The locally cached publisher (2.2.11) passes these through, so the failure  ║
+// ║  appears only in the ci-build.                                               ║
+// ║                                                                              ║
+// ║  RESTORE by deleting the /* on the next line and the */ at end of file,      ║
+// ║  once the publisher handles TestPlan in an R4 IG, or once this IG moves to   ║
+// ║  a FHIR version that carries TestPlan natively. Restore at the same time:    ║
+// ║    - the Unit Test Procedure links in input/pagecontent/testplan.md          ║
+// ║    - the banner at the top of that page                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+/*
+
 Alias: $gherkin = urn:ietf:bcp:13  // IANA media-type registry used as language system
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -560,3 +583,5 @@ payload from YY4 feeds YY5.
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
 * testCase[=].testRun[=].script.sourceString = "integration-qrcode-flow.feature"
+
+*/
