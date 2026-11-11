@@ -22,6 +22,8 @@ This transaction is specified as a content interaction rather than as an API: wh
 
 ### 2:3.YY1.2 Actor Roles
 
+<p id="t2:3.YY1.2-1" class="tableTitle"><strong>Table 2:3.YY1.2-1: Actor Roles</strong></p>
+
 | Actor | Role |
 |-------|------|
 | {{ linkvhlr}}, {{ linkvhls}} | {{ reqSubmitPKItitle.valueString }}     |
@@ -44,7 +46,7 @@ This transaction is specified as a content interaction rather than as an API: wh
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY1.svg%}
   </div>
-  <p id="f2:3.YY1.4-1" class="figureTitle">Figure 2:3.YY1.4-1: Submit PKI Material with DID Interaction Diagram</p>
+  <p id="f2:3.YY1.4-1" class="figureTitle"><strong>Figure 2:3.YY1.4-1: Submit PKI Material with DID Interaction Diagram</strong></p>
 </figure>
 
 #### 2:3.YY1.4.1 Submit PKI Material Request Message
@@ -95,7 +97,9 @@ The DID Document SHALL be formatted as a JSON document containing:
 - Service endpoints where the entity can be reached
 - Authentication and assertion methods as appropriate
 
-**Required DID Document Elements:**
+The required DID Document elements are listed in Table 2:3.YY1.4.1.2-1.
+
+<p id="t2:3.YY1.4.1.2-1" class="tableTitle"><strong>Table 2:3.YY1.4.1.2-1: Required DID Document Elements</strong></p>
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
@@ -107,7 +111,9 @@ The DID Document SHALL be formatted as a JSON document containing:
 
 **Verification Method Structure:**
 
-Each verification method SHALL include:
+Each verification method SHALL include the elements listed in Table 2:3.YY1.4.1.2-2.
+
+<p id="t2:3.YY1.4.1.2-2" class="tableTitle"><strong>Table 2:3.YY1.4.1.2-2: Verification Method Elements</strong></p>
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
@@ -122,9 +128,11 @@ Each verification method SHALL include:
 
 **Carrying the Certificate Chain**
 
-Key material SHALL be carried as a certificate chain in the `x5c` member of the `publicKeyJwk`, as defined by [RFC 7517 Section 4.7](https://datatracker.ietf.org/doc/html/rfc7517#section-4.7) and [RFC 7515 Section 4.1.6](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6).
+Key material SHALL be carried as a certificate chain in the `x5c` member of the `publicKeyJwk`, as defined by [RFC 7517 Section 4.7](https://datatracker.ietf.org/doc/html/rfc7517#section-4.7) and [RFC 7515 Section 4.1.6](https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6). The JWK members used are listed in Table 2:3.YY1.4.1.2-3.
 
 This applies to both paths by which key material is obtained. Where the material is issued by a Certificate Authority, `x5c` carries the issued certificate followed by each issuing certificate. Where the material is self-generated, `x5c` carries a **chain of one**: the submitter's self-signed certificate, which is simultaneously the leaf and the terminus of its own chain. A chain of one is not exclusive to self-generated material: a trust list retrieved through [ITI-YY2 Retrieve Trust List with DID](ITI-YY2.html) may likewise carry a certificate authority's own certificate as a single entry.
+
+<p id="t2:3.YY1.4.1.2-3" class="tableTitle"><strong>Table 2:3.YY1.4.1.2-3: Certificate Chain Members of publicKeyJwk</strong></p>
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
@@ -141,7 +149,7 @@ This profile constrains where the chain terminates. It does not constrain how th
 
 **Example DID Document:**
 
-The following example carries Certificate Authority issued material. It illustrates a `did:web` identifier, a certificate chain in `x5c` (the Document Signer Certificate holding the public key, followed by the Signing Certificate Authority that issued it), and a `proof` over the document. Certificate values are truncated for readability.
+The following example carries Certificate Authority-issued material. It illustrates a `did:web` identifier, a certificate chain in `x5c` (the Document Signer Certificate holding the public key, followed by the Signing Certificate Authority that issued it), and a `proof` over the document. Certificate values are truncated for readability.
 
 ```json
 {
@@ -211,7 +219,7 @@ The following pathways are informative examples of mechanisms in use:
 
 Upon receiving a DID Document submission, the {{ linkta }} SHALL:
 
-1. **Validate DID Document Structure**: Verify the DID Document conforms to W3C DID Core specification
+1. **Validate DID Document Structure**: Verify the DID Document conforms to the W3C DID Core specification
 2. **Verify Cryptographic Material**: Validate that:
    - Public keys are properly formatted (JWK)
    - Key types and curves are acceptable per trust framework policy
@@ -223,7 +231,7 @@ Upon receiving a DID Document submission, the {{ linkta }} SHALL:
 
    The onboarded key material is what makes this check conclusive: a chain that validates only to an arbitrary certificate authority establishes nothing about membership of this trust network. How the path is constructed, which algorithms and key strengths are permitted, and how revocation status is obtained are defined by the governing trust framework. Trust frameworks commonly distribute revocation status as certificate revocation lists (CRLs); some frameworks discourage the use of the Online Certificate Status Protocol (OCSP) because a status request reveals which certificate is being verified, and by whom, at the time of use.
 4. **Verify Identity**: Authenticate the submitting entity's identity through:
-   - secure connection
+   - Secure connection
    - Verification of proof/signature on the DID Document
    - Validation against pre-registered organizational identifiers
    - Confirmation that the subject of the first certificate in each `x5c` corresponds to the authenticated identity of the submitting participant, so that a participant cannot publish key material on behalf of another
@@ -233,13 +241,13 @@ Upon receiving a DID Document submission, the {{ linkta }} SHALL:
 **Rejection Criteria**
 
 The {{ linkta }} SHALL reject submissions that:
-- Do not conform to W3C DID Core specification
+- Do not conform to the W3C DID Core specification
 - Contain invalid or malformed cryptographic material
 - Cannot be authenticated to a known trust network participant
 - Carry a certificate chain that cannot be validated to a certificate authority recognized by the governing trust framework
 - Carry a certificate whose subject does not correspond to the authenticated submitting participant
 - Omit `x5c`, or present a chain whose first certificate does not certify the public key expressed in the JWK
-- Present self-generated key material where the governing trust framework requires Certificate Authority issued material
+- Present self-generated key material where the governing trust framework requires Certificate Authority-issued material
 - Use prohibited cryptographic algorithms or insufficient key sizes
 - Lack required metadata or provenance information
 
@@ -282,9 +290,9 @@ Upon receiving the response, the submitting actor ({{ linkvhls }} or {{ linkvhlr
 3. **Retain Private Keys**: Regardless of the response, the submitting actor SHALL continue to securely maintain the private key(s) corresponding to any submitted public key material.
 
 
-### 2:3.YY1.5 Security Considerations 
+### 2:3.YY1.5 Security Considerations
 
-The secure and verifiable exchange of PKI material via DID Documents is foundational to the operation of a Verified Health Link (VHL) trust network. Any compromise in the integrity, authenticity, or provenance of this material undermines the ability of network participants to verify digital signatures, authenticate service endpoints, or enforce trust relationships.
+The secure and verifiable exchange of PKI material via DID Documents is foundational to the operation of a Verifiable Health Link (VHL) trust network. Any compromise in the integrity, authenticity, or provenance of this material undermines the ability of network participants to verify digital signatures, authenticate service endpoints, or enforce trust relationships.
 
 #### 2:3.YY1.5.1 DID Document Integrity
 
@@ -294,7 +302,7 @@ The secure and verifiable exchange of PKI material via DID Documents is foundati
 
 - Submitting entities SHOULD securely store private keys with appropriate access controls
 - Key material SHOULD meet minimum cryptographic strength requirements (e.g., EC P-256 or stronger)
-- Where key material is Certificate Authority issued, the submitting entity does not generate the trust network signing key itself; the private key corresponding to the issued certificate is nonetheless held by the submitting entity and is subject to the same protection obligations
+- Where key material is Certificate Authority-issued, the submitting entity does not generate the trust network signing key itself; the private key corresponding to the issued certificate is nonetheless held by the submitting entity and is subject to the same protection obligations
 - Self-generated key material is carried as a self-signed certificate, and therefore has an explicit validity period and subject name. Submitting entities SHOULD plan for its expiry and replacement as they would for any other certificate
 - Publishing a public key is not the same as conferring authority on it. Where the trust framework operates a certificate authority, authority derives from the certificate chain carried in `x5c` and not from the presence of the key in a DID Document
 

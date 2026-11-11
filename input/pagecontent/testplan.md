@@ -64,7 +64,7 @@ Testing of actor options includes:
     - Correct request format: VC as `application/vc` body; FHIR search parameters carried in `credentialSubject.id` and not repeated in the request line
     - VHL Sharer acceptance of a valid VC with valid `proof.proofValue` from a receiver whose key is in the trust network
     - VHL Sharer rejection of VCs with: invalid `proof.proofValue`, unresolvable `proof.verificationMethod`, expired `validUntil`, a `credentialSubject.id` whose folder ID is not one the VHL Sharer issued
-  - Behaviour where neither actor claims the option: the VHL Sharer does not establish the identity of the requester, and access follows from possession of the VHL and, where the `P` flag is set, the passcode.
+  - Behavior where neither actor claims the option: the VHL Sharer does not establish the identity of the requester, and access follows from possession of the VHL and, where the `P` flag is set, the passcode.
 - **Include DocumentReference Option** - VHL Receiver requests and VHL Sharer returns DocumentReference resources in the manifest response using `_include=List:item`.
 - **Verify Document Signature Option** - VHL Receiver verifies digital signatures on retrieved documents using previously obtained PKI material.
 - **VC Enveloped VHL Option** - VHL Sharer returns the VHL as a signed W3C Verifiable Credential (`application/vc`) from ITI-YY3 in place of a QR code, and the VHL Receiver decodes that carrier at ITI-YY4.
@@ -75,7 +75,7 @@ Testing of actor options includes:
 
 ### Unit Test Procedure
 
-Unit Tests in this context is where a SUT is tested against a simulator or validator.  A simulator is a implementation of an actor that is designed specifically to test the opposite pair actor. The simulator might be a reference implementation or may be a specially designed test-bench. Where a reference implementation is used the negative tests are harder to simulate. A validator is a implementation that can check conformance. A validator may be a simulator, but may also be a standalone tool used to validate only a message encoding. Some reference implementations may be able to validate to a StructureDefinition profile, but often these do not include sufficient constraints given the overall actor conformance criteria. 
+Unit Tests in this context is where a SUT is tested against a simulator or validator.  A simulator is an implementation of an actor that is designed specifically to test the opposite pair actor. The simulator might be a reference implementation or may be a specially designed test-bench. Where a reference implementation is used the negative tests are harder to simulate. A validator is an implementation that can check conformance. A validator may be a simulator, but may also be a standalone tool used to validate only a message encoding. Some reference implementations may be able to validate to a StructureDefinition profile, but often these do not include sufficient constraints given the overall actor conformance criteria. 
 
 **Trust Anchor**
 - [ITI-YY1] : On receipt of a DID Document, validate, organize, and sign the trust list, acknowledge
@@ -99,4 +99,3 @@ Integration Tests in this context is where two SUT of paired actors test against
 **Integration**
 - Establish Trust
 - Generate/Provide/Retrieve
-----specific keys are available to use

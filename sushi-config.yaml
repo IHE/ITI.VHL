@@ -60,7 +60,7 @@ resources:
     description: "An authorized organization in the trust framework that manages and distributes PKI material—such as public key certificates and revocation lists—to participants in the network."
   ActorDefinition/VHLHolder:
     name: "VHL Holder"
-    description: "An individual—typically the patient or their delegate—who possesses a Verified Health Link (VHL) and presents it to a VHL Receiver."
+    description: "An individual—typically the patient or their delegate—who possesses a Verifiable Health Link (VHL) and presents it to a VHL Receiver."
   ActorDefinition/VHLReceiver:
     name: "VHL Receiver"
     description: "A system or organization that receives a VHL from a VHL Holder and uses it to retrieve health documents from a VHL Sharer, after verifying the authenticity and integrity of the VHL."
@@ -122,7 +122,7 @@ pages:
     title: Changes to Other IHE Specifications
     generation: markdown
   vhl_vs_shl.md:
-    title: "Appendix A: Comparison of health links"
+    title: "Appendix A: Comparison of VHL and SHL"
     generation: markdown
   download.md:
     title: "Download and Analysis"
@@ -153,4 +153,4 @@ menu:
     Changes to Other IHE Specifications: other.html
     Download and Analysis: download.html
     Test Plan: testplan.html
-    Appendix A (VHL vs SHL): vhl_vs_shl.html
+    "Appendix A: Comparison of VHL and SHL": vhl_vs_shl.html

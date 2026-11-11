@@ -14,12 +14,13 @@
 {% assign provideVHLDescription = provideVHL.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 {% assign provideVHLRespDescription = provideVHLResp.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 
-The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
+The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verifiable Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
 The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc`). VHL Receivers scan the QR code or parse the VC to extract the VHL payload for subsequent document retrieval.
 
 ### 2:3.YY4.2 Actor Roles
 
+<p id="t2:3.YY4.2-1" class="tableTitle"><strong>Table 2:3.YY4.2-1: Actor Roles</strong></p>
 
 | Actor | Role |
 |-------|------|
@@ -29,7 +30,7 @@ The VHL is transmitted as a QR code containing an HCERT-encoded payload with the
 
 ### 2:3.YY4.3 Referenced Standards
 - **RFC 7515**: JSON Web Signature (JWS)
-- **RFC 7519**: JSON Web Token (JWT)  
+- **RFC 7519**: JSON Web Token (JWT)
 - **RFC 4648**: Base64url Encoding
 - **RFC 8392**: CBOR Web Token (CWT)
 - **RFC 8152**: CBOR Object Signing and Encryption (COSE)
@@ -45,7 +46,7 @@ The VHL is transmitted as a QR code containing an HCERT-encoded payload with the
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY4.svg%}
   </div>
-  <p id="f2:3.YY4.4-1" class="figureTitle">Figure 2:3.YY4.4-1: Provide VHL Interaction Diagram</p>
+  <p id="f2:3.YY4.4-1" class="figureTitle"><strong>Figure 2:3.YY4.4-1: Provide VHL Interaction Diagram</strong></p>
 </figure>
 
 #### 2:3.YY4.4.1 Provide VHL Request Message
@@ -69,7 +70,7 @@ The VHL is transmitted via QR code with the following characteristics:
 - Suitable for in-person encounters, walk-in clinics, emergency departments
 - QR code contains HCERT/CWT structure with embedded VHL payload
 - Can be displayed on screen or printed on paper
-- Minimum recommended diagonal size: 35-60mm
+- Minimum recommended diagonal size: 35–60 mm
 
 **Verifiable Credential Transmission (VC Enveloped VHL)**
 
@@ -97,8 +98,8 @@ When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-envel
 3. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
 
 The VHL Holder MAY:
-- Maintain record of VHL presentations (QR or VC)
-- Revoke VHL access if supported by VHL Sharer
+- Maintain a record of VHL presentations (QR or VC)
+- Revoke VHL access if supported by the VHL Sharer
 
 ##### 2:3.YY4.4.1.4 Expected Actions - VHL Receiver
 
@@ -138,7 +139,7 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
 
 6. **Verify Digital Signature**:
    - Extract `kid` from CWT protected header
-   - Retrieve corresponding Document Signing Certificate (DSC) from trust list
+   - Retrieve corresponding Document Signer Certificate (DSC) from trust list
    - Verify the COSE signature (RFC 8152) using DSC public key
    - Check the DSC's revocation status where applicable
    - Confirm signature is valid and CWT has not been tampered with
@@ -194,7 +195,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
 1. **Store Decryption Key Securely**:
    - The `key` parameter from the VHL payload is required to decrypt documents
    - Store the key securely in memory for the session
-   - The key will be used during document retrieval (ITI-YY6) to decrypt document contents
+   - The key will be used during document retrieval ([ITI-68](https://profiles.ihe.net/ITI/MHD/ITI-68.html)) to decrypt document contents
 
 2. **Parse Manifest URL**:
    - Extract the manifest URL from the VHL payload
@@ -206,7 +207,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
      - `_include=List:item`: (if VHL Sharer supports Include DocumentReference Option)
    - Example: `https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item`
 
-3. Prepare to Retrieve Manifest as per ITI-YY5
+3. **Prepare to Retrieve Manifest**: as per [ITI-YY5](ITI-YY5.html)
 
 The VHL Receiver MAY:
 - Prompt user for passcode if "P" flag is present (required for ITI-YY5)
@@ -251,12 +252,12 @@ parameters, cache the key, and prepare for ITI-YY5 Retrieve Manifest.
 
 **Manifest URL Parsing:**
 
-The manifest URL from the VHL payload contains all parameters needed for ITI-YY5 Part 1 (fhir-parameters):
+The manifest URL from the VHL payload contains all FHIR search parameters needed for [ITI-YY5](ITI-YY5.html):
 
 ```
 URL: https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
 
-Parsed FHIR Search Parameters (for ITI-YY5 Part 1):
+Parsed FHIR Search Parameters (for ITI-YY5):
 - _id=abc123def456
 - code=folder
 - status=current
@@ -276,7 +277,7 @@ If QR code scanning or decoding fails:
 - Missing hcert claim or claim key 5
 - Signature verification failure
 
-VHL Receiver SHALL:
+The VHL Receiver SHALL:
 - Reject the VHL
 - Inform user with specific error message
 - Request user to rescan QR code
@@ -293,21 +294,23 @@ If VHL expired (either exp in CWT or VHL payload):
 - VHL Receiver SHOULD inform user/operator
 - User may request new VHL from VHL Holder
 
-#### 2:3.YY4.4.2  Provide VHL Response Message 
+#### 2:3.YY4.4.2 Provide VHL Response Message
 
 ##### 2:3.YY4.4.2.1 Trigger Events
-The VHL Receiver MAY provide optional acknowledgment to VHL Holder confirming receipt and validation. This is transmission-mechanism dependent.
+The VHL Receiver MAY provide an optional acknowledgment to the VHL Holder confirming receipt and validation. This is transmission-mechanism dependent.
 
 ##### 2:3.YY4.4.2.2 Message Semantics
 
-For transmission mechanisms supporting bidirectional communication, response MAY include:
+For transmission mechanisms supporting bidirectional communication, the response MAY include the elements listed in Table 2:3.YY4.4.2.2-1.
+
+<p id="t2:3.YY4.4.2.2-1" class="tableTitle"><strong>Table 2:3.YY4.4.2.2-1: Provide VHL Acknowledgment Elements</strong></p>
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
-| Acknowledgment | 0..1 | Confirmation VHL received and validated |
-| Receipt Identifier | 0..1 | Unique identifier for receipt transaction |
-| Receiver Identifier | 0..1 | Identifier of VHL Receiver organization |
-| Timestamp | 0..1 | ISO 8601 timestamp of receipt |
+| Acknowledgment | [0..1] | Confirmation VHL received and validated |
+| Receipt Identifier | [0..1] | Unique identifier for receipt transaction |
+| Receiver Identifier | [0..1] | Identifier of VHL Receiver organization |
+| Timestamp | [0..1] | ISO 8601 timestamp of receipt |
 {: .grid}
 
 ##### 2:3.YY4.4.2.3 Expected Actions
@@ -327,8 +330,8 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 - CWT signature provides end-to-end trust verification
 
 #### 2:3.YY4.5.2 VHL Confidentiality
-- VHL does NOT contain PHI
-- VHL only contains reference (URL) to retrieve documents
+- VHL does NOT contain clinical content; it does carry the patient business identifier in the manifest URL and a free-text label (see [ITI-YY5 Privacy of Request Metadata](ITI-YY5.html#23yy556-privacy-of-request-metadata))
+- VHL only contains a reference (URL) to retrieve documents
 - Actual documents retrieved over secure channel (ITI-YY5)
 
 #### 2:3.YY4.5.3 Replay Attacks
@@ -340,13 +343,13 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 #### 2:3.YY4.5.4 Passcode Protection
 - Passcode communicated out-of-band (not in VHL)
 - "P" flag indicates passcode required
-- Passcode validated during manifest retrieval (ITI-YY5 Part 2)
+- Passcode validated during manifest retrieval (ITI-YY5)
 - VHL Sharers SHOULD implement rate limiting on passcode attempts
 
 #### 2:3.YY4.5.5 QR Code Security
 
 **QR Code Characteristics:**
-- Can be photographed/copied - use time-limited expiration
+- Can be photographed/copied—use time-limited expiration
 - Suitable for supervised encounters (in-person, on-screen display)
 - Digital signature provides authenticity verification
 - Recommended for higher security scenarios
@@ -362,5 +365,3 @@ For transmission mechanisms supporting bidirectional communication, response MAY
 When the VHL is carried as a Verifiable Credential:
 - Confidentiality is equivalent to the QR form: the VC carries the decryption `key` and SHOULD be treated as sensitive
 - VHL Sharers SHOULD issue VCs with short lifetimes; single-use VCs are RECOMMENDED for high-security scenarios
-
-
