@@ -198,47 +198,49 @@ Options that may be selected for each actor in this implementation guide are lis
 
 <p id ="tXX.2-1" class="tableTitle">Table XX.2-1: Actor Options</p>
 
-| Actor          | Option Name                          |
-|----------------|--------------------------------------|
-| {{ linkvhls }} | Include DocumentReference            |
-| ^              | Sign Manifest Request                |
-| ^              | VC Enveloped VHL                     |
-| {{ linkvhlr }} | Include DocumentReference            |
-| ^              | Sign Manifest Request                |
-| ^              | Verify Document Signature            |
+| Actor          | Option Name                                     |
+|----------------|-------------------------------------------------|
+| {{ linkvhls }} | Include DocumentReference                       |
+| ^              | Sign Manifest Request (HTTP Message Signatures) |
+| ^              | Sign Manifest Request (OAuth with SSRAA)        |
+| ^              | Sign Manifest Request (Verifiable Credential)   |
+| ^              | VC Enveloped VHL                                |
+| {{ linkvhlr }} | Include DocumentReference                       |
+| ^              | Sign Manifest Request (HTTP Message Signatures) |
+| ^              | Sign Manifest Request (OAuth with SSRAA)        |
+| ^              | Sign Manifest Request (Verifiable Credential)   |
+| ^              | Verify Document Signature                       |
 {: .grid}
 
-### 1:XX.2.1 Sign Manifest Request Option (VHL Sharer)
+The three Sign Manifest Request Options differ only in the mechanism by which the {{ linkvhlr }} presents its credential. Each is optional for both actors, and each is complementary between them: the {{ linkvhlr }} side presents the credential, and the {{ linkvhls }} side verifies it and confirms the {{ linkvhlr }}'s authorization within the trust network before responding. An option is therefore only effective where both actors claim it. An actor MAY claim more than one, in which case the two agree on which to use for a given exchange.
 
-The Sign Manifest Request Option enables the {{ linkvhls }} to authenticate the {{ linkvhlr }} that requests a manifest, establishing its authorization within the trust network before it responds.
-
-This option provides:
-- Authentication of the VHL Receiver by the VHL Sharer
+Any of the three provides:
+- Authentication of the {{ linkvhlr }} by the {{ linkvhls }}
 - Non-repudiation of manifest requests
 - Protection against request forgery
 - Enhanced audit trail
 
-A {{ linkvhls }} supporting this option rejects a request that carries no credential under the agreed mechanism, or whose credential does not verify against the {{ linkvhlr }}'s key material obtained from the trust list, returning `401 Unauthorized`.
+A {{ linkvhls }} claiming one of these options rejects a request that carries no credential under that option, or whose credential does not verify against the {{ linkvhlr }}'s key material obtained from the trust list, returning `401 Unauthorized`. Where neither actor claims any of the three, the {{ linkvhls }} does not establish the identity of the requester, and access to the manifest follows from possession of the VHL and, where the `P` flag is set, the passcode. A deployment that requires the identity of the requester to be established — by jurisdictional policy, by regulation, or under a data sharing agreement — therefore requires one of these options of both actors. What the options do and do not establish is set out in [2:3.YY5.1 Scope](ITI-YY5.html#23yy51-scope).
 
-**Complementary Option:** This option is the counterpart to the [Sign Manifest Request Option (VHL Receiver)](#1xx22-sign-manifest-request-option-vhl-receiver). Authenticating is only possible where the requester presents a credential, so the two are normally deployed together. Where neither actor claims the option, the {{ linkvhls }} does not establish the identity of the requester, and access to the manifest follows from possession of the VHL and, where the `P` flag is set, the passcode.
+### 1:XX.2.1 Sign Manifest Request Option (HTTP Message Signatures)
 
-The option is realized by one of three mechanisms, which the two actors agree on: [HTTP Message Signatures](ITI-YY5.html#23yy5413-sign-manifest-request---http-message-signatures), [OAuth with SSRAA](ITI-YY5.html#23yy5414-sign-manifest-request---oauth-with-ssraa), or [Verifiable Credential](ITI-YY5.html#23yy5415-sign-manifest-request---verifiable-credential). Each is defined in [ITI-YY5](ITI-YY5.html), as is the scope of what the option does and does not establish ([2:3.YY5.1 Scope](ITI-YY5.html#23yy51-scope)).
+Under this option the {{ linkvhlr }} signs selected components of the outgoing HTTP manifest request with its trust-network key per RFC 9421, and the {{ linkvhls }} verifies that signature against the {{ linkvhlr }}'s public key from the trust list. Authentication is carried entirely within the HTTP request, so neither a token endpoint nor a prior credential exchange is needed.
 
-### 1:XX.2.2 Sign Manifest Request Option (VHL Receiver)
+The option is defined in [2:3.YY5.4.1.4](ITI-YY5.html#23yy5414-sign-manifest-request-option-http-message-signatures).
 
-The Sign Manifest Request Option enables the {{ linkvhlr }} to authenticate itself to the {{ linkvhls }} when it requests a manifest.
+### 1:XX.2.2 Sign Manifest Request Option (OAuth with SSRAA)
 
-This option provides:
-- Authentication of the VHL Receiver by the VHL Sharer
-- Non-repudiation of manifest requests
-- Protection against request forgery
-- Enhanced audit trail
+Under this option the {{ linkvhlr }} presents an OAuth 2.0 access token obtained as defined in the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/) (SSRAA), using OAuth Backend Services with JWT client assertions, and the {{ linkvhls }} validates that token. The two actors complete SSRAA Discovery and Dynamic Client Registration beforehand, and a {{ linkvhls }} claiming this option publishes its FHIR base URL in the VHL payload at [Generate VHL [ITI-YY3]](ITI-YY3.html) so that the {{ linkvhlr }} can reach the authorization server.
 
-**Complementary Option:** This option is designed to work with the [Sign Manifest Request Option (VHL Sharer)](#1xx21-sign-manifest-request-option-vhl-sharer). Presenting a credential is only useful where the recipient verifies it, so the two are normally deployed together.
+The option is defined in [2:3.YY5.4.1.5](ITI-YY5.html#23yy5415-sign-manifest-request-option-oauth-with-ssraa).
 
-The mechanisms by which the {{ linkvhlr }} presents its credential are the three listed in [Section 1:XX.2.1](#1xx21-sign-manifest-request-option-vhl-sharer) and defined in [ITI-YY5](ITI-YY5.html).
+### 1:XX.2.3 Sign Manifest Request Option (Verifiable Credential)
 
-### 1:XX.2.3 Include DocumentReference Option
+Under this option the {{ linkvhlr }} self-issues a JSON-LD Verifiable Credential whose subject is the manifest it decoded from the VHL, signs it with its trust-network key as an embedded `DataIntegrityProof`, and sends that credential as the manifest request body; the {{ linkvhls }} verifies the proof against the trust network. No HTTP-level signing is required, because the credential is the request. This option additionally binds the request to the particular VHL the {{ linkvhlr }} decoded, and is the one option in which the {{ linkvhlr }} can state, inside the signature, the agreement it acts under and the purpose it asserts.
+
+The option is defined in [2:3.YY5.4.1.6](ITI-YY5.html#23yy5416-sign-manifest-request-option-verifiable-credential).
+
+### 1:XX.2.4 Include DocumentReference Option
 
 The Include DocumentReference Option enables the {{ linkvhls }} to process the `_include=List:item` parameter in manifest requests and return DocumentReference resources along with the List resource in a single response. A {{ linkvhlr }} supporting this option includes `_include=List:item` in the manifest request; otherwise it retrieves each referenced DocumentReference separately.
 
@@ -249,9 +251,9 @@ The Include DocumentReference Option enables the {{ linkvhls }} to process the `
 
 **Implementation Note:** When generating VHLs in ITI-YY3, VHL Sharers supporting this option SHOULD include `_include=List:item` in the manifest URL. VHL Sharers not supporting this option SHOULD NOT include the `_include` parameter in the manifest URL.
 
-See ITI-YY5 Section [2:3.YY5.4.2.2 Message Semantics](ITI-YY5.html#23yy5422-message-semantics) and [2:3.YY5.4.1.7 Expected Actions - VHL Sharer](ITI-YY5.html#23yy5417-expected-actions---vhl-sharer) for detailed behavior.
+See ITI-YY5 Section [2:3.YY5.4.2.2 Message Semantics](ITI-YY5.html#23yy5422-message-semantics) and [2:3.YY5.4.1.3 Expected Actions](ITI-YY5.html#23yy5413-expected-actions) for detailed behavior.
 
-### 1:XX.2.4 Verify Document Signature Option (VHL Receiver)
+### 1:XX.2.5 Verify Document Signature Option (VHL Receiver)
 
 In this option the {{ linkvhlr }}, after receipt of a digitally signed document from a {{ linkvhls }}, shall verify the digital signature using previously retrieved PKI material. This key material may or may not be distributed under the same trust network under which the VHL was distributed. This key material may or may not be the same key material that was used to verify the VHL.
 
@@ -260,7 +262,7 @@ See [DSG - Document Digital Signature](#1xx65-dsg---document-digital-signature) 
 This option is captured in the following business requirement:
 - [Verify Document Signature](Requirements-VerifyDocumentSignature.html)
 
-### 1:XX.2.5 VC Enveloped VHL Option (VHL Sharer)
+### 1:XX.2.6 VC Enveloped VHL Option (VHL Sharer)
 
 The VC Enveloped VHL Option enables the {{ linkvhls }} to return the VHL as a signed W3C Verifiable Credential (`application/vc`) instead of a QR code in the ITI-YY3 Generate VHL transaction. The VC is subsequently transmitted to the {{ linkvhlr }} via ITI-YY4 Provide VHL as an alternative carrier to the HCERT/CWT QR code.
 
@@ -273,9 +275,9 @@ This option provides:
 
 When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} supports this option, the {{ linkvhls }} returns the VHL as the `credentialSubject.id` of a VC issued per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with an embedded `DataIntegrityProof` signed by the {{ linkvhls }} using its trust-network key. The value carried is the `vhlink:` URI that the QR carrier embeds at HCERT claim key 5, so both carriers convey byte-identical payloads. If the option is not supported and `format=vc` is requested, the {{ linkvhls }} SHALL return an OperationOutcome error.
 
-**Naming Note:** This option (a Sharer option carrying the VHL) is distinct from the [Verifiable Credential](ITI-YY5.html#23yy5415-sign-manifest-request---verifiable-credential) mechanism of the Sign Manifest Request Option, in which the {{ linkvhlr }} self-issues a VC as the manifest request body at ITI-YY5.
+**Naming Note:** This option (a Sharer option carrying the VHL) is distinct from the [Sign Manifest Request Option (Verifiable Credential)](ITI-YY5.html#23yy5416-sign-manifest-request-option-verifiable-credential), in which the {{ linkvhlr }} self-issues a VC as the manifest request body at ITI-YY5.
 
-See ITI-YY3 Section [2:3.YY3.4.1.2.1 Output Carrier Options](ITI-YY3.html#output-carrier-options) for VC construction, ITI-YY4 Section [2:3.YY4.4.1.2 Message Semantics](ITI-YY4.html#23yy4412-message-semantics) for transmission, and ITI-YY4 Section [2:3.YY4.4.1.4 Expected Actions - VHL Receiver](ITI-YY4.html#23yy4414-expected-actions---vhl-receiver) for decoding.
+See ITI-YY3 Section [2:3.YY3.4.1.2.1 Output Carrier Options](ITI-YY3.html#output-carrier-options) for VC construction, ITI-YY4 Section [2:3.YY4.4.1.2 Message Semantics](ITI-YY4.html#23yy4412-message-semantics) for transmission, and ITI-YY4 Section [2:3.YY4.4.1.3 Expected Actions](ITI-YY4.html#23yy4413-expected-actions) for decoding.
 
 <a name="required-groupings"> </a>
 
@@ -392,7 +394,7 @@ Key security considerations include:
 
 ### 1:XX.5.1 Trust Network Security
 
-- All participants ({{ linkvhlr }}, {{ linkvhls }}) SHALL establish trust via the {{ linkta }}. ITI-YY1 (Submit PKI Material) and ITI-YY2 (Retrieve Trust List) transactions MAY be used to support this trust establishment.
+- Every participant ({{ linkvhlr }}, {{ linkvhls }}) depends on a trust relationship with a {{ linkta }}: without one there is no material against which a VHL signature can be verified. ITI-YY1 (Submit PKI Material with DID) and ITI-YY2 (Retrieve Trust List with DID) are this profile's transactions for establishing and retrieving that material. [Section XX.1](#actors-and-transactions) gives their optionality and states that a deployment may instead use jurisdiction-specific PKI exchange mechanisms, which are out of scope for this profile.
 - Certificates and keys should be regularly updated and revocation status checked.
 - Onboarding establishes key material in both directions: the participant's own certificate authority material is pre-shared with the trust network, and the {{ linkta }}'s public key is shared with the participant. Neither can be obtained over the channel it secures, so both are established through the verified, out-of-band process the trust framework defines.
 - Appearing in a retrieved trust list does not by itself make a public key trustworthy. Where the governing trust framework operates a certificate authority, authority for a key derives from its certificate chain, and [ITI-YY2 Expected Actions](ITI-YY2.html) is where this profile requires that chain to resolve back to material pre-shared at onboarding. How the path is constructed, which algorithms and key strengths are permitted, and how revocation status is obtained are left to the trust framework.
@@ -404,7 +406,7 @@ Key security considerations include:
 
 ### 1:XX.5.3 Cryptographic Algorithm Selection
 
-The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic primitives for digital signatures, message authentication, and content encryption. This IG does not mandate a single algorithm suite for deployment. Implementers select algorithms consistent with the underlying specifications — for example, RFC 9421 (HTTP Message Signatures), RFC 7515/7516/7518 (JWS/JWE/JWA), RFC 8152 (COSE), W3C Data Integrity (Verifiable Credentials), the HL7 SSRAA IG (OAuth with SSRAA mechanism), and the WHO SMART Trust specification (HCERT). The preceding list is illustrative, not exhaustive.
+The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic primitives for digital signatures, message authentication, and content encryption. This IG does not mandate a single algorithm suite for deployment. Implementers select algorithms consistent with the underlying specifications — for example, RFC 9421 (HTTP Message Signatures), RFC 7515/7516/7518 (JWS/JWE/JWA), RFC 8152 (COSE), W3C Data Integrity (Verifiable Credentials), the HL7 SSRAA IG (OAuth with SSRAA), and the WHO SMART Trust specification (HCERT). The preceding list is illustrative, not exhaustive.
 
 **Interoperability baseline:** For the purpose of interoperability testing, implementations SHALL support **ECDSA using curve P-256 and SHA-256** as a common baseline across signature operations. This is `ES256` in the JOSE and COSE registries and `ecdsa-p256-sha256` in the HTTP Message Signatures registry. A single baseline is possible because this algorithm is expressible in every signature container this profile uses — JWS/JWT, COSE, HTTP Message Signatures, and the W3C Data Integrity ECDSA cryptosuites — and because it is the algorithm the trust networks this profile targets already distribute.
 
@@ -415,7 +417,7 @@ Where an underlying specification sets its own algorithm requirements, those req
 | Signature operation | Governed by |
 |---------------------|-------------|
 | HCERT/CWT signature on the VHL ([ITI-YY3](ITI-YY3.html), [ITI-YY4](ITI-YY4.html)) | [WHO SMART Trust HCERT specification](https://smart.who.int/trust/hcert_spec.html), which defines a primary and a secondary algorithm and requires both to be implemented |
-| JWT client assertions and access tokens under the OAuth with SSRAA mechanism ([ITI-YY5](ITI-YY5.html)) | the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/), which operates on its own X.509 credentials rather than on trust network key material |
+| JWT client assertions and access tokens under the Sign Manifest Request Option (OAuth with SSRAA) at [ITI-YY5](ITI-YY5.html) | the [HL7 Security for Scalable Registration, Authentication, and Authorization IG](http://hl7.org/fhir/us/udap-security/), which operates on its own X.509 credentials rather than on trust network key material |
 | `DataIntegrityProof` on Verifiable Credentials | the declared `cryptosuite`, which determines both the canonicalization and the signature algorithm |
 | JWE encryption of document binaries ([ITI-YY5](ITI-YY5.html)) | the [SMART Health Links encryption convention](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files), which fixes `alg=dir` and `enc=A256GCM` so that the symmetric key carried in the VHL payload can be used directly |
 {: .grid}
@@ -465,7 +467,7 @@ The grouping of the {{ linkvhlr }} and the {{ linkvhls }} with an ATNA Secure No
 
 The protection ITI-19 affords depends on which ATNA Secure Transport (STX) option the deployment claims. A Secure Node or Secure Application is required to support at least one STX option, and the available options include [STX: No Secure Transport](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html), for which ITI-19 requires no actions because confidentiality is provided by an already-secure network such as an isolated segment or a VPN. Where a TLS option is claimed, ITI-19 specifies mutual authentication using X.509 certificates. The ATNA grouping therefore establishes that the channel is protected by a means the deployment has chosen and declared; it does not by itself establish that TLS, or mutual certificate authentication, is in use.
 
-That protection is distinct from the authentication ITI-YY5 requires. Authenticate Node authenticates the communicating node and secures the channel between nodes; ITI-YY5 authenticates the requesting entity and establishes its authorization within the trust network, and under the Verifiable Credential mechanism additionally binds the request to the particular VHL the {{ linkvhlr }} decoded. The authentication options in [ITI-YY5](ITI-YY5.html) are consequently not made redundant by the ATNA grouping, and an ATNA grouping does not satisfy them.
+That protection is distinct from the authentication ITI-YY5 requires. Authenticate Node authenticates the communicating node and secures the channel between nodes; ITI-YY5 authenticates the requesting entity and establishes its authorization within the trust network, and under the Sign Manifest Request Option (Verifiable Credential) additionally binds the request to the particular VHL the {{ linkvhlr }} decoded. The authentication options in [ITI-YY5](ITI-YY5.html) are consequently not made redundant by the ATNA grouping, and an ATNA grouping does not satisfy them.
 
 <a name="pcf-cross-profile"> </a>
 ### 1:XX.6.2 PCF - Privacy Consent on FHIR
@@ -477,7 +479,7 @@ Recommended groupings:
 - **{{ linkvhlh }} (or the Holder's client app)** MAY be grouped with a PCF **Consent Recorder** so that the Holder authors a `Consent` resource when generating a VHL.
 - **{{ linkvhls }}** MAY be grouped with a PCF **Consent Registry** so that consents governing a generated folder are persisted and discoverable, and with a PCF **Consent Enforcement Point** so that the set of documents returned at [ITI-YY5](ITI-YY5.html) is filtered by the active `Consent.provision` (actor, purpose, period, class, code).
 
-The `$generate-vhl` operation (ITI-YY3) accepts an optional `purposeOfUse` input parameter bound (extensible) to the HL7 v3 [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) value set. The {{ linkvhls }} persists this value against the generated folder. When the {{ linkvhls }} is grouped with a PCF Consent Recorder or Consent Registry, the value populates `Consent.provision.purpose` on any `Consent` created for or bound to the folder. At ITI-YY5, the {{ linkvhls }} MAY reject manifest requests whose purpose claim (carried by the chosen authentication option — OAuth token, UDAP assertion, or Verifiable Credential) is inconsistent with the purpose recorded at generation time.
+The `$generate-vhl` operation (ITI-YY3) accepts an optional `purposeOfUse` input parameter bound (extensible) to the HL7 v3 [PurposeOfUse](http://terminology.hl7.org/ValueSet/v3-PurposeOfUse) value set. The {{ linkvhls }} persists this value against the generated folder. When the {{ linkvhls }} is grouped with a PCF Consent Recorder or Consent Registry, the value populates `Consent.provision.purpose` on any `Consent` created for or bound to the folder. At ITI-YY5, the {{ linkvhls }} MAY reject manifest requests whose purpose claim is inconsistent with the purpose recorded at generation time. Where that claim can travel depends on the Sign Manifest Request Option in use: in the access token or the SSRAA `hl7-b2b` extension under OAuth with SSRAA, and in `credentialSubject.purposeOfUse` under the Verifiable Credential option, which also lets the {{ linkvhlr }} name the policy it acts under in `termsOfUse` — a `Consent.policyRule` among the possibilities. HTTP Message Signatures carry neither.
 
 ### 1:XX.6.3 MHD - Mobile Health Document Sharing
 
@@ -491,7 +493,7 @@ This is a discovery mechanism only. The DID so obtained is dereferenced and its 
 
 ### 1:XX.6.5 DSG - Document Digital Signature
 
-The Verify Document Signature Option ([Section XX.2.4](#1xx24-verify-document-signature-option-vhl-receiver)) concerns signatures over the documents themselves, which this profile does not define; the IHE profile that does is [Document Digital Signature (DSG)](https://profiles.ihe.net/ITI/DSGj/Volume1/ch-37.html). A {{ linkvhlr }} supporting the option is correspondingly grouped with a DSG **Content Consumer**, and a {{ linkvhls }} that signs the documents it shares with a DSG **Content Creator**.
+The Verify Document Signature Option ([Section XX.2.5](#1xx25-verify-document-signature-option-vhl-receiver)) concerns signatures over the documents themselves, which this profile does not define; the IHE profile that does is [Document Digital Signature (DSG)](https://profiles.ihe.net/ITI/DSGj/Volume1/ch-37.html). A {{ linkvhlr }} supporting the option is correspondingly grouped with a DSG **Content Consumer**, and a {{ linkvhls }} that signs the documents it shares with a DSG **Content Creator**.
 
 DSG carries the XML and JSON cases as content modules on those same two actors rather than as separate profiles:
 

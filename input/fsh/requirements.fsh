@@ -372,7 +372,7 @@ Usage: #definition
 * description = """
 The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL initiate a request to retrieve a set of health documents from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL).
 
-The Receiver SHALL have verified the VHL signature against PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html) before making the request. Validation in the other direction — the Sharer establishing the Receiver's participation in the trust network — applies where the Sign Manifest Request Option is in use, and is optional.
+The Receiver SHALL have verified the VHL signature against PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html) before making the request. Validation in the other direction — the Sharer establishing the Receiver's participation in the trust network — applies where one of the Sign Manifest Request Options is in use, and is optional.
 
 **Optional behaviors:**
 * The VHL Sharer MAY record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement.
@@ -404,7 +404,7 @@ The [VHL Sharer](ActorDefinition-VHLSharer.html) SHALL respond to a manifest req
 
 Before any manifest content is released, the Sharer SHALL establish that the VHL presented is valid and authorizes what is being requested.
 
-Authentication of the requesting Receiver is a separate and optional control, provided by the Sign Manifest Request Option. Where the Sharer supports that option it authenticates the Receiver against the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html) before releasing any manifest content. Where it does not, release of the manifest follows from a valid VHL and, where the `P` flag is set, the correct passcode.
+Authentication of the requesting Receiver is a separate and optional control, provided by the three Sign Manifest Request Options. Where the Sharer claims one of them it authenticates the Receiver against the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html) before releasing any manifest content. Where it does not, release of the manifest follows from a valid VHL and, where the `P` flag is set, the correct passcode.
 
 **Optional behaviors:**
 * The VHL Sharer MAY record an audit event documenting the access, in accordance with the [Audit Event – Accessed Health Data](Requirements-AuditEventAccess.html) requirement.
@@ -413,7 +413,7 @@ Authentication of the requesting Receiver is a separate and optional control, pr
 * actor[+] = Canonical(VHLSharer)
 * statement[+].key = "authenticate-receiver"
 * statement[=].label = "Authenticate the Receiver"
-* statement[=].requirement = "Where the Sign Manifest Request Option is supported, authenticate the requesting [VHL Receiver](ActorDefinition-VHLReceiver.html) against the trust network before releasing any manifest content, and reject the request where the Receiver cannot be authenticated"
+* statement[=].requirement = "Where one of the Sign Manifest Request Options is supported, authenticate the requesting [VHL Receiver](ActorDefinition-VHLReceiver.html) against the trust network before releasing any manifest content, and reject the request where the Receiver cannot be authenticated"
 * statement[=].conformance = #MAY
 * statement[+].key = "authorize-request"
 * statement[=].label = "Authorize the request"
