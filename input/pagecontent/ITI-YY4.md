@@ -1,6 +1,8 @@
 {% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
+> **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for both the VHL Holder (Initiator) and the VHL Receiver (Responder). Optional behaviors within this transaction, such as the VC Enveloped VHL Option, are defined as actor options for this transaction.
+
  {% assign provideVHL = site.data.Requirements-ProvideVHL %}
  {% assign provideVHLResp = site.data.Requirements-RespondtoProvideVHL %}
 

@@ -273,7 +273,7 @@ This option provides:
 
 **How It Works:**
 
-When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} supports this option, the {{ linkvhls }} returns the VHL as the `credentialSubject.id` of a VC issued per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with an embedded `DataIntegrityProof` signed by the {{ linkvhls }} using its trust-network key. The value carried is the `vhlink:` URI that the QR carrier embeds at HCERT claim key 5, so both carriers convey byte-identical payloads. If the option is not supported and `format=vc` is requested, the {{ linkvhls }} SHALL return an OperationOutcome error.
+When the caller of `$generate-vhl` sets `format=vc` and the {{ linkvhls }} supports this option, the {{ linkvhls }} returns the VHL as the `credentialSubject.id` of a VC issued per the [W3C Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/), with an embedded `DataIntegrityProof` signed by the {{ linkvhls }} using its trust-network key. The value carried is the VHL payload as a base64url-encoded `vhlink:` URI; the QR carrier places the same payload fields at HCERT claim key 5 as a CBOR map, so the two carriers convey the same payload in different encodings. If the option is not supported and `format=vc` is requested, the {{ linkvhls }} SHALL return an OperationOutcome error.
 
 **Naming Note:** This option (a Sharer option carrying the VHL) is distinct from the [Sign Manifest Request Option (Verifiable Credential)](ITI-YY5.html#23yy5416-sign-manifest-request-option-verifiable-credential), in which the {{ linkvhlr }} self-issues a VC as the manifest request body at ITI-YY5.
 

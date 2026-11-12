@@ -166,8 +166,8 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
       | error_condition                                       | http_status              |
       | Malformed request or missing required parameters      | 400 Bad Request          |
       | Signature verification failed or receiver unknown     | 401 Unauthorized         |
-      | VHL expired, revoked, or does not authorize access    | 403 Forbidden            |
-      | List resource with specified _id not found            | 404 Not Found            |
-      | Invalid or missing passcode                           | 422 Unprocessable Entity |
+      | VHL does not authorize the requested documents        | 403 Forbidden            |
+      | List _id not found, or the VHL is no longer active    | 404 Not Found            |
+      | Invalid or missing passcode                           | 401 Unauthorized         |
       | Rate limit exceeded                                   | 429 Too Many Requests    |
       | Internal server error                                 | 500 Internal Server Error|
