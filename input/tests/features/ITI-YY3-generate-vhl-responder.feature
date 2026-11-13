@@ -80,17 +80,17 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     When the "v" field is set in the SHL payload
     Then the "v" field SHALL default to 1
 
-  # ─── OAuth with SSRAA Mechanism ───────────────────────────────────────────────
+  # ─── Sign Manifest Request Option (OAuth with SSRAA) ───────────────────────────────────────────────
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer includes extension.fhirBaseUrl when OAuth with SSRAA mechanism is supported
-    Given the VHL Sharer supports the OAuth with SSRAA mechanism of the Sign Manifest Request Option
+  Scenario: VHL Sharer includes extension.fhirBaseUrl when the OAuth with SSRAA option is claimed
+    Given the VHL Sharer claims the Sign Manifest Request Option (OAuth with SSRAA)
     When the SHL payload is constructed
     Then the "extension" object SHALL include "fhirBaseUrl" set to the canonical FHIR base URL of the VHL Sharer
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer does not include extension.fhirBaseUrl when OAuth with SSRAA mechanism is not supported
-    Given the VHL Sharer does NOT support the OAuth with SSRAA mechanism of the Sign Manifest Request Option
+  Scenario: VHL Sharer does not include extension.fhirBaseUrl when the OAuth with SSRAA option is not claimed
+    Given the VHL Sharer does NOT claim the Sign Manifest Request Option (OAuth with SSRAA)
     When the SHL payload is constructed
     Then the "extension.fhirBaseUrl" field SHALL NOT be present
 

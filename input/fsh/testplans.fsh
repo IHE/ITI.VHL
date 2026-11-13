@@ -286,11 +286,11 @@ headers) and response format (searchset Bundle structure, search.mode, error cod
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 VHL Sharer Responder Expected Actions** – Verifies HTTP Message Signature
-verification (keyid lookup, RFC 9421 signature base, Content-Digest), OAuth FAST Option
+verification (keyid lookup, RFC 9421 signature base, Content-Digest), Sign Manifest Request Option (OAuth with SSRAA)
 token validation, VHL authorisation (folder ID, expiry, revocation, passcode hash comparison),
 FHIR search execution (_include support), Bundle construction, error codes (400/401/403/404/429/500),
 rate limiting, and audit logging.
-Source: sections 2:3.YY5.4.1.5 (Responder Expected Actions), 2:3.YY5.4.2 (Response Message),
+Source: sections 2:3.YY5.4.1.3 (Expected Actions), 2:3.YY5.4.2 (Response Message),
 and 2:3.YY5.5 (Security Considerations).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
@@ -416,7 +416,7 @@ decompression, CWT parsing (RFC 8392), COSE signature verification (RFC 8152) us
 trust list, CWT claims validation (exp/iat), hcert extraction (claim key -260 / 5), and VHL
 payload validation (url/key/flag/exp). Also covers post-decoding actions, all decode failure
 rejections, and optional acknowledgment.
-Source: sections 2:3.YY4.4.1.4 (Receiver Expected Actions) and 2:3.YY4.5 (Security).
+Source: sections 2:3.YY4.4.1.3 (Expected Actions) and 2:3.YY4.5 (Security).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
@@ -447,7 +447,7 @@ enforcement, expiry enforcement, PHI exclusion from the QR payload, and acknowle
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 VHL Receiver Initiator Expected Actions** – Verifies request construction (HTTP POST
 /List/_search), HTTP Message Signature creation (Content-Digest, Signature-Input with keyid/alg/created,
-Signature), OAuth with FAST Option (client_credentials, private_key_jwt, required scopes, Bearer
+Signature), Sign Manifest Request Option (OAuth with SSRAA) (client_credentials, private_key_jwt, required scopes, Bearer
 header, token caching), TLS requirements, and Bundle response processing (match/include search.mode,
 individual DocumentReference retrieval fallback).
 Source: sections 2:3.YY5.4.1 (Request Message) and 2:3.YY5.5.2 (HTTP Message Signatures).

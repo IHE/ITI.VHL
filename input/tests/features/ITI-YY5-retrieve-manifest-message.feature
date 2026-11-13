@@ -1,9 +1,9 @@
 Feature: ITI-YY5 Retrieve Manifest – Message Semantics
   Defines the format of the ITI-YY5 request and response messages.
   The request is an HTTP POST to /List/_search with FHIR search parameters
-  and SHL parameters. Where the Sign Manifest Request Option is in use, authentication
-  is via one of its mechanisms: HTTP Message Signatures (RFC 9421), OAuth with SSRAA,
-  or Verifiable Credential. The response is a FHIR searchset Bundle.
+  and SHL parameters. Where one of the Sign Manifest Request Options is in use,
+  authentication is via that option: HTTP Message Signatures (RFC 9421), OAuth with
+  SSRAA, or Verifiable Credential. The response is a FHIR searchset Bundle.
   Defined once here for both the VHL Receiver (initiator) and VHL Sharer (responder).
 
   Background:
@@ -84,7 +84,7 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
     When the optional SHL parameters are assembled
     Then the body MAY include an "embeddedLengthMax" integer parameter
 
-  # ─── Request: HTTP Message Signature Headers (when Mechanism A is used) ────────
+  # ─── Request: HTTP Message Signature Headers ───────────────────────────────────
 
   @message-semantics @SHALL
   Scenario: Request includes Content-Digest header with SHA-256 hash of the body when HTTP signatures are used
@@ -121,11 +121,11 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
       | rsa-pss-sha256      |
       | rsa-v1_5-sha256     |
 
-  # ─── Request: OAuth with SSRAA Headers (when Mechanism B is used) ───────
+  # ─── Request: OAuth with SSRAA Headers ──────────────────────────────────
 
   @message-semantics @SHALL
   Scenario: Request includes Authorization Bearer header when OAuth with SSRAA is used
-    Given the VHL Receiver is authenticating using the OAuth with SSRAA mechanism
+    Given the VHL Receiver is authenticating under the OAuth with SSRAA option
     When the authorization header is set
     Then the request SHALL include "Authorization: Bearer <access-token>"
 
@@ -166,8 +166,8 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
       | error_condition                                       | http_status              |
       | Malformed request or missing required parameters      | 400 Bad Request          |
       | Signature verification failed or receiver unknown     | 401 Unauthorized         |
-      | VHL expired, revoked, or does not authorize access    | 403 Forbidden            |
-      | List resource with specified _id not found            | 404 Not Found            |
-      | Invalid or missing passcode                           | 422 Unprocessable Entity |
+      | VHL does not authorize the requested documents        | 403 Forbidden            |
+      | List _id not found, or the VHL is no longer active    | 404 Not Found            |
+      | Invalid or missing passcode                           | 401 Unauthorized         |
       | Rate limit exceeded                                   | 429 Too Many Requests    |
       | Internal server error                                 | 500 Internal Server Error|

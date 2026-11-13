@@ -225,7 +225,7 @@ Trust list retrieval is subject to the secure channel requirements in [Volume 1 
 
 Clients ({{ linkvhlr }}s and {{ linkvhls }}s) SHOULD check that key types and algorithms are acceptable per their trust framework policy.
 
-Because a `did:web` DID Document is retrieved over HTTPS, and the identifier carries no inherent binding to the content returned, transport security alone does not establish that a trust list is authentic — whoever controls the host controls the content served. The `proof` over the document is what establishes authenticity, and clients SHALL verify it before use.
+Because a `did:web` DID Document is retrieved over HTTPS, and the identifier carries no inherent binding to the content returned, transport security alone does not establish that a trust list is authentic — whoever controls the host controls the content served. The `proof` over the document is what establishes authenticity, which is why verifying it before any of the document's content is relied upon is required at [2:3.YY2.4.2.3 Expected Actions](#23yy2423-expected-actions).
 
 Where key material is Certificate Authority-issued, clients SHALL validate the `x5c` chain to a recognized certificate authority before using a key. Extracting a public key from a retrieved DID Document without validating its chain reduces a certificate hierarchy to the assertion that a key was present in a document, discarding the authority the hierarchy exists to convey.
 

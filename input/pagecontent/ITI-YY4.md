@@ -1,6 +1,8 @@
 {% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
+> **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for both the VHL Holder (Initiator) and the VHL Receiver (Responder). Optional behaviors within this transaction, such as the VC Enveloped VHL Option, are defined as actor options for this transaction.
+
  {% assign provideVHL = site.data.Requirements-ProvideVHL %}
  {% assign provideVHLResp = site.data.Requirements-RespondtoProvideVHL %}
 
@@ -24,21 +26,27 @@ The VHL is transmitted as a QR code containing an HCERT-encoded payload with the
 
 | Actor | Role |
 |-------|------|
-| {{ linkvhlh }} | Provides the VHL to a VHL Receiver through a supported transmission mechanism |
-| {{ linkvhlr }} | Receives the VHL from a VHL Holder and prepares to retrieve the referenced health documents |
+| {{ linkvhlh }} | {{ provideVHLTitle.valueString }} |
+| {{ linkvhlr }} | {{ provideVHLRespTitle.valueString }} |
 {: .grid}
 
 ### 2:3.YY4.3 Referenced Standards
-- **RFC 7515**: JSON Web Signature (JWS)
-- **RFC 7519**: JSON Web Token (JWT)
+- **SMART Health Links Specification**: [VHL Payload Structure](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)
 - **RFC 4648**: Base64url Encoding
+
+**QR Code Carrier:**
+- **WHO SMART Trust HCERT Specification**: [HCERT Structure](https://smart.who.int/trust/hcert_spec.html)
 - **RFC 8392**: CBOR Web Token (CWT)
 - **RFC 8152**: CBOR Object Signing and Encryption (COSE)
 - **RFC 1950**: ZLIB Compressed Data Format
 - **RFC 1951**: DEFLATE Compressed Data Format
+- **RFC 9285**: [The Base45 Data Encoding](https://www.rfc-editor.org/rfc/rfc9285.html)
 - **ISO/IEC 18004:2015**: QR Code specification
-- **SMART Health Links Specification**: [VHL Payload Structure](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)
-- **WHO SMART Trust HCERT Specification**: [HCERT Structure](https://smart.who.int/trust/hcert_spec.html)
+
+**VC Enveloped VHL Option (Optional):**
+- **W3C VC Data Model v2**: [Verifiable Credentials Data Model v2](https://www.w3.org/TR/vc-data-model-2.0/)
+- **W3C Data Integrity**: [Verifiable Credential Data Integrity 1.0](https://www.w3.org/TR/vc-data-integrity/) — `DataIntegrityProof`
+- **W3C Data Integrity ECDSA Cryptosuites**: [ecdsa-rdfc-2019 / ecdsa-jcs-2019](https://www.w3.org/TR/vc-di-ecdsa/)
 
 ### 2:3.YY4.4 Messages
 
@@ -58,6 +66,23 @@ A VHL Holder initiates the Provide VHL transaction when:
 - The VHL Holder wishes to grant access to their health documents to a VHL Receiver
 - The VHL Holder has obtained a valid VHL from a VHL Sharer (via ITI-YY3 Generate VHL transaction)
 - The VHL Holder encounters a VHL Receiver capable of processing VHLs in a relevant healthcare context
+
+Before transmitting, the {{ linkvhlh }} SHALL:
+
+**QR Code Transmission:**
+1. Verify QR code validity (not expired, CWT signature valid)
+2. Display QR code on device screen or provide printed copy
+3. Ensure QR code is displayed at appropriate size for reliable scanning
+4. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
+
+**Verifiable Credential Transmission**, where the {{ linkvhls }} supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc):
+1. Verify the VC is valid (`validUntil` not passed, `DataIntegrityProof` intact)
+2. Transmit the `application/vc` document to the {{ linkvhlr }} via an agreed channel (HTTPS, email attachment, file transfer, or NFC)
+3. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
+
+The {{ linkvhlh }} MAY:
+- Maintain record of VHL presentations (QR or VC)
+- Revoke VHL access if supported by VHL Sharer
 
 ##### 2:3.YY4.4.1.2 Message Semantics
 
@@ -80,28 +105,7 @@ When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-envel
 - The VC carries the VHL as the `vhlink:` URI at `credentialSubject.id` — the same payload the QR carrier places at HCERT claim key 5, though encoded as a URI rather than as a CBOR map — and is signed by the VHL Sharer with a `DataIntegrityProof` (cryptosuite per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection))
 - Suitable for machine-to-machine transfer and asynchronous delivery scenarios where QR presentation is impractical
 
-##### 2:3.YY4.4.1.3 Expected Actions - VHL Holder
-
-**QR Code Transmission:**
-
-The VHL Holder SHALL:
-1. Verify QR code validity (not expired, CWT signature valid)
-2. Display QR code on device screen or provide printed copy
-3. Ensure QR code is displayed at appropriate size for reliable scanning
-4. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
-
-**Verifiable Credential Transmission (VC Enveloped VHL Option):**
-
-When the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc), the VHL Holder SHALL:
-1. Verify the VC is valid (`validUntil` not passed, `DataIntegrityProof` intact)
-2. Transmit the `application/vc` document to the VHL Receiver via an agreed channel (HTTPS, email attachment, file transfer, or NFC)
-3. Provide passcode out-of-band if VHL is passcode-protected (P flag present)
-
-The VHL Holder MAY:
-- Maintain a record of VHL presentations (QR or VC)
-- Revoke VHL access if supported by the VHL Sharer
-
-##### 2:3.YY4.4.1.4 Expected Actions - VHL Receiver
+##### 2:3.YY4.4.1.3 Expected Actions
 
 {{ provideVHLRespDescription.valueMarkdown }}
 
@@ -134,7 +138,7 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
    - Extract the CWT structure containing protected header and claims
    - Protected header contains:
      - `alg` (algorithm): selected per [Cryptographic Algorithm Selection](volume-1.html#1xx53-cryptographic-algorithm-selection)
-     - `kid` (key identifier): 8-byte truncated SHA-256 of DSC
+     - `kid` (key identifier): the identifier the trust framework derives from the DSC, matched against the verification methods in the trust list
    - Handle CBOR parsing errors
 
 6. **Verify Digital Signature**:
@@ -168,7 +172,7 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
 9. **Validate VHL Payload**:
    - Verify `url` field is present and is a valid HTTPS URL
    - Verify `key` field is present and is 43 characters (base64url-encoded 32 bytes)
-   - Check the payload's `exp` (if present) - reject if current time > expiration
+   - Check the payload's `exp` (if present)
    - Note `flag` value:
      - "L" indicates long-term use
      - "P" indicates passcode required (obtain from VHL Holder)
@@ -195,7 +199,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
 1. **Store Decryption Key Securely**:
    - The `key` parameter from the VHL payload is required to decrypt documents
    - Store the key securely in memory for the session
-   - The key will be used during document retrieval ([ITI-68](https://profiles.ihe.net/ITI/MHD/ITI-68.html)) to decrypt document contents
+   - The key will be used during document retrieval via [Retrieve Document [ITI-68]](https://profiles.ihe.net/ITI/MHD/ITI-68.html) to decrypt document contents
 
 2. **Parse Manifest URL**:
    - Extract the manifest URL from the VHL payload
@@ -205,7 +209,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
      - `status`: Typically "current"
      - `patient.identifier`: Patient business identifier via FHIR chained search on the patient reference parameter, in `system|value` format. This is the same identifier the VHL Holder supplied as `sourceIdentifier` at [ITI-YY3](ITI-YY3.html).
      - `_include=List:item`: (if VHL Sharer supports Include DocumentReference Option)
-   - Example: `https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item`
+   - Example: `https://vhl-sharer.example.org/List?_id=lHBSyhoJRJiO7zU0pxJLPA3traJm0sx2CsO9m6ABOAT&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item`
 
 3. **Prepare to Retrieve Manifest**: as per [ITI-YY5](ITI-YY5.html)
 
@@ -237,7 +241,7 @@ Step 8: Within hcert (claim -260), read claim key 5. It is a CBOR map with text 
         Where key 5 is instead a vhlink:/ string, as earlier drafts specified, strip
         the prefix and base64url-decode it. Either way the payload is:
   {
-    "url": "https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
+    "url": "https://vhl-sharer.example.org/List?_id=lHBSyhoJRJiO7zU0pxJLPA3traJm0sx2CsO9m6ABOAT&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item",
     "key": "86F8LY5LlWAa1-OS_FgrTnYNqFHJP2ey5RSKLJBN9jk",
     "flag": "LP",
     "exp": 1735689600,
@@ -252,13 +256,13 @@ parameters, cache the key, and prepare for ITI-YY5 Retrieve Manifest.
 
 **Manifest URL Parsing:**
 
-The manifest URL from the VHL payload contains all FHIR search parameters needed for [ITI-YY5](ITI-YY5.html):
+The manifest URL from the VHL payload contains all parameters needed for [Retrieve Manifest [ITI-YY5]](ITI-YY5.html):
 
 ```
-URL: https://vhl-sharer.example.org/List?_id=abc123def456&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
+URL: https://vhl-sharer.example.org/List?_id=lHBSyhoJRJiO7zU0pxJLPA3traJm0sx2CsO9m6ABOAT&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item
 
 Parsed FHIR Search Parameters (for ITI-YY5):
-- _id=abc123def456
+- _id=lHBSyhoJRJiO7zU0pxJLPA3traJm0sx2CsO9m6ABOAT
 - code=folder
 - status=current
 - patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123
@@ -289,10 +293,11 @@ If signature verification fails:
 - VHL Receiver SHOULD inform user/operator
 - VHL Receiver MAY log failed verification
 
-If VHL expired (either exp in CWT or VHL payload):
+If the CWT `exp` claim has passed, the signed token is no longer valid:
 - VHL Receiver SHALL reject the VHL
 - VHL Receiver SHOULD inform user/operator
 - User may request new VHL from VHL Holder
+
 
 #### 2:3.YY4.4.2 Provide VHL Response Message
 
@@ -325,18 +330,19 @@ For transmission mechanisms supporting bidirectional communication, the response
 
 ### 2:3.YY4.5 Security Considerations
 
+Where the VHL is transmitted over HTTP between the two actors, the secure channel requirements in [Volume 1 Section XX.5.2 Secure Channel Requirements](volume-1.html#1xx52-secure-channel-requirements) apply. Several of the transmission mechanisms this transaction allows are not HTTP exchanges — a printed QR code, or one displayed on a screen — and for those the {{ linkvhlh }} is responsible for presenting the VHL only to an intended {{ linkvhlr }}, since no transport control stands between them.
+
 #### 2:3.YY4.5.1 VHL Integrity and Authenticity
 - Digital signature ensures VHL issued by trusted VHL Sharer
 - CWT signature provides end-to-end trust verification
 
 #### 2:3.YY4.5.2 VHL Confidentiality
-- VHL does NOT contain clinical content; it does carry the patient business identifier in the manifest URL and a free-text label (see [ITI-YY5 Privacy of Request Metadata](ITI-YY5.html#23yy556-privacy-of-request-metadata))
-- VHL only contains a reference (URL) to retrieve documents
-- Actual documents retrieved over secure channel (ITI-YY5)
+- The VHL carries no clinical data, but it is not a public link. It carries the decryption `key`, the optional `label`, and a manifest URL that itself contains the patient business identifier — so the VHL as a whole is sensitive, and warrants the handling given to a credential rather than to a link. See [ITI-YY3 Encryption Key Security](ITI-YY3.html#23yy351-encryption-key-security) and [ITI-YY5 Privacy of Request Metadata](ITI-YY5.html#23yy556-privacy-of-request-metadata).
+- Document content is held separately and retrieved at [Retrieve Manifest [ITI-YY5]](ITI-YY5.html), over the secure channel and encrypted to the `key`.
 
 #### 2:3.YY4.5.3 Replay Attacks
 - VHL Sharers SHOULD include expiration timestamps in both CWT and VHL payload
-- VHL Receivers SHOULD enforce expiration validation
+- The two expiration fields carry different force. The CWT `exp` claim bounds the validity of the signed token, and rejecting a VHL whose CWT has expired is required at [2:3.YY4.4.1.3 Expected Actions](#23yy4413-expected-actions). The VHL payload `exp` is a hint to the {{ linkvhlr }} per [SMART Health Links](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html); what denies access is deactivation of the VHL by the {{ linkvhls }}, which a {{ linkvhlr }} observes as `404 Not Found` at [ITI-YY5](ITI-YY5.html)
 - VHL Sharers MAY implement single-use VHLs
 - Short expiration times reduce replay attack window
 

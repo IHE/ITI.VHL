@@ -150,7 +150,7 @@ A critical privacy requirement for the EVC is unlinkability: Article 5a(16) of [
 
 > (b) enable privacy preserving techniques which ensure unlinkability, where the attestation of attributes does not require the identification of the user.
 
-The **Verifiable Credential mechanism** of the Sign Manifest Request Option (ITI-YY5 Section 2:3.YY5.4.1.5) is relevant to the EUVAC context: the self-issued VC binds each manifest request cryptographically to the receiver's identity and the specific decoded manifest, ensuring the VHL Sharer can authenticate the receiver without maintaining a persistent session or correlating requests across VHL presentations — supporting the unlinkability requirements above when combined with appropriate key management practices.
+The **Sign Manifest Request Option (Verifiable Credential)** (ITI-YY5 Section 2:3.YY5.4.1.6) is relevant to the EUVAC context: the self-issued VC binds each manifest request cryptographically to the receiver's identity and the specific decoded manifest, ensuring the VHL Sharer can authenticate the receiver without maintaining a persistent session or correlating requests across VHL presentations — supporting the unlinkability requirements above when combined with appropriate key management practices.
 """
 
 
@@ -172,7 +172,7 @@ TEFCA's trust model aligns with the VHL profile's trust network architecture. In
 - TEFCA's credential and certificate management infrastructure can serve as a trust anchor for VHL exchanges
 - The individual (patient) retains control over sharing their health records via VHL, consistent with TEFCA's patient access principles
 
-**OAuth with SSRAA mechanism of the Sign Manifest Request Option:**
+**Sign Manifest Request Option (OAuth with SSRAA):**
 
 Organizations already using OAuth with UDAP (via the [HL7 SSRAA IG](http://hl7.org/fhir/us/udap-security/)) can leverage VHL for health record sharing without additional authentication infrastructure. TEFCA participants, for example, can use their existing TEFCA-issued X.509 certificates and UDAP Dynamic Client Registration to authenticate VHL exchanges, enabling seamless interoperability within established national-scale health information networks.
 """

@@ -9,7 +9,7 @@ The payload carried by a Verifiable Health Link.
 
 This model specializes the [SMART Health Link Payload](http://hl7.org/fhir/uv/smart-health-cards-and-links/StructureDefinition-ShlPayload.html).
 
-Two things distinguish this model from its parent: the `U` flag is not used, and `extension.fhirBaseUrl` is defined for the OAuth with SSRAA mechanism of the Sign Manifest Request Option. See [Generate VHL [ITI-YY3]](ITI-YY3.html) for the construction steps.
+Two things distinguish this model from its parent: the `U` flag is not used, and `extension.fhirBaseUrl` is defined for the Sign Manifest Request Option (OAuth with SSRAA). See [Generate VHL [ITI-YY3]](ITI-YY3.html) for the construction steps.
 
 **Carriers.** This model defines the payload's fields, not its serialization, and the two carriers in this profile encode it differently:
 
@@ -32,11 +32,11 @@ The WHO SMART Trust HCERT specification types claim key 5 against this model; se
 // Added by this profile.
 
 * extension 0..1 BackboneElement "Implementation-defined extensions" """
-Object carrying implementation-defined extensions. Required when the VHL Sharer supports the OAuth with SSRAA mechanism of the Sign Manifest Request Option.
+Object carrying implementation-defined extensions. Required when the VHL Sharer claims the Sign Manifest Request Option (OAuth with SSRAA).
 """
 
 * extension.fhirBaseUrl 0..1 string "FHIR base URL of the VHL Sharer" """
 The FHIR base URL of the VHL Sharer, for example `https://vhl-sharer.example.org`. It lets the VHL Receiver perform UDAP Discovery and Dynamic Client Registration with the VHL Sharer before making an authenticated manifest request through ITI-YY5.
 
-Where the VHL Sharer does not support the OAuth with SSRAA mechanism this element SHALL NOT be present, so that VHL Receivers are not led into attempting UDAP Discovery unnecessarily.
+Where the VHL Sharer does not claim that option this element SHALL NOT be present, so that VHL Receivers are not led into attempting UDAP Discovery unnecessarily.
 """
