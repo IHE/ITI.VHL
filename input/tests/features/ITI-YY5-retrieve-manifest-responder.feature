@@ -7,7 +7,7 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Given the VHL Sharer has received an HTTP POST to "/List/_search"
     And the VHL Sharer has access to the trust list
 
-  # ─── HTTP Message Signature Verification (Option A) ─────────────────────────
+  # ─── HTTP Message Signature Verification ───────────────────────────────────────
 
   @responder-actions @SHALL
   Scenario: VHL Sharer extracts keyid from the Signature-Input header when HTTP signatures are used
@@ -57,7 +57,7 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the timestamp is validated
     Then the VHL Sharer SHALL proceed with processing the request
 
-  # ─── OAuth with SSRAA Option Verification (Option B) ───────────────────────
+  # ─── OAuth with SSRAA Verification ─────────────────────────────────────
 
   @responder-actions @SHALL
   Scenario: VHL Sharer validates an OAuth Bearer token when SSRAA Option is supported
@@ -95,12 +95,21 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
 
   # ─── §2:3.YY5.5.5 Trust Network Validation ────────────────────────────────
 
-  @security @SHALL
-  Scenario: VHL Sharer authenticates the VHL Receiver's participation in the trust network
-    Given a Retrieve Manifest request is received
+  @security @option-sign-manifest-request @SHALL
+  Scenario: VHL Sharer claiming a Sign Manifest Request Option authenticates the VHL Receiver
+    Given the VHL Sharer claims one of the Sign Manifest Request Options
+    And a Retrieve Manifest request is received
     When the VHL Sharer processes authentication
     Then the VHL Sharer SHALL authenticate the VHL Receiver's participation in the trust network
     And SHALL reject requests from participants not in the trust list with HTTP 401 Unauthorized
+
+  @security @option-sign-manifest-request
+  Scenario: VHL Sharer claiming no Sign Manifest Request Option does not authenticate the Receiver
+    Given the VHL Sharer claims none of the Sign Manifest Request Options
+    And a Retrieve Manifest request is received
+    When the VHL Sharer processes the request
+    Then the VHL Sharer SHALL NOT require a Receiver credential
+    And SHALL proceed to validate the presented VHL and any required passcode
 
   @security @SHALL
   Scenario: VHL Sharer validates certificates are not expired or revoked
@@ -115,7 +124,7 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Given the request body includes "_id=abc123def456"
     When the VHL Sharer performs VHL authorization
     Then the VHL Sharer SHALL confirm a valid VHL with that folder ID exists
-    And SHALL return HTTP 403 Forbidden if no matching VHL is found
+    And SHALL return HTTP 404 Not Found if no matching VHL is found
 
   @responder-actions @SHALL
   Scenario: VHL Sharer validates the VHL COSE signature from HCERT
@@ -124,29 +133,29 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     Then the VHL Sharer SHALL validate the VHL signature (HCERT/CWT COSE signature from ITI-YY3)
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer rejects a request for an expired VHL with HTTP 403
-    Given the VHL associated with the folder ID has an expired "exp" claim
-    When the VHL Sharer checks expiry
-    Then the VHL Sharer SHALL return HTTP 403 Forbidden
+  Scenario: VHL Sharer rejects a request for a VHL that is no longer active with HTTP 404
+    Given the VHL associated with the folder ID has been deactivated
+    When the VHL Sharer confirms whether the VHL is still active
+    Then the VHL Sharer SHALL return HTTP 404 Not Found
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer rejects a request for a revoked VHL with HTTP 403
+  Scenario: VHL Sharer rejects a request for a revoked VHL with HTTP 404
     Given the VHL associated with the folder ID has been revoked
     When the VHL Sharer checks revocation status
-    Then the VHL Sharer SHALL return HTTP 403 Forbidden
+    Then the VHL Sharer SHALL return HTTP 404 Not Found
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer validates passcode using constant-time comparison when P flag is set
+  Scenario: VHL Sharer validates the passcode against the stored hash when the P flag is set
     Given the VHL has a P flag and the request includes "passcode=user-pin"
     When the passcode is validated
-    Then the VHL Sharer SHALL compare using constant-time comparison against the stored hash
-    And SHALL return HTTP 422 Unprocessable Entity if the passcode is incorrect
+    Then the VHL Sharer SHALL validate the passcode against the stored hash using a secure comparison
+    And SHALL return HTTP 401 Unauthorized if the passcode is incorrect
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer returns HTTP 422 when a required passcode is missing
+  Scenario: VHL Sharer returns HTTP 401 when a required passcode is missing
     Given the VHL has a P flag and the request body includes no "passcode" parameter
     When the VHL Sharer processes the request
-    Then the VHL Sharer SHALL return HTTP 422 Unprocessable Entity
+    Then the VHL Sharer SHALL return HTTP 401 Unauthorized
 
   # ─── FHIR Search Execution ────────────────────────────────────────────────────
 

@@ -1,24 +1,25 @@
-
-
 @startuml
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 30
+skinparam ranksep 55
+skinparam defaultFontSize 12
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #2B2B2B
+  FontColor #000000
+}
 top to bottom direction
-skinparam nodesep 75
 
-title VHL Utilization Actor Diagram
-
-
-agent "Holder" as H
-agent "VHL Sharer" as VHLS
-agent "VHL Receiver" as VHLR
-
+rectangle "VHL Sharer" as VHLS
+rectangle "VHL Holder" as H
+rectangle "VHL Receiver" as VHLR
 
 url of H is [[ActorDefinition-VHLHolder.html]]
 url of VHLR is [[ActorDefinition-VHLReceiver.html]]
 url of VHLS is [[ActorDefinition-VHLSharer.html]]
 
-H -- VHLS : _"Generate VHL"
-H -- VHLR : "Provide VHL"
-
-VHLS -r- VHLR : _"Establish Secure Connection\nRequest Document\nRequest Documents"
-
+VHLS -- H : "  Generate VHL [ITI-YY3]"
+H -- VHLR : "  Provide VHL [ITI-YY4]"
+VHLS -- VHLR : "  Retrieve Manifest [ITI-YY5]"
 @enduml

@@ -6,7 +6,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-A [VHL Holder](ActorDefinition-VHLHolder.html) initiates a request to a [VHL Sharer](ActorDefinition-VHLSharer.html) to generate a Verified Health Link (VHL) that references one or more health documents. The resulting VHL allows the Holder to subsequently share access to those documents with a [VHL Receiver](ActorDefinition-VHLReceiver.html).
+A [VHL Holder](ActorDefinition-VHLHolder.html) initiates a request to a [VHL Sharer](ActorDefinition-VHLSharer.html) to generate a Verifiable Health Link (VHL) that references one or more health documents. The resulting VHL allows the Holder to subsequently share access to those documents with a [VHL Receiver](ActorDefinition-VHLReceiver.html).
 The Holder MAY include optional parameters to constrain or protect the issued VHL-such as defining an expiration period, scoping which documents are included, or requiring a passcode for retrieval. These parameters guide the Sharer's issuance of the VHL and influence the conditions under which the associated documents may be accessed.
 
 **Preconditions:**
@@ -16,7 +16,7 @@ The Holder MAY include optional parameters to constrain or protect the issued VH
 * actor[+] = Canonical(VHLHolder)
 * statement[+].key = "initiate-request"
 * statement[=].label = "Initiate Request"
-* statement[=].requirement = "Initiate a request to generate a Verified Health Link (VHL)"
+* statement[=].requirement = "Initiate a request to generate a Verifiable Health Link (VHL)"
 * statement[=].conformance = #SHALL
 
 Instance: RespondtoGenerateVHLRequest
@@ -28,7 +28,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Sharer](ActorDefinition-VHLSharer.html) SHALL generate a Verified Health Link (VHL) to be issued to a [VHL Holder](ActorDefinition-VHLHolder.html).
+The [VHL Sharer](ActorDefinition-VHLSharer.html) SHALL generate a Verifiable Health Link (VHL) to be issued to a [VHL Holder](ActorDefinition-VHLHolder.html).
 
 The Sharer SHALL conduct all necessary tasks to prepare the content referenced by the VHL. These tasks MAY be further defined by applicable content profiles or implementation guides, and MAY include:
 * Generation of new documents in real time;
@@ -66,7 +66,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Sharer](ActorDefinition-VHLSharer.html) SHALL record the consent granted by a [VHL Holder](ActorDefinition-VHLHolder.html) to authorize the sharing of their health data via a Verified Health Link (VHL). This consent confirms that the Holder agrees to the creation of a VHL and its use by authorized [VHL Receivers](ActorDefinition-VHLReceiver.html) to access specific health documents.
+The [VHL Sharer](ActorDefinition-VHLSharer.html) SHALL record the consent granted by a [VHL Holder](ActorDefinition-VHLHolder.html) to authorize the sharing of their health data via a Verifiable Health Link (VHL). This consent confirms that the Holder agrees to the creation of a VHL and its use by authorized [VHL Receivers](ActorDefinition-VHLReceiver.html) to access specific health documents.
 
 In this requirement, the VHL Sharer acts as a Consent Recorder, as defined in the [Privacy Consent on FHIR (PCF)](https://profiles.ihe.net/ITI/PCF/index.html) profile. Specifically, the Sharer SHALL initiate the [Access Consent - ITI-108](https://profiles.ihe.net/ITI/PCF/ITI-108.html) transaction to formally capture the Holder's consent.
 
@@ -107,7 +107,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Sharer](ActorDefinition-VHLSharer.html) MAY record audit events when health data is accessed through a Verified Health Link (VHL). These events support accountability, traceability, and compliance with applicable security and privacy regulations.
+The [VHL Sharer](ActorDefinition-VHLSharer.html) MAY record audit events when health data is accessed through a Verifiable Health Link (VHL). These events support accountability, traceability, and compliance with applicable security and privacy regulations.
 
 Audit records MAY include the following metadata:
 * Timestamp of the access event
@@ -130,7 +130,7 @@ Usage: #definition
 * publisher = "IHE"
 * description = """
 **Purpose:**  
-Ensure that the VHL Sharer records audit events when health documents are accessed or retrieved using a Verified Health Link (VHL).
+Ensure that the VHL Sharer records audit events when health documents are accessed or retrieved using a Verifiable Health Link (VHL).
 
 **Description:**  
 The [VHL Sharer](ActorDefinition-VHLSharer.html) MAY record audit events for critical events involving document access. These MAY include:
@@ -151,7 +151,7 @@ Usage: #definition
 * publisher = "IHE"
 * description = """
 **Purpose:**  
-Ensure that the VHL Receiver generates audit records when receiving and using a Verified Health Link (VHL) to retrieve health information, in support of accountability and traceability.
+Ensure that the VHL Receiver generates audit records when receiving and using a Verifiable Health Link (VHL) to retrieve health information, in support of accountability and traceability.
 
 **Description:**  
 The [VHL Receiver](ActorDefinition-VHLReceiver.html) MAY record audit events for critical events during its handling of a VHL. These MAY include:
@@ -173,7 +173,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-Before participating in any Verified Health Link (VHL) transactions, the [VHL Sharer](ActorDefinition-VHLSharer.html) and [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL establish a trust relationship based on shared acceptance of a designated [Trust Anchor](ActorDefinition-TrustAnchor.html).
+Before participating in any Verifiable Health Link (VHL) transactions, the [VHL Sharer](ActorDefinition-VHLSharer.html) and [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL establish a trust relationship based on shared acceptance of a designated [Trust Anchor](ActorDefinition-TrustAnchor.html).
 
 Trust is established by referencing and accepting public key material published and distributed in accordance with this specification ( via [Retrieve Trust List Response](Requirements-RespondtoRetrieveTrustListRequest.html)).
 
@@ -191,7 +191,12 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-When a [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html) generates a new public-private key pair for use within the VHL trust network, they SHALL submit the corresponding public key material to the [Trust Anchor](ActorDefinition-TrustAnchor.html) for validation and inclusion in the trust list.
+When a [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html) obtains new key material for use within the VHL trust network, they SHALL submit the corresponding public key material to the [Trust Anchor](ActorDefinition-TrustAnchor.html) for validation and inclusion in the trust list.
+
+Key material is obtained by one of two paths, as determined by the governing trust framework:
+
+* **Self-generated** or
+* **Certificate Authority (CA) issued**
 
 The submission MAY include metadata to support categorization of key usage (e.g., digital signatures, encryption, secure channels) and business or operational context.
 """
@@ -200,9 +205,9 @@ The submission MAY include metadata to support categorization of key usage (e.g.
 * actor[+] = Canonical(VHLReceiver)
 
 * statement[+].key = "generate-private-public-key-pair"
-* statement[=].label = "Generate Private-Public Key Pair"
+* statement[=].label = "Obtain Trust Network Key Material"
 * statement[=].requirement = """
-Generate one or more private-public key pairs for use within the VHL trust network. Key pairs SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or secure channels) and MAY be categorized by business domain or participant role.
+Obtain one or more sets of key material for use within the VHL trust network, either by generating private-public key pairs directly or by obtaining certificates issued under a Certificate Authority recognized by the trust framework. Key material SHOULD be scoped to specific usage contexts (e.g., signing, encryption, or secure channels) and MAY be categorized by business domain or participant role.
 """
 * statement[=].conformance = #SHALL
 * statement[+].key = "prepare-submission-metadata"
@@ -243,7 +248,12 @@ Upon receipt of public key material from a [VHL Sharer](ActorDefinition-VHLShare
 
 * statement[+].key = "validate-pki-material"
 * statement[=].label = "Validate PKI Material"
-* statement[=].requirement = "Validate submitted PKI material in accordance with the certificate governance policies of the Trust Anchor. Validation SHALL include checks on cryptographic algorithm conformity, expiration dates, and valid certificate chains to a trusted authority."
+* statement[=].requirement = "Validate submitted PKI material in accordance with the certificate governance policies of the Trust Anchor. Validation SHALL include checks on cryptographic algorithm conformity, expiration dates, and certificate chains that resolve back to a certificate verifiable against one of the public keys pre-shared with the trust network at the time of onboarding."
+* statement[=].conformance = #SHALL
+
+* statement[+].key = "validate-submitter-identity"
+* statement[=].label = "Validate Submitter Identity"
+* statement[=].requirement = "Where the submitted material is issued by a Certificate Authority, validate that the certificate subject corresponds to the authenticated identity of the submitting participant, so that a participant cannot publish key material on behalf of another. The means of authenticating the submitting participant are determined by the governing trust framework."
 * statement[=].conformance = #SHALL
 
 Instance:   InitiateRetrieveTrustListRequest
@@ -267,7 +277,10 @@ The retrieved material MAY include:
 Participants SHOULD cache the received trust list to reduce network and server load.
 
 **Preconditions:**
+* The Trust Anchor SHALL have made available at least one endpoint (such as an mCSD-compliant endpoint) that is accessible to all participants in the trust network.
 * The requesting participant knows in advance the endpoint from which to retrieve PKI material, as published or distributed by the Trust Anchor.
+* The requesting participant holds the Trust Anchor's public key, shared with the participant at the time of onboarding, with which to verify the cryptographic proof over the retrieved trust list.
+* The Trust Anchor MAY additionally provide individual endpoints per participant, in addition to the common endpoint.
 """
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(VHLSharer)
@@ -289,8 +302,6 @@ This MAY include:
 * Usage metadata (e.g., key type, scope, intended usage)
 
 The Trust Anchor SHALL only respond with validated and trustworthy material in accordance with the governance policies of the VHL trust framework. This signed trust list enables all participants in the VHL trust network to verify digital signatures and establish secure connections in accordance with the governance policies of the Trust Anchor.
-
-Upon receipt of this response, participants SHALL process the trust list as described in [Receive Trust List](Requirements-ReceiveTrustList.html).
 """
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(TrustAnchor)
@@ -320,7 +331,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The Provide VHL transaction enables a [VHL Holder](ActorDefinition-VHLHolder.html) to transmit a Verified Health Link (VHL) to a [VHL Receiver](ActorDefinition-VHLReceiver.html). The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer.
+The Provide VHL transaction enables a [VHL Holder](ActorDefinition-VHLHolder.html) to transmit a Verifiable Health Link (VHL) to a [VHL Receiver](ActorDefinition-VHLReceiver.html). The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer.
 
 Depending on the use case, the VHL MAY be rendered or transmitted using formats such as QR code or deep link (HTTPS URL). 
 """
@@ -340,7 +351,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL be capable of receiving a Verified Health Link (VHL) from a [VHL Holder](ActorDefinition-VHLHolder.html) through a supported transport mechanism (e.g., QR code scan, direct URL, or digital message).
+The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL be capable of receiving a Verifiable Health Link (VHL) from a [VHL Holder](ActorDefinition-VHLHolder.html) through a supported transport mechanism (e.g., QR code scan, direct URL, or digital message).
 
 Upon receipt, the Receiver SHALL:
 * Parse the VHL
@@ -359,9 +370,9 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL initiate a request to retrieve a set of health documents from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL).
+The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL initiate a request to retrieve a set of health documents from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verifiable Health Link (VHL).
 
-Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
+The Receiver SHALL have verified the VHL signature against PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html) before making the request. Validation in the other direction — the Sharer establishing the Receiver's participation in the trust network — applies where one of the Sign Manifest Request Options is in use, and is optional.
 
 **Optional behaviors:**
 * The VHL Sharer MAY record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement.
@@ -381,6 +392,42 @@ Both the Receiver and Sharer SHALL validate each other's participation in the tr
 * statement[=].requirement = "Record an audit event documenting the access request by the Receiver, in accordance with the [Audit Event – Received Health Data](Requirements-AuditEventReceived.html) requirement"
 * statement[=].conformance = #MAY
 
+Instance:   RespondtoRequestVHLDocuments
+InstanceOf: Requirements
+Usage: #definition
+* name = "RespondtoRequestVHLDocuments"
+* title = "Respond to Request VHL Documents"
+* status = $pubStatus#active
+* publisher = "IHE"
+* description = """
+The [VHL Sharer](ActorDefinition-VHLSharer.html) SHALL respond to a manifest request from a [VHL Receiver](ActorDefinition-VHLReceiver.html) that presents a previously issued Verifiable Health Link (VHL), returning only those documents the VHL authorizes.
+
+Before any manifest content is released, the Sharer SHALL establish that the VHL presented is valid and authorizes what is being requested.
+
+Authentication of the requesting Receiver is a separate and optional control, provided by the three Sign Manifest Request Options. Where the Sharer claims one of them it authenticates the Receiver against the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html) before releasing any manifest content. Where it does not, release of the manifest follows from a valid VHL and, where the `P` flag is set, the correct passcode.
+
+**Optional behaviors:**
+* The VHL Sharer MAY record an audit event documenting the access, in accordance with the [Audit Event – Accessed Health Data](Requirements-AuditEventAccess.html) requirement.
+* The VHL Sharer MAY apply rate limiting per Receiver or per folder ID, and log failed authentication and authorization attempts.
+"""
+* actor[+] = Canonical(VHLSharer)
+* statement[+].key = "authenticate-receiver"
+* statement[=].label = "Authenticate the Receiver"
+* statement[=].requirement = "Where one of the Sign Manifest Request Options is supported, authenticate the requesting [VHL Receiver](ActorDefinition-VHLReceiver.html) against the trust network before releasing any manifest content, and reject the request where the Receiver cannot be authenticated"
+* statement[=].conformance = #MAY
+* statement[+].key = "authorize-request"
+* statement[=].label = "Authorize the request"
+* statement[=].requirement = "Confirm that the presented VHL is valid, unexpired and not revoked, that any required passcode is satisfied, and that the VHL authorizes the documents requested"
+* statement[=].conformance = #SHALL
+* statement[+].key = "return-manifest"
+* statement[=].label = "Return the manifest"
+* statement[=].requirement = "Return a FHIR searchset Bundle containing only those documents the VHL authorizes, applying any consent-based filtering in force"
+* statement[=].conformance = #SHALL
+* statement[+].key = "record-audit-event"
+* statement[=].label = "Record audit event"
+* statement[=].requirement = "Record an audit event documenting the access, in accordance with the [Audit Event – Accessed Health Data](Requirements-AuditEventAccess.html) requirement"
+* statement[=].conformance = #MAY
+
 Instance: RequestVHLDocument
 InstanceOf: Requirements
 Usage: #definition
@@ -389,9 +436,9 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL initiate a request to retrieve a single health document from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL).
+Having obtained a manifest through [Retrieve Manifest [ITI-YY5]](ITI-YY5.html), the [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL retrieve each health document it needs from the location that manifest gives for it, using [MHD ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html).
 
-This transaction SHALL be conducted over a secure channel. Both the Receiver and Sharer SHALL validate each other's participation in the trust network using PKI material published by the [Trust Anchor](ActorDefinition-TrustAnchor.html).
+Document binaries are encrypted. The Receiver decrypts each one using the symmetric key carried in the `key` field of the VHL payload.
 
 **Optional behaviors:**
 * The VHL Receiver MAY verify the digital signature of the returned health document to confirm its authenticity, integrity, and provenance, as defined in the [Verify Document Signature](Requirements-VerifyDocumentSignature.html) requirement.
@@ -399,8 +446,12 @@ This transaction SHALL be conducted over a secure channel. Both the Receiver and
 """
 * actor[+] = Canonical(VHLReceiver)
 * statement[+].key = "retrieve-health-document"
-* statement[=].label = "Retrieve single health document"
-* statement[=].requirement = "Initiate a request to retrieve a single health document from a [VHL Sharer](ActorDefinition-VHLSharer.html), using a previously received and validated Verified Health Link (VHL)"
+* statement[=].label = "Retrieve an individual document"
+* statement[=].requirement = "Retrieve an individual health document referenced by a previously obtained manifest, using [MHD ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html)"
+* statement[=].conformance = #SHALL
+* statement[+].key = "decrypt-document"
+* statement[=].label = "Decrypt the document"
+* statement[=].requirement = "Decrypt the retrieved binary using the symmetric key carried in the `key` field of the VHL payload"
 * statement[=].conformance = #SHALL
 * statement[+].key = "verify-digital-signature"
 * statement[=].label = "Verify digital signature"
@@ -421,10 +472,9 @@ Usage: #definition
 * description = """
 A [VHL Sharer](ActorDefinition-VHLSharer.html) or [VHL Receiver](ActorDefinition-VHLReceiver.html), after receiving PKI material from a [Trust Anchor](ActorDefinition-TrustAnchor.html), SHALL validate and process the trust information for subsequent cryptographic operations.
 
-Participants SHOULD:
-* Cache the received trust list or certificate material to reduce network and server load
-* Validate digital signatures or trust paths before use in VHL validation or secure channel sessions
-* Monitor certificate expiration or revocation status where applicable
+A participant SHALL NOT treat a public key as trusted solely because it appears in a retrieved trust list. The certificate chain accompanying the key SHALL resolve back to a certificate verifiable against one of the public keys pre-shared with the trust network at the time of onboarding, before the key is used. Where the key material is self-generated, that chain is a single self-signed certificate, which is itself the material pre-shared at onboarding.
+
+The participant verifies the cryptographic proof over a retrieved trust list using the Trust Anchor's public key, which is shared with the participant at the time of onboarding.
 """
 * derivedFrom = Canonical(EstablishTrust)
 * actor[+] = Canonical(VHLSharer)
@@ -438,7 +488,7 @@ Cache the received trust list or certificate material to reduce network and serv
 * statement[+].key = "validate-digital-signatures"
 * statement[=].label = "Validate digital signatures"
 * statement[=].requirement = """
-Validate digital signatures or trust paths
+Validate digital signatures using the Trust Anchor public key established at onboarding, and validate that the certificate chain accompanying each key resolves back to a certificate verifiable against key material pre-shared with the trust network at onboarding, before the key is used.
 """
 * statement[=].conformance = #SHALL
 * statement[+].key = "monitor-certificate-expiration"
@@ -456,7 +506,7 @@ Usage: #definition
 * status = $pubStatus#active
 * publisher = "IHE"
 * description = """
-The [VHL Sharer](ActorDefinition-VHLSharer.html) and [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL jointly establish a secure connection prior to executing any Verified Health Link (VHL) transactions involving the exchange of sensitive data.
+The [VHL Sharer](ActorDefinition-VHLSharer.html) and [VHL Receiver](ActorDefinition-VHLReceiver.html) SHALL jointly establish a secure connection prior to executing any Verifiable Health Link (VHL) transactions involving the exchange of sensitive data.
 
 This requirement is satisfied by implementing secure channel establishment as defined in the [Audit Trail and Node Authentication (ATNA)](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html) Profile, specifically through the Authenticate Node [ITI-19] transaction.
 
@@ -481,7 +531,7 @@ Usage: #definition
 * description = """
 The [VHL Receiver](ActorDefinition-VHLReceiver.html), upon receiving a digitally signed health document from a [VHL Sharer](ActorDefinition-VHLSharer.html), MAY verify the document's digital signature using previously retrieved PKI material.
 
-This verification process confirms the authenticity, integrity, and provenance of the document independently of the Verified Health Link (VHL) itself.
+This verification process confirms the authenticity, integrity, and provenance of the document independently of the Verifiable Health Link (VHL) itself.
 
 The public key used for this verification MAY:
 * Originate from a different trust network than the one used to validate the VHL

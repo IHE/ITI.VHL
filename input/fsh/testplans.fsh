@@ -19,6 +19,29 @@
 // ║  Feature files live under input/tests/features/                              ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
+// ╔══════════════════════════════════════════════════════════════════════════════╗
+// ║  TEMPORARILY DISABLED — DO NOT DELETE                                        ║
+// ║                                                                              ║
+// ║  Everything below is commented out so the ci-build on build.fhir.org can     ║
+// ║  complete. TestPlan is an R5-and-later resource and this IG is published     ║
+// ║  at fhirVersion 4.0.1 (sushi-config.yaml). The build.fhir.org publisher      ║
+// ║  (6.0.0-snapshot1) aborts while parsing the generated resources with:        ║
+// ║                                                                              ║
+// ║      Error parsing .../TestPlan-TestPlan-QRCodeFlow:                         ║
+// ║      The resource TestPlan cannot be converted from R5 to RN                 ║
+// ║                                                                              ║
+// ║  The locally cached publisher (2.2.11) passes these through, so the failure  ║
+// ║  appears only in the ci-build.                                               ║
+// ║                                                                              ║
+// ║  RESTORE by deleting the /* on the next line and the */ at end of file,      ║
+// ║  once the publisher handles TestPlan in an R4 IG, or once this IG moves to   ║
+// ║  a FHIR version that carries TestPlan natively. Restore at the same time:    ║
+// ║    - the Unit Test Procedure links in input/pagecontent/testplan.md          ║
+// ║    - the banner at the top of that page                                      ║
+// ╚══════════════════════════════════════════════════════════════════════════════╝
+
+/*
+
 Alias: $gherkin = urn:ietf:bcp:13  // IANA media-type registry used as language system
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -51,8 +74,9 @@ considerations.
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 Message Semantics** – Verifies the DID Document message format that the Trust Anchor
 must validate: mandatory @context / id / verificationMethod fields, verification method structure,
+a verificationMethod array carrying more than one entry with each validated independently,
 public key format (JWK/RFC 7517), private key exclusion, accepted cryptographic suites, key
-strength (P-256+), and HTTP POST / Content-Type requirements.
+strength (P-256+), and HTTP PUT / Content-Type requirements.
 Source: section 2:3.YY1.4.1.2 (Message Semantics).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
@@ -160,7 +184,7 @@ Verifies the DID Document structure the VHL Sharer must construct.
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY1 VHL Sharer Initiator Expected Actions** – Verifies key pair generation, submission
-pathways (direct HTTP POST, indirect publication, offline), provenance metadata, response
+pathways (direct HTTP PUT, indirect publication, offline), provenance metadata, response
 handling (201/400/401/403/422), and secure private key retention.
 Source: sections 2:3.YY1.4.1.2 (Message Semantics) and 2:3.YY1.4.1.3 (Initiator Expected Actions).
 """
@@ -262,11 +286,11 @@ headers) and response format (searchset Bundle structure, search.mode, error cod
 
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 VHL Sharer Responder Expected Actions** – Verifies HTTP Message Signature
-verification (keyid lookup, RFC 9421 signature base, Content-Digest), OAuth FAST Option
+verification (keyid lookup, RFC 9421 signature base, Content-Digest), Sign Manifest Request Option (OAuth with SSRAA)
 token validation, VHL authorisation (folder ID, expiry, revocation, passcode hash comparison),
-FHIR search execution (_include support), Bundle construction, error codes (400/401/403/404/422/429/500),
+FHIR search execution (_include support), Bundle construction, error codes (400/401/403/404/429/500),
 rate limiting, and audit logging.
-Source: sections 2:3.YY5.4.1.5 (Responder Expected Actions), 2:3.YY5.4.2 (Response Message),
+Source: sections 2:3.YY5.4.1.3 (Expected Actions), 2:3.YY5.4.2 (Response Message),
 and 2:3.YY5.5 (Security Considerations).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
@@ -392,7 +416,7 @@ decompression, CWT parsing (RFC 8392), COSE signature verification (RFC 8152) us
 trust list, CWT claims validation (exp/iat), hcert extraction (claim key -260 / 5), and VHL
 payload validation (url/key/flag/exp). Also covers post-decoding actions, all decode failure
 rejections, and optional acknowledgment.
-Source: sections 2:3.YY4.4.1.4 (Receiver Expected Actions) and 2:3.YY4.5 (Security).
+Source: sections 2:3.YY4.4.1.3 (Expected Actions) and 2:3.YY4.5 (Security).
 """
 * testCase[=].testRun[=].script.language.coding.system = "urn:ietf:bcp:13"
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
@@ -423,7 +447,7 @@ enforcement, expiry enforcement, PHI exclusion from the QR payload, and acknowle
 * testCase[=].testRun[+].narrative = """
 **ITI-YY5 VHL Receiver Initiator Expected Actions** – Verifies request construction (HTTP POST
 /List/_search), HTTP Message Signature creation (Content-Digest, Signature-Input with keyid/alg/created,
-Signature), OAuth with FAST Option (client_credentials, private_key_jwt, required scopes, Bearer
+Signature), Sign Manifest Request Option (OAuth with SSRAA) (client_credentials, private_key_jwt, required scopes, Bearer
 header, token caching), TLS requirements, and Bundle response processing (match/include search.mode,
 individual DocumentReference retrieval fallback).
 Source: sections 2:3.YY5.4.1 (Request Message) and 2:3.YY5.5.2 (HTTP Message Signatures).
@@ -546,7 +570,7 @@ Scenario groups:
   matches the YY5 endpoint; passcode is obtained from VHL Holder when P flag is present.
 - **Group C – Manifest Retrieval (YY5):** VHL Receiver uses the decoded folder ID and URL
   to send an authenticated HTTP POST; VHL Sharer verifies the receiver's signature using the
-  trust list; correct passcode results in HTTP 200 Bundle; incorrect passcode results in 422.
+  trust list; correct passcode results in HTTP 200 Bundle; incorrect passcode results in 401 with remaining attempt count.
 - **Group D – Full End-to-End:** Complete flow from YY3 generation through YY4 decode to YY5
   manifest retrieval succeeds; passcode-protected variant succeeds end-to-end.
 - **Group E – Expired and Revoked VHL Rejection:** VHL Receiver rejects an expired QR code at
@@ -559,3 +583,5 @@ payload from YY4 feeds YY5.
 * testCase[=].testRun[=].script.language.coding.code   = #text/x-gherkin
 * testCase[=].testRun[=].script.language.text          = "Gherkin"
 * testCase[=].testRun[=].script.sourceString = "integration-qrcode-flow.feature"
+
+*/

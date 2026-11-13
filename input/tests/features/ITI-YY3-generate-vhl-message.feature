@@ -1,6 +1,6 @@
 Feature: ITI-YY3 Generate VHL – Message Semantics
   Defines the format of the ITI-YY3 request and response messages.
-  The request is an HTTP GET FHIR operation; the response is a FHIR operation
+  The request is an HTTP POST FHIR operation; the response is a FHIR operation
   response containing a Binary QR code. Defined here once for both the
   VHL Holder (initiator) and VHL Sharer (responder) actor files.
 
@@ -10,10 +10,11 @@ Feature: ITI-YY3 Generate VHL – Message Semantics
   # ─── Request: HTTP Method and Endpoint ──────────────────────────────────────
 
   @message-semantics @SHALL
-  Scenario: Request is HTTP GET to the Patient $generate-vhl operation endpoint
+  Scenario: Request is HTTP POST to the Patient $generate-vhl operation endpoint
     When the request is constructed
-    Then the HTTP method SHALL be GET
+    Then the HTTP method SHALL be POST
     And the URL SHALL be "[base]/Patient/$generate-vhl"
+    And the parameters SHALL be carried in the request body, not the request line
 
   # ─── Request: Required Parameters ────────────────────────────────────────────
 
@@ -124,9 +125,18 @@ Feature: ITI-YY3 Generate VHL – Message Semantics
     Then it SHALL be base64url-encoded
 
   @message-semantics @SHALL
-  Scenario: Encoded SHL payload is prefixed with vhlink:/
+  Scenario: Encoded SHL payload is prefixed with vhlink:/ for the VC carrier
+    Given "format" is "vc"
     When the base64url-encoded payload is assembled
     Then it SHALL be prefixed with "vhlink:/"
+
+  @message-semantics @SHALL
+  Scenario: HCERT carrier places the payload at claim key 5 as a CBOR map
+    Given "format" is "qrcode"
+    When the VHL payload is placed in the HCERT structure
+    Then HCERT claim key 5 SHALL be a CBOR map with text keys
+    And it SHALL NOT be base64url-encoded or prefixed with "vhlink:/"
+    And "exp" and "v" SHALL be CBOR integers
 
   # ─── Response: Error Format ──────────────────────────────────────────────────
 
