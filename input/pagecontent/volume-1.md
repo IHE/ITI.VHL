@@ -331,7 +331,7 @@ The use cases below are **illustrative**. Each describes a program or deployment
 Across these use cases the transactions combine in the common pattern shown in Figure 1:XX.4.2-1. The {{ linkvhls }} and the {{ linkvhlr }} first onboard to a {{ linkta }}, submitting their own PKI material with {{ linksubmitpki }} and obtaining the trust list with {{ linkretrievepki }}, or through the jurisdiction-specific mechanisms that may be used in their place. A {{ linkvhlh }} then obtains a VHL from the {{ linkvhls }} with {{ linkgeneratevhl }}, and presents it to the {{ linkvhlr }} with {{ linkprovidevhl }}. The {{ linkvhlr }} verifies the VHL against the trust list before redeeming it with {{ linkretrievemanifest }}, then retrieves the documents the manifest references using [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). Individual use cases exercise different subsets of this pattern.
 
 <figure >
-  <div style="width:35em; max-width:100%;">
+  <div style="width:60em; max-width:100%;">
   {%include usecase-processflow.svg%}
   </div>
   <p id="f1:XX.4.2-1" class="figureTitle"><strong>Figure 1:XX.4.2-1: VHL Transactions Applicable Across the Use Cases</strong></p>
