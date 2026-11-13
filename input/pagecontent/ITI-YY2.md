@@ -23,17 +23,18 @@
 
 ### 2:3.YY2.1 Scope
 
-The Retrieve Trust List with DID transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted public key material from the {{ linkta }} using Decentralized Identifiers (DIDs). 
-    
+The Retrieve Trust List with DID transaction allows both {{ linkvhls }}s and {{ linkvhlr }}s to retrieve trusted public key material from the {{ linkta }} using Decentralized Identifiers (DIDs).
+
 Retrieved material SHALL be used to determine the trustworthiness of VHL artifacts in accordance with the governing trust framework.
 
 ### 2:3.YY2.2 Actor Roles
 
+<p id="t2:3.YY2.2-1" class="tableTitle"><strong>Table 2:3.YY2.2-1: Actor Roles</strong></p>
 
 | Actor | Role |
-|-------|--------|
-| VHL Receiver, VHL Sharer | {{ reqRetrievePKItitle.valueString }} |
-| Trust Anchor             | {{ reqRetrievePKIResptitle.valueString }} |
+|-------|------|
+| {{ linkvhlr }}, {{ linkvhls }} | {{ reqRetrievePKItitle.valueString }} |
+| {{ linkta }}             | {{ reqRetrievePKIResptitle.valueString }} |
 {: .grid}
 
 ### 2:3.YY2.3 Referenced Standards
@@ -51,7 +52,7 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY2.svg%}
   </div>
-  <p id="f2:3.YY2.4-1" class="figureTitle">Figure 2:3.YY2.4-1: Retrieve Trust List with DID Interaction Diagram</p>
+  <p id="f2:3.YY2.4-1" class="figureTitle"><strong>Figure 2:3.YY2.4-1: Retrieve Trust List with DID Interaction Diagram</strong></p>
 </figure>
 
 
@@ -65,7 +66,7 @@ Retrieved material SHALL be used to determine the trustworthiness of VHL artifac
 The requesting actor SHALL:
 
 1. **Determine Retrieval Endpoint**: Identify the {{ linkta }} endpoint for DID Document retrieval
-2. **Construct Request**: Build an HTTP GET request for retrieval of DID Document
+2. **Construct Request**: Build an HTTP GET request for retrieval of the DID Document
 3. **Submit Request**: Send the request over a secure connection
 
 
@@ -87,22 +88,22 @@ Upon receiving a Retrieve Trust List Request, the {{ linkta }} SHALL:
 1. **Authenticate Request**: Validate the requesting entity is authorized to retrieve trust material
 2. **Process Query**: Identify the requested DID Document(s) based on query parameters
 3. **Filter Results**: Return only active, non-revoked DID Documents
-4. **Construct Response**: Format the response according to the requested representation, ensure returned DID Documents conform to W3C DID Core specification and include sufficient verification methods for signature validation
-5. **Sign Response** : Digitally sign the response to ensure integrity
+4. **Construct Response**: Format the response according to the requested representation, ensure returned DID Documents conform to the W3C DID Core specification and include sufficient verification methods for signature validation
+5. **Sign Response**: Digitally sign the response to ensure integrity
 
 
-#### 2:3.YY2.4.2 Retrieve Trust List Response Message 
+#### 2:3.YY2.4.2 Retrieve Trust List Response Message
 
 ##### 2:3.YY2.4.2.1 Trigger Events
 
 {{ reqRetrievePKIRespdescription.valueMarkdown}}
 
 
-##### 2:3.YY2.4.2.2  Message Semantics
+##### 2:3.YY2.4.2.2 Message Semantics
 
 **Success Response:**
 
-The following response returns a trust list DID Document holding Certificate Authority issued key material for two participants. Certificate values are truncated for readability.
+The following response returns a trust list DID Document holding Certificate Authority-issued key material for two participants. Certificate values are truncated for readability.
 
 ```http
 HTTP/1.1 200 OK
@@ -162,6 +163,8 @@ Content-Type: application/json
 
 **Error Responses:**
 
+<p id="t2:3.YY2.4.2.2-1" class="tableTitle"><strong>Table 2:3.YY2.4.2.2-1: Retrieve Trust List Error Responses</strong></p>
+
 | HTTP Status | Condition |
 |-------------|-----------|
 | 404 Not Found | Requested DID not found in Trust Anchor registry |
@@ -175,7 +178,9 @@ The response SHALL include one or more DID Documents. Their structure, and the k
 
 In addition, each returned DID Document SHALL carry a `proof` over the document, enabling the recipient to establish that the document was published by the {{ linkta }} and has not been altered.
 
-The `proof` element SHALL contain:
+The `proof` element SHALL contain the sub-elements listed in Table 2:3.YY2.4.2.2-2.
+
+<p id="t2:3.YY2.4.2.2-2" class="tableTitle"><strong>Table 2:3.YY2.4.2.2-2: Trust List proof Sub-elements</strong></p>
 
 | Sub-element | Cardinality | Description |
 |-------------|-------------|-------------|
@@ -210,11 +215,11 @@ Upon receiving the Trust List response, the {{ linkvhlr }} or {{ linkvhls }} SHA
 8. **Monitor Expiry**: Track any expiration times and refresh cached material as needed
 
 
-### 2:3.YY2.5 Security Considerations 
+### 2:3.YY2.5 Security Considerations
 
 #### 2:3.YY2.5.1 Secure Retrieval
 
-Trust list retrieval is subject to the secure channel requirements in [Volume 1 Section XX.5.2 Secure Channel Requirements](volume-1.html#1xx52-secure-channel-requirements). The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
+Trust list retrieval is subject to the secure channel requirements in [Volume 1 Section 1:XX.5.2 Secure Channel Requirements](volume-1.html#1xx52-secure-channel-requirements). The {{ linkta }} SHOULD authenticate requesting entities before serving trust material.
 
 #### 2:3.YY2.5.2 DID Document Validation
 
@@ -222,12 +227,12 @@ Clients ({{ linkvhlr }}s and {{ linkvhls }}s) SHOULD check that key types and al
 
 Because a `did:web` DID Document is retrieved over HTTPS, and the identifier carries no inherent binding to the content returned, transport security alone does not establish that a trust list is authentic — whoever controls the host controls the content served. The `proof` over the document is what establishes authenticity, which is why verifying it before any of the document's content is relied upon is required at [2:3.YY2.4.2.3 Expected Actions](#23yy2423-expected-actions).
 
-Where key material is Certificate Authority issued, that same section requires the `x5c` chain to be validated before a key is used. Extracting a public key from a retrieved DID Document without validating its chain reduces a certificate hierarchy to the assertion that a key was present in a document, discarding the authority the hierarchy exists to convey.
+Where key material is Certificate Authority-issued, clients SHALL validate the `x5c` chain to a recognized certificate authority before using a key. Extracting a public key from a retrieved DID Document without validating its chain reduces a certificate hierarchy to the assertion that a key was present in a document, discarding the authority the hierarchy exists to convey.
 
 #### 2:3.YY2.5.3 Caching and Freshness
 
 Implementations SHOULD:
-- Cache retrieved DID Documents to reduce load on {{ linkta }}
+- Cache retrieved DID Documents to reduce load on the {{ linkta }}
 - Respect any cache-control headers or expiration times
 - Implement periodic refresh of cached material
 - Immediately invalidate cached DID Documents upon revocation notification

@@ -11,14 +11,14 @@ skinparam rectangle {
 }
 top to bottom direction
 
-rectangle "VHL Sharer" as VHLS
+rectangle "VHL Sharer" as TrustVHLS
 rectangle "Trust Anchor" as TA
-rectangle "VHL Receiver" as VHLR
+rectangle "VHL Receiver" as TrustVHLR
 
 url of TA is [[ActorDefinition-TrustAnchor.html]]
-url of VHLR is [[ActorDefinition-VHLReceiver.html]]
-url of VHLS is [[ActorDefinition-VHLSharer.html]]
+url of TrustVHLR is [[ActorDefinition-VHLReceiver.html]]
+url of TrustVHLS is [[ActorDefinition-VHLSharer.html]]
 
-VHLS -- TA : "  Submit PKI Material with DID [ITI-YY1]\n  Retrieve Trust List with DID [ITI-YY2]"
-TA -- VHLR : "  Submit PKI Material with DID [ITI-YY1]\n  Retrieve Trust List with DID [ITI-YY2]"
+TrustVHLS -- TA : "  Submit PKI Material with DID [ITI-YY1]\n  Retrieve Trust List with DID [ITI-YY2]"
+TA -- TrustVHLR : "  Submit PKI Material with DID [ITI-YY1]\n  Retrieve Trust List with DID [ITI-YY2]"
 @enduml

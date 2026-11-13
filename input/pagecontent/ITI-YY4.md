@@ -16,12 +16,13 @@
 {% assign provideVHLDescription = provideVHL.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 {% assign provideVHLRespDescription = provideVHLResp.extension  | where: "url", "http://hl7.org/fhir/5.0/StructureDefinition/extension-Requirements.description" | first %}
 
-The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verified Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
+The Provide VHL transaction enables a {{ linkvhlh }} to transmit a Verifiable Health Link (VHL) to a {{ linkvhlr }}. The VHL serves as a signed authorization mechanism that allows the Receiver to subsequently retrieve one or more health documents from a VHL Sharer (via ITI-YY5).
 
 The VHL is transmitted as a QR code containing an HCERT-encoded payload with the `HC1:` prefix, OR — when the VHL Sharer supports the [VC Enveloped VHL Option](ITI-YY3.html#vc-enveloped-vhl-carrier-option--formatvc) at ITI-YY3 — as a signed W3C Verifiable Credential (`application/vc`). VHL Receivers scan the QR code or parse the VC to extract the VHL payload for subsequent document retrieval.
 
 ### 2:3.YY4.2 Actor Roles
 
+<p id="t2:3.YY4.2-1" class="tableTitle"><strong>Table 2:3.YY4.2-1: Actor Roles</strong></p>
 
 | Actor | Role |
 |-------|------|
@@ -53,7 +54,7 @@ The VHL is transmitted as a QR code containing an HCERT-encoded payload with the
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY4.svg%}
   </div>
-  <p id="f2:3.YY4.4-1" class="figureTitle">Figure 2:3.YY4.4-1: Provide VHL Interaction Diagram</p>
+  <p id="f2:3.YY4.4-1" class="figureTitle"><strong>Figure 2:3.YY4.4-1: Provide VHL Interaction Diagram</strong></p>
 </figure>
 
 #### 2:3.YY4.4.1 Provide VHL Request Message
@@ -94,7 +95,7 @@ The VHL is transmitted via QR code with the following characteristics:
 - Suitable for in-person encounters, walk-in clinics, emergency departments
 - QR code contains HCERT/CWT structure with embedded VHL payload
 - Can be displayed on screen or printed on paper
-- Minimum recommended diagonal size: 35-60mm
+- Minimum recommended diagonal size: 35–60 mm
 
 **Verifiable Credential Transmission (VC Enveloped VHL)**
 
@@ -142,7 +143,7 @@ The VHL Receiver SHALL decode the received VHL using the appropriate path below.
 
 6. **Verify Digital Signature**:
    - Extract `kid` from CWT protected header
-   - Retrieve corresponding Document Signing Certificate (DSC) from trust list
+   - Retrieve corresponding Document Signer Certificate (DSC) from trust list
    - Verify the COSE signature (RFC 8152) using DSC public key
    - Check the DSC's revocation status where applicable
    - Confirm signature is valid and CWT has not been tampered with
@@ -210,7 +211,7 @@ After successfully decoding the VHL payload (from either QR code or VC), the VHL
      - `_include=List:item`: (if VHL Sharer supports Include DocumentReference Option)
    - Example: `https://vhl-sharer.example.org/List?_id=lHBSyhoJRJiO7zU0pxJLPA3traJm0sx2CsO9m6ABOAT&code=folder&status=current&patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123&_include=List:item`
 
-3. Prepare to Retrieve Manifest as per ITI-YY5
+3. **Prepare to Retrieve Manifest**: as per [ITI-YY5](ITI-YY5.html)
 
 The VHL Receiver MAY:
 - Prompt user for passcode if "P" flag is present (required for ITI-YY5)
@@ -280,7 +281,7 @@ If QR code scanning or decoding fails:
 - Missing hcert claim or claim key 5
 - Signature verification failure
 
-VHL Receiver SHALL:
+The VHL Receiver SHALL:
 - Reject the VHL
 - Inform user with specific error message
 - Request user to rescan QR code
@@ -298,21 +299,23 @@ If the CWT `exp` claim has passed, the signed token is no longer valid:
 - User may request new VHL from VHL Holder
 
 
-#### 2:3.YY4.4.2  Provide VHL Response Message 
+#### 2:3.YY4.4.2 Provide VHL Response Message
 
 ##### 2:3.YY4.4.2.1 Trigger Events
-The VHL Receiver MAY provide optional acknowledgment to VHL Holder confirming receipt and validation. This is transmission-mechanism dependent.
+The VHL Receiver MAY provide an optional acknowledgment to the VHL Holder confirming receipt and validation. This is transmission-mechanism dependent.
 
 ##### 2:3.YY4.4.2.2 Message Semantics
 
-For transmission mechanisms supporting bidirectional communication, response MAY include:
+For transmission mechanisms supporting bidirectional communication, the response MAY include the elements listed in Table 2:3.YY4.4.2.2-1.
+
+<p id="t2:3.YY4.4.2.2-1" class="tableTitle"><strong>Table 2:3.YY4.4.2.2-1: Provide VHL Acknowledgment Elements</strong></p>
 
 | Element | Cardinality | Description |
 |---------|-------------|-------------|
-| Acknowledgment | 0..1 | Confirmation VHL received and validated |
-| Receipt Identifier | 0..1 | Unique identifier for receipt transaction |
-| Receiver Identifier | 0..1 | Identifier of VHL Receiver organization |
-| Timestamp | 0..1 | ISO 8601 timestamp of receipt |
+| Acknowledgment | [0..1] | Confirmation VHL received and validated |
+| Receipt Identifier | [0..1] | Unique identifier for receipt transaction |
+| Receiver Identifier | [0..1] | Identifier of VHL Receiver organization |
+| Timestamp | [0..1] | ISO 8601 timestamp of receipt |
 {: .grid}
 
 ##### 2:3.YY4.4.2.3 Expected Actions
@@ -352,7 +355,7 @@ Where the VHL is transmitted over HTTP between the two actors, the secure channe
 #### 2:3.YY4.5.5 QR Code Security
 
 **QR Code Characteristics:**
-- Can be photographed/copied - use time-limited expiration
+- Can be photographed/copied—use time-limited expiration
 - Suitable for supervised encounters (in-person, on-screen display)
 - Digital signature provides authenticity verification
 - Recommended for higher security scenarios
@@ -368,5 +371,3 @@ Where the VHL is transmitted over HTTP between the two actors, the secure channe
 When the VHL is carried as a Verifiable Credential:
 - Confidentiality is equivalent to the QR form: the VC carries the decryption `key` and SHOULD be treated as sensitive
 - VHL Sharers SHOULD issue VCs with short lifetimes; single-use VCs are RECOMMENDED for high-security scenarios
-
-

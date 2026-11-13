@@ -1,5 +1,6 @@
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 {% assign linkvhls = '<a href="ActorDefinition-VHLSharer.html">VHL Sharer</a>' %}
+{% assign linkvhlh = '<a href="ActorDefinition-VHLHolder.html">VHL Holder</a>' %}
 
 > **Note on Transaction Optionality**: This transaction is **REQUIRED (R)** for both the VHL Receiver (Initiator) and the VHL Sharer (Responder). Optional behaviors within this transaction, such as the Sign Manifest Request Options, the Include DocumentReference Option and the Verify Document Signature Option, are defined as actor options for this transaction.
 
@@ -12,13 +13,13 @@
 
 ### 2:3.YY5.1 Scope
 
-The Retrieve Manifest transaction enables a {{ linkvhlr }} to retrieve a manifest (searchset Bundle) of available health documents from a {{ linkvhls }} using a previously obtained and validated Verified Health Link (VHL). 
+The Retrieve Manifest transaction enables a {{ linkvhlr }} to retrieve a manifest (searchset Bundle) of available health documents from a {{ linkvhls }} using a previously obtained and validated Verifiable Health Link (VHL).
 
 This transaction occurs after the {{ linkvhlr }} has received a VHL from a VHL Holder (via ITI-YY4 Provide VHL) and validated the VHL signature.
 
 **FHIR Search Transaction:** This transaction uses a standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists. The manifest URL from the VHL payload contains all necessary FHIR search parameters. No custom operation is required.
 
-**Authentication:** Authentication of the {{ linkvhlr }} to the {{ linkvhls }} is provided by the three **Sign Manifest Request Options**, each named for the mechanism it uses. Each is optional for both the {{ linkvhlr }} and the {{ linkvhls }} ([Volume 1 Table XX.2-1](volume-1.html#actor-options)), and each is complementary between them. Nothing in this transaction obliges either actor to support any of them.
+**Authentication:** Authentication of the {{ linkvhlr }} to the {{ linkvhls }} is provided by the three **Sign Manifest Request Options**, each named for the mechanism it uses. Each is optional for both the {{ linkvhlr }} and the {{ linkvhls }} ([Volume 1 Table 1:XX.2-1](volume-1.html#actor-options)), and each is complementary between them. Nothing in this transaction obliges either actor to support any of them.
 
   1. **Sign Manifest Request Option (HTTP Message Signatures):** the {{ linkvhlr }} signs selected components of the outgoing HTTP manifest request (e.g., `@method`, `@target-uri`, `content-digest`, `date`) using its trust-network key, and the {{ linkvhls }} verifies the signature against the {{ linkvhlr }}'s public key from the trust network. This option requires no additional token endpoint or credential exchange — authentication is carried entirely within the HTTP request itself. See [2:3.YY5.4.1.4](#23yy5414-sign-manifest-request-option-http-message-signatures).
 
@@ -33,11 +34,13 @@ Where both actors claim the same option, the {{ linkvhls }} authenticates the re
 
 Independently of those options, the {{ linkvhlr }} SHALL have verified the VHL signature against the trust list before making this request (see [ITI-YY4](ITI-YY4.html)), and the {{ linkvhls }} SHALL validate the VHL presented to it — folder ID, whether the VHL is still active, revocation status, and the passcode where the `P` flag is set — before returning a manifest. Verification of the VHL is what the {{ linkvhls }} always relies on; authentication of the {{ linkvhlr }} is the additional control that the Sign Manifest Request Options provide.
 
-**Capability Statements:** 
+**Capability Statements:**
 - {{ linkvhlr }} capabilities are defined in [VHL Receiver Client Capability Statement](CapabilityStatement-VHLReceiverCapabilityStatement.html)
 - {{ linkvhls }} capabilities are defined in [VHL Sharer Server Capability Statement](CapabilityStatement-VHLSharerCapabilityStatement.html)
 
 ### 2:3.YY5.2 Actor Roles
+
+<p id="t2:3.YY5.2-1" class="tableTitle"><strong>Table 2:3.YY5.2-1: Actor Roles</strong></p>
 
 | Actor | Role |
 |-------|------|
@@ -91,7 +94,7 @@ Independently of those options, the {{ linkvhlr }} SHALL have verified the VHL s
   <div style="width:35em; max-width:100%;">
      {%include ITI-YY5.svg%}
   </div>
-  <p id="f2:3.YY5.4-1" class="figureTitle">Figure 2:3.YY5.4-1: Retrieve Manifest Interaction Diagram</p>
+  <p id="f2:3.YY5.4-1" class="figureTitle"><strong>Figure 2:3.YY5.4-1: Retrieve Manifest Interaction Diagram</strong></p>
 </figure>
 
 #### 2:3.YY5.4.1 Retrieve Manifest Request Message
@@ -166,20 +169,24 @@ https://vhl-sharer.example.org/List?_id=lHBSyhoJRJiO7zU0pxJLPA3traJm0sx2CsO9m6AB
 
 **FHIR Search Parameters**
 
-The following FHIR search parameters are extracted from the manifest URL:
+The FHIR search parameters listed in Table 2:3.YY5.4.1.2-1 are extracted from the manifest URL.
+
+<p id="t2:3.YY5.4.1.2-1" class="tableTitle"><strong>Table 2:3.YY5.4.1.2-1: FHIR Search Parameters of the Manifest URL</strong></p>
 
 | Parameter | Type | Cardinality | Description | Example |
 |-----------|------|-------------|-------------|---------|
 | _id | token | [1..1] | The folder ID (with 256-bit entropy) from the VHL - primary authorization mechanism | `_id=lHBSyhoJRJiO7zU0pxJLPA3traJm0sx2CsO9m6ABOAT` |
 | code | token | [1..1] | The type of List (typically "folder") | `code=folder` |
 | status | token | [1..1] | The status of the List (typically "current") | `status=current` |
-| patient.identifier | token (chained) | [1..1] | FHIR chained search on the patient reference parameter; resolves the patient by business identifier (`system\|value`) without requiring a direct Patient resource reference. | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
+| patient.identifier | token (chained) | [1..1] | FHIR chained search on the patient reference parameter; resolves the patient by business identifier (`system|value`) without requiring a direct Patient resource reference. | `patient.identifier=urn:oid:2.16.840.1.113883.2.4.6.3|PASSPORT123` |
 | _include | special | [0..1] | Include referenced DocumentReference resources; SHALL be "List:item" if used. Only processed if VHL Sharer supports Include DocumentReference Option | `_include=List:item` |
 {: .grid}
 
 **SHL Manifest Request Parameters**
 
-In addition to the FHIR search parameters in the URL, the following SHL-defined manifest parameters (per the [SMART Health Links specification](http://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)) SHALL be included in the request body:
+In addition to the FHIR search parameters in the URL, the following SHL-defined manifest parameters (per the [SMART Health Links specification](http://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html)) SHALL be included in the request body, as listed in Table 2:3.YY5.4.1.2-2:
+
+<p id="t2:3.YY5.4.1.2-2" class="tableTitle"><strong>Table 2:3.YY5.4.1.2-2: SHL Manifest Request Parameters</strong></p>
 
 | Parameter | Type | Cardinality | Description |
 |-----------|------|-------------|-------------|
@@ -192,7 +199,9 @@ In addition to the FHIR search parameters in the URL, the following SHL-defined 
 
 The manifest URL decoded from the VHL is a FHIR search URL in `GET` form — `[base]/List?…`. The {{ linkvhlr }} issues the request as an HTTP `POST` to `[base]/List/_search`, carrying the parameters from that URL. POST is used rather than GET so that the passcode and the other SHL manifest parameters travel in the request body rather than the request line.
 
-Each parameter SHALL be conveyed exactly once. [FHIR](https://hl7.org/fhir/R4/http.html) permits search parameters to appear in the query string of a `_search` request as well as in the body, and treats a parameter appearing in both places as a repeat of that parameter — which for `_id` would change the meaning of the search. Implementations SHALL therefore place the parameters in one location only:
+Each parameter SHALL be conveyed exactly once. [FHIR](https://hl7.org/fhir/R4/http.html) permits search parameters to appear in the query string of a `_search` request as well as in the body, and treats a parameter appearing in both places as a repeat of that parameter — which for `_id` would change the meaning of the search. Implementations SHALL therefore place the parameters in one location only, as listed in Table 2:3.YY5.4.1.2-3:
+
+<p id="t2:3.YY5.4.1.2-3" class="tableTitle"><strong>Table 2:3.YY5.4.1.2-3: Parameter Placement by Sign Manifest Request Mechanism</strong></p>
 
 | Sign Manifest Request Option | Parameters conveyed in |
 |------------------------------|------------------------|
@@ -205,7 +214,7 @@ Keeping the parameters out of the request line also keeps the patient business i
 
 ##### 2:3.YY5.4.1.3 Expected Actions
 
-Upon receiving Retrieve Manifest Request, the {{ linkvhls }} SHALL:
+Upon receiving a Retrieve Manifest Request, the {{ linkvhls }} SHALL:
 
 1. **Parse Request**:
    - Extract FHIR search parameters from request body
@@ -299,6 +308,8 @@ The {{ linkvhls }} that supports the **Include DocumentReference Option** SHALL 
 - `_include=List:item` (special)
 
 **Error Responses:**
+
+<p id="t2:3.YY5.4.1.7-1" class="tableTitle"><strong>Table 2:3.YY5.4.1.7-1: Retrieve Manifest Error Responses</strong></p>
 
 | HTTP Status | Condition | OperationOutcome.issue.code |
 |-------------|-----------|------------------------------|
@@ -656,7 +667,9 @@ This message is sent when the {{ linkvhls }} has successfully authenticated the 
 
 ##### 2:3.YY5.4.2.2 Message Semantics
 
-Because the VHL manifest URL constructed at [ITI-YY3](ITI-YY3.html) is a FHIR search on `List` using the search parameters required by the Document Responder in [IHE MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html), the Retrieve Manifest response is — at the FHIR level — an [MHD ITI-66 response message](https://profiles.ihe.net/ITI/MHD/ITI-66.html#23662-message-semantics): a FHIR `searchset` Bundle. The shape of the Bundle depends on whether the {{ linkvhls }} supports the **Include DocumentReference Option** AND the {{ linkvhlr }} included `_include=List:item` in the request:
+Because the VHL manifest URL constructed at [ITI-YY3](ITI-YY3.html) is a FHIR search on `List` using the search parameters required by the Document Responder in [IHE MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html), the Retrieve Manifest response is — at the FHIR level — an [MHD ITI-66 response message](https://profiles.ihe.net/ITI/MHD/ITI-66.html#23662-message-semantics): a FHIR `searchset` Bundle. The shape of the Bundle depends on whether the {{ linkvhls }} supports the **Include DocumentReference Option** AND the {{ linkvhlr }} included `_include=List:item` in the request, as listed in Table 2:3.YY5.4.2.2-1:
+
+<p id="t2:3.YY5.4.2.2-1" class="tableTitle"><strong>Table 2:3.YY5.4.2.2-1: Retrieve Manifest Response Cases</strong></p>
 
 | Case | Bundle contents | Receiver follow-up |
 |------|-----------------|--------------------|
@@ -672,7 +685,7 @@ The Bundle conforms to the standard MHD ITI-66 response. For Bundle structure, e
 
 **Case B — Bundle with Include DocumentReference Option**
 
-The Bundle extends the ITI-66 response by including each referenced DocumentReference resource (`search.mode="include"`) — this `_include=List:item` behaviour is not defined by ITI-66. The {{ linkvhlr }} can move directly to binary retrieval.
+The Bundle extends the ITI-66 response by including each referenced DocumentReference resource (`search.mode="include"`) — this `_include=List:item` behavior is not defined by ITI-66. The {{ linkvhlr }} can move directly to binary retrieval.
 
 ```json
 {
@@ -819,8 +832,8 @@ The Bundle extends the ITI-66 response by including each referenced DocumentRefe
 
 The {{ linkvhlr }} SHALL:
 - Parse the Bundle and distinguish List vs. DocumentReference resources by `search.mode`.
-- **If the Bundle does NOT contain DocumentReference resources** (Example A): for each `List.entry[].item.reference`, perform a FHIR read against the {{ linkvhls }} to obtain the DocumentReference metadata.
-- For each DocumentReference, retrieve the binary by dereferencing `content.attachment.url` per [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval), authenticated as that section requires.
+- **If the Bundle does NOT contain DocumentReference resources** (Case A): for each `List.entry[].item.reference`, perform a FHIR read against the {{ linkvhls }} to obtain the DocumentReference metadata.
+- For each DocumentReference, retrieve the binary by dereferencing `content.attachment.url` per [Retrieve Document [ITI-68]](#23yy5424-document-content-retrieval), reusing the same authentication option chosen for this ITI-YY5 session.
 - Decrypt the retrieved binary using the `key` from the VHL payload cached from ITI-YY4, per [Document Encryption](#23yy5425-document-encryption).
 - Verify that the decrypted payload's media type matches `DocumentReference.content.attachment.contentType`.
 
@@ -847,7 +860,7 @@ VHL document binaries are encrypted following the [SMART Health Links — Encryp
 
 **Scope:**
 - Encryption SHALL be applied to the document binary at `DocumentReference.content.attachment.url`. It is independent of the **Include DocumentReference Option** — the option only controls whether DocumentReference *metadata* is bundled into the manifest response.
-- `DocumentReference.content.attachment.contentType` SHALL describe the **decrypted** payload (e.g. `application/fhir+json`, `application/pdf`). The encrypted transport representation is signalled by the `application/jose` Content-Type on the ITI-68 response.
+- `DocumentReference.content.attachment.contentType` SHALL describe the **decrypted** payload (e.g. `application/fhir+json`, `application/pdf`). The encrypted transport representation is signaled by the `application/jose` Content-Type on the ITI-68 response.
 - An unencrypted variant is permitted only when the originating VHL payload was generated without a `key` (matching SHL payload format semantics). VHL flows generated per ITI-YY3 always include a `key` and therefore always encrypt.
 
 **Example — JWE Compact Serialization (illustrative, truncated):**
@@ -871,7 +884,7 @@ The five dot-separated segments are the JWE Compact Serialization (RFC 7516): pr
 
 #### 2:3.YY5.5.1 Transport Security
 
-Secure transport is required for all communications in this transaction. See [Volume 1 Section XX.5.2 Secure Channel Requirements](volume-1.html#1xx52-secure-channel-requirements) for the applicable ATNA baseline.
+Secure transport is required for all communications in this transaction. See [Volume 1 Section 1:XX.5.2 Secure Channel Requirements](volume-1.html#1xx52-secure-channel-requirements) for the applicable ATNA baseline.
 
 #### 2:3.YY5.5.2 HTTP Message Signatures
 
@@ -883,6 +896,7 @@ Implementations that support HTTP Message Signatures per RFC 9421:
 A signature that covers `content-digest` commits to the exact bytes of the request body. Any intermediary that alters those bytes — a gateway that re-encodes form parameters, a proxy that re-chunks or re-serializes content, a security appliance that normalizes the payload — will cause verification to fail, and the failure is indistinguishable at the {{ linkvhls }} from a forged request. Deployments that place such intermediaries between the {{ linkvhlr }} and the {{ linkvhls }} SHOULD confirm that the request body is conveyed unmodified, or select one of the other authentication options, whose credentials are not bound to the body encoding.
 
 #### 2:3.YY5.5.3 Audit Logging
+
 Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - All document access requests (successful and failed)
 - Authentication method used (HTTP signatures, OAuth, or Verifiable Credential)
@@ -894,24 +908,26 @@ Both {{ linkvhlr }} and {{ linkvhls }} SHOULD log:
 - User identifiers (from recipient parameter)
 
 #### 2:3.YY5.5.4 Rate Limiting
-{{ linkvhls }} SHOULD implement rate limiting:
+
+The {{ linkvhls }} SHOULD implement rate limiting:
 - Per receiver (identified by keyid or OAuth client_id)
 - Per folder ID (to prevent brute force on VHL tokens)
 - Per IP address
 - Return 429 Too Many Requests when limits exceeded
 
 #### 2:3.YY5.5.5 Passcode Security
-When VHL is passcode-protected (P flag):
+
+When the VHL is passcode-protected (P flag):
 - Failed passcode attempts SHOULD be rate limited
 - Passcode SHOULD NOT be logged in audit trails
 - Consider lockout after repeated failed attempts
 
-The passcode is carried in the request body, or inside the credential under the Verifiable Credential option, over the ATNA secure channel — so it stays out of request lines, proxy logs and content-distribution logs. It is not otherwise protected in transit, which is inherited from the [SMART Health Links manifest request](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#smart-health-link-manifest-request). The defence against a weak passcode is therefore limiting how many guesses an attacker gets, not the transport.
+The passcode is carried in the request body, or inside the credential under the Verifiable Credential mechanism, over the ATNA secure channel — so it stays out of request lines, proxy logs and content-distribution logs. It is not otherwise protected in transit, which is inherited from the [SMART Health Links manifest request](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#smart-health-link-manifest-request). The defense against a weak passcode is therefore limiting how many guesses an attacker gets, not the transport.
 
 Two measures from the SMART Health Links specification are worth carrying into a VHL deployment:
 
 - **A total lifetime count of incorrect attempts** for a given folder ID, after which the VHL stops resolving. Rate limiting alone only slows an exhaustive search of a short numeric passcode; a lifetime count is what ends it. {{ linkvhls }}s SHOULD enforce such a count in addition to the per-receiver and per-folder limits in [Rate Limiting](#23yy554-rate-limiting).
-- **Enforcement against concurrent requests, not only sequential ones.** An attacker issuing many manifest requests in parallel can otherwise burn through far more guesses than the counter allows before any of them records a failure. Limiting in-flight requests per folder ID, or serialising their processing, closes that gap.
+- **Enforcement against concurrent requests, not only sequential ones.** An attacker issuing many manifest requests in parallel can otherwise burn through far more guesses than the counter allows before any of them records a failure. Limiting in-flight requests per folder ID, or serializing their processing, closes that gap.
 
 <a name="23yy556-privacy-of-request-metadata"> </a>
 

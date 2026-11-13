@@ -18,7 +18,7 @@ Within the VHL trust model, both the {{ linkvhlr }} and the {{ linkvhls }} are p
 - Verification of the origin and integrity of a VHL;
 - Authentication and authorization of requests made by means of a VHL.
     
-The authority to participate in the trust network is governed by each actor's **jurisdiction**, which determines eligibility and onboarding criteria. A participant's authorization is established through PKI, by validating its certificate chain against material established at onboarding and published by the **Trust Anchor** ({{ linkta }}).
+The authority to participate in the trust network is governed by each actor's **jurisdiction**, which determines eligibility and onboarding criteria. A participant's authorization is established through PKI, by validating its certificate chain against material established at onboarding and published by the {{ linkta }}.
 
 Jurisdictions may also impose specific regulatory requirements on the privacy and security of health data exchange. These may include mandatory **consent verification**, **audit logging**, or other compliance controls that impact how VHL-based exchanges are implemented.
 
@@ -36,7 +36,7 @@ As members of a trust network, both the {{ linkvhlr }} and the {{ linkvhls }} pu
 
 ## Background Knowledge and Reading
 
-This profile assumes the reader is familiar with the [IHE Technical Frameworks General Introduction](https://profiles.ihe.net/GeneralIntro/) and with [HL7 FHIR R4](http://hl7.org/fhir/R4/). VHL builds on the specifications below, and readers new to any of them should consult it before reading the transaction definitions.
+This profile assumes the reader is familiar with the [IHE Technical Frameworks General Introduction](https://profiles.ihe.net/GeneralIntro/) and with [HL7 FHIR R4](http://hl7.org/fhir/R4/). VHL builds on the specifications below, and readers new to any of them should consult them before reading the transaction definitions.
 
 - **SMART Health Links Specification**: [SMART Health Links](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html) — the payload format and manifest-request parameters VHL adopts; see also [Appendix A: Comparison of VHL and SHL](vhl_vs_shl.html) and the [SHL encryption convention](https://hl7.org/fhir/uv/smart-health-cards-and-links/links-specification.html#encrypting-and-decrypting-files)
 - **IHE MHD**: [Mobile Health Document Sharing](https://profiles.ihe.net/ITI/MHD/) — [ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html) and [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html)
@@ -77,8 +77,6 @@ This section defines the actors, transactions, and/or content modules in this pr
   </li>
 </ul>
 
-The figure below shows the actors directly involved in this profile and the relevant transactions between them.
-
 Trust between the {{ linkvhlr }} and the {{ linkvhls }} MAY be established through:
 - Implementation of the optional Submit PKI Material with DID [ITI-YY1] and Retrieve Trust List with DID [ITI-YY2] transactions, OR
 - Alternative jurisdiction-specific PKI exchange mechanisms (out of scope for this profile)
@@ -89,8 +87,7 @@ This is illustrated in Figure 1:XX.1-1.
   <div style="width:18em; max-width:100%;">
   {%include trust_interaction.svg%}
   </div>
-  <p id="f1:XX.1-1" class="figureTitle">Figure 1:XX.1-1
-  : Trust Network PKI Exchange</p>
+  <p id="f1:XX.1-1" class="figureTitle"><strong>Figure 1:XX.1-1: Trust Network PKI Exchange</strong></p>
 </figure>
 
 The process of a VHL Holder requesting a VHL for a set of health documents from a {{ linkvhls }} and subsequently sharing them to a {{ linkvhlr }} is illustrated in Figure 1:XX.1-2.
@@ -99,12 +96,14 @@ The process of a VHL Holder requesting a VHL for a set of health documents from 
   <div style="width:23em; max-width:100%;">
   {%include vhl_interaction.svg%}
   </div>
-  <p id="f1:XX.1-2" class="figureTitle" >Figure 1:XX.1-2: VHL Generation, Provision, and Document Retrieval Flow</p>
+  <p id="f1:XX.1-2" class="figureTitle"><strong>Figure 1:XX.1-2: VHL Generation, Provision, and Document Retrieval Flow</strong></p>
 </figure>
 
 <br clear="all">
 
-<p id ="tXX.1-1" class="tableTitle">Table XX.1-1: VHL Profile - Actors and Transactions</p>
+Table 1:XX.1-1 lists the transactions for each actor directly involved in the VHL Profile. To claim compliance with this profile, an actor shall support all required transactions (labeled "R") and may support the optional transactions (labeled "O").
+
+<p id="t1:XX.1-1" class="tableTitle"><strong>Table 1:XX.1-1: VHL Profile - Actors and Transactions</strong></p>
 
 | Actors         | Transactions                 | Initiator or Responder | Optionality| Reference                 |
 |----------------|------------------------------|------------------------|------------|---------------------------|
@@ -142,7 +141,7 @@ The transactions in this profile are summarized in the sections below.
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to submit PKI material to a {{ linkta }} using Decentralized Identifiers (DIDs).
 
-For more details see the detailed [transaction description](ITI-YY1.html)
+For more details, see the detailed [transaction description](ITI-YY1.html).
 
 This transaction is captured as the following requirements:
 - [Initiate Submit PKI Material Request](Requirements-InitiateSubmitPKIMaterialRequest.html)
@@ -152,7 +151,7 @@ This transaction is captured as the following requirements:
 
 This transaction is used by a {{ linkvhlr }} or {{ linkvhls }} to retrieve a Trust List from a {{ linkta }} containing DID Documents with PKI material.
 
-For more details see the detailed [transaction description](ITI-YY2.html)
+For more details, see the detailed [transaction description](ITI-YY2.html).
 
 This transaction is captured as the following requirements:
 - [Initiate Retrieve Trust List Request](Requirements-InitiateRetrieveTrustListRequest.html)
@@ -162,7 +161,7 @@ This transaction is captured as the following requirements:
 
 This transaction is used by a {{ linkvhlh }} to request that a {{ linkvhls }} generate a VHL. By default the VHL is carried as a QR code encoded as an HCERT/CWT structure; where the {{ linkvhls }} supports the VC Enveloped VHL Option it MAY instead be carried as a signed Verifiable Credential.
 
-For more details see the detailed [transaction description](ITI-YY3.html)
+For more details, see the detailed [transaction description](ITI-YY3.html).
 
 This transaction is captured as the following requirements:
 - [Initiate VHL Generation Request](Requirements-InitiateVHLGenerationRequest.html)
@@ -172,7 +171,7 @@ This transaction is captured as the following requirements:
 
 This transaction is initiated by a {{ linkvhlh }} to transmit a VHL to a {{ linkvhlr }}, either by displaying a QR code for scanning or, where the {{ linkvhls }} supports the VC Enveloped VHL Option, as a signed Verifiable Credential.
 
-For more details see the detailed [transaction description](ITI-YY4.html)
+For more details, see the detailed [transaction description](ITI-YY4.html).
 
 This transaction is captured as the following requirements:
 - [Provide VHL](Requirements-ProvideVHL.html)
@@ -182,7 +181,7 @@ This transaction is captured as the following requirements:
 
 This transaction is initiated by a {{ linkvhlr }} to retrieve a document manifest from a {{ linkvhls }} using a previously validated VHL as authorization. The transaction uses standard FHIR search on the List resource, following the same pattern as MHD ITI-66 Find Document Lists.
 
-For more details see the detailed [transaction description](ITI-YY5.html)
+For more details, see the detailed [transaction description](ITI-YY5.html).
 
 This transaction is captured as the following requirements:
 - [Request VHL Documents](Requirements-RequestVHLDocuments.html)
@@ -192,24 +191,26 @@ The documents referenced by the returned manifest are retrieved separately, usin
 
 <a name="actor-options"> </a>
 
-## 1:XX.2  Actor Options
+## 1:XX.2 Actor Options
 
-Options that may be selected for each actor in this implementation guide are listed in Table XX.2-1 below. Dependencies between options when applicable are specified in notes.
+Options that may be selected for each actor in this implementation guide are listed in Table 1:XX.2-1 below. Dependencies between options when applicable are specified in notes.
 
-<p id ="tXX.2-1" class="tableTitle">Table XX.2-1: Actor Options</p>
+<p id="t1:XX.2-1" class="tableTitle"><strong>Table 1:XX.2-1: VHL Profile - Actor Options</strong></p>
 
-| Actor          | Option Name                                     |
-|----------------|-------------------------------------------------|
-| {{ linkvhls }} | Include DocumentReference                       |
-| ^              | Sign Manifest Request (HTTP Message Signatures) |
-| ^              | Sign Manifest Request (OAuth with SSRAA)        |
-| ^              | Sign Manifest Request (Verifiable Credential)   |
-| ^              | VC Enveloped VHL                                |
-| {{ linkvhlr }} | Include DocumentReference                       |
-| ^              | Sign Manifest Request (HTTP Message Signatures) |
-| ^              | Sign Manifest Request (OAuth with SSRAA)        |
-| ^              | Sign Manifest Request (Verifiable Credential)   |
-| ^              | Verify Document Signature                       |
+| Actor          | Option Name                                     | Reference |
+|----------------|-------------------------------------------------|-----------|
+| {{ linkta }}   | No options defined                              | -- |
+| {{ linkvhlh }} | No options defined                              | -- |
+| {{ linkvhls }} | Include DocumentReference                       | [Section 1:XX.2.4](#1xx24-include-documentreference-option) |
+| ^              | Sign Manifest Request (HTTP Message Signatures) | [Section 1:XX.2.1](#1xx21-sign-manifest-request-option-http-message-signatures) |
+| ^              | Sign Manifest Request (OAuth with SSRAA)        | [Section 1:XX.2.2](#1xx22-sign-manifest-request-option-oauth-with-ssraa) |
+| ^              | Sign Manifest Request (Verifiable Credential)   | [Section 1:XX.2.3](#1xx23-sign-manifest-request-option-verifiable-credential) |
+| ^              | VC Enveloped VHL                                | [Section 1:XX.2.6](#1xx26-vc-enveloped-vhl-option-vhl-sharer) |
+| {{ linkvhlr }} | Include DocumentReference                       | [Section 1:XX.2.4](#1xx24-include-documentreference-option) |
+| ^              | Sign Manifest Request (HTTP Message Signatures) | [Section 1:XX.2.1](#1xx21-sign-manifest-request-option-http-message-signatures) |
+| ^              | Sign Manifest Request (OAuth with SSRAA)        | [Section 1:XX.2.2](#1xx22-sign-manifest-request-option-oauth-with-ssraa) |
+| ^              | Sign Manifest Request (Verifiable Credential)   | [Section 1:XX.2.3](#1xx23-sign-manifest-request-option-verifiable-credential) |
+| ^              | Verify Document Signature                       | [Section 1:XX.2.5](#1xx25-verify-document-signature-option-vhl-receiver) |
 {: .grid}
 
 The three Sign Manifest Request Options differ only in the mechanism by which the {{ linkvhlr }} presents its credential. Each is optional for both actors, and each is complementary between them: the {{ linkvhlr }} side presents the credential, and the {{ linkvhls }} side verifies it and confirms the {{ linkvhlr }}'s authorization within the trust network before responding. An option is therefore only effective where both actors claim it. An actor MAY claim more than one, in which case the two agree on which to use for a given exchange.
@@ -245,7 +246,7 @@ The option is defined in [2:3.YY5.4.1.6](ITI-YY5.html#23yy5416-sign-manifest-req
 The Include DocumentReference Option enables the {{ linkvhls }} to process the `_include=List:item` parameter in manifest requests and return DocumentReference resources along with the List resource in a single response. A {{ linkvhlr }} supporting this option includes `_include=List:item` in the manifest request; otherwise it retrieves each referenced DocumentReference separately.
 
 **Benefits:**
-- Reduces network round trips for VHL Receiver
+- Reduces network round trips for the VHL Receiver
 - Improves performance for document discovery
 - Simplifies workflow for retrieving document metadata
 
@@ -285,7 +286,7 @@ See ITI-YY3 Section [2:3.YY3.4.1.2.1 Output Carrier Options](ITI-YY3.html#output
 
 The following actor groupings are required for secure operations within the VHL trust network:
 
-<p id ="tXX.3-1" class="tableTitle">Table XX.3-1: VHL Profile - Required Actor Groupings</p>
+<p id="t1:XX.3-1" class="tableTitle"><strong>Table 1:XX.3-1: VHL Profile - Required Actor Groupings</strong></p>
 
 | VHL Actor | Grouping Condition | Actor(s) to be grouped with | Reference |
 |-----------|--------------------|-----------------------------|-----------|
@@ -309,7 +310,7 @@ This section shows how the transactions/content modules of the profile are combi
 
 ### 1:XX.4.1 Concepts
 
-A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to share access to health documents in a secure, auditable, and configurable manner. Sharing options may include **limited-time access**, **PIN-protected retrieval**, or **ongoing access** to a longitudinal dataset that may evolve over time. VHLs can be rendered as QR codes or downloaded to a user’s device, supporting patient-mediated data sharing and enhancing interoperability across healthcare systems.
+A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to share access to health documents in a secure, auditable, and configurable manner. Sharing options may include **limited-time access**, **PIN-protected retrieval**, or **ongoing access** to a longitudinal dataset that may evolve over time. VHLs can be rendered as QR codes or downloaded to a user's device, supporting patient-mediated data sharing and enhancing interoperability across healthcare systems.
 
 ### 1:XX.4.2 Use Cases
 
@@ -325,7 +326,7 @@ A **Verifiable Health Link (VHL)** is a mechanism that enables individuals to sh
 }
 </style>
 
-The use cases below are **illustrative**. Each describes a programme or deployment that exists independently of this profile, and is presented to show where the VHL transactions apply — not as a statement that the deployment implements this profile as specified here.
+The use cases below are **illustrative**. Each describes a program or deployment that exists independently of this profile, and is presented to show where the VHL transactions apply — not as a statement that the deployment implements this profile as specified here.
 
 Across these use cases the transactions combine in the common pattern shown in Figure 1:XX.4.2-1. The {{ linkvhls }} and the {{ linkvhlr }} first onboard to a {{ linkta }}, submitting their own PKI material with {{ linksubmitpki }} and obtaining the trust list with {{ linkretrievepki }}, or through the jurisdiction-specific mechanisms that may be used in their place. A {{ linkvhlh }} then obtains a VHL from the {{ linkvhls }} with {{ linkgeneratevhl }}, and presents it to the {{ linkvhlr }} with {{ linkprovidevhl }}. The {{ linkvhlr }} verifies the VHL against the trust list before redeeming it with {{ linkretrievemanifest }}, then retrieves the documents the manifest references using [ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html). Individual use cases exercise different subsets of this pattern.
 
@@ -333,7 +334,7 @@ Across these use cases the transactions combine in the common pattern shown in F
   <div style="width:35em; max-width:100%;">
   {%include usecase-processflow.svg%}
   </div>
-  <p id="f1:XX.4.2-1" class="figureTitle">Figure 1:XX.4.2-1: VHL Transactions Applicable Across the Use Cases</p>
+  <p id="f1:XX.4.2-1" class="figureTitle"><strong>Figure 1:XX.4.2-1: VHL Transactions Applicable Across the Use Cases</strong></p>
 </figure>
 
 #### 1:XX.4.2.1 Use Case #1: WHO Global Digital Health Certification Network
@@ -365,7 +366,7 @@ This use case has the following business requirements:
 This use case has the following business requirement:
 - [Establish Trust](Requirements-EstablishTrust.html)
 
-#### 1:XX.4.2.2 Use Case #2: EU Vaccination Card
+#### 1:XX.4.2.2 Use Case #2: European Vaccination Card
 
 {% assign UseCaseEVAC = site.data.ExampleScenario-UseCaseEVAC %}
 
@@ -385,10 +386,11 @@ This use case has the following business requirements:
 - [Create Secure Channel](Requirements-CreateSecureChannel.html)
 - [Request VHL Documents](Requirements-RequestVHLDocuments.html)
 
-<a name = "security-considerations"></a>
+<a name="security-considerations"> </a>
+
 ## 1:XX.5 Security Considerations
 
-VHL is a building block that is meant to be used together with added security measures, otherwise it is not suitable for exchange in environments where security and provenance cannot be reliably established by other means.
+VHL is a building block that is meant to be used together with added security measures; otherwise, it is not suitable for exchange in environments where security and provenance cannot be reliably established by other means.
 
 Key security considerations include:
 
@@ -412,7 +414,9 @@ The transactions in this profile (ITI-YY1 through ITI-YY5) rely on cryptographic
 
 This baseline ensures that two independent conformant implementations can always interoperate during testing. It does not preclude support for — or preferred deployment use of — other algorithms (other ECDSA curves, EdDSA, RSA-PSS, or future post-quantum algorithms).
 
-Where an underlying specification sets its own algorithm requirements, those requirements govern:
+Where an underlying specification sets its own algorithm requirements, those requirements govern, as listed in Table 1:XX.5.3-1:
+
+<p id="t1:XX.5.3-1" class="tableTitle"><strong>Table 1:XX.5.3-1: Algorithm Requirements Set by Underlying Specifications</strong></p>
 
 | Signature operation | Governed by |
 |---------------------|-------------|
@@ -450,26 +454,29 @@ Algorithms named in examples, tables, and code blocks throughout this IG are ill
 
 ### 1:XX.5.6 Privacy Considerations
 
-- VHL payloads do not contain clinical content - only a reference to a document folder. They do carry the patient business identifier supplied at generation time and a free-text label, both of which are readable by anyone holding the VHL; see [ITI-YY5 Privacy of Request Metadata](ITI-YY5.html#23yy556-privacy-of-request-metadata).
+- VHL payloads do not contain clinical content—only a reference to a document folder. They do carry the patient business identifier supplied at generation time and a free-text label, both of which are readable by anyone holding the VHL; see [ITI-YY5 Privacy of Request Metadata](ITI-YY5.html#23yy556-privacy-of-request-metadata).
 - Actual health data is transmitted over secure channels (ITI-YY5).
 - Consent may be recorded during VHL generation; see [PCF - Privacy Consent on FHIR](#1xx62-pcf---privacy-consent-on-fhir).
 - VHL Holders retain the right to revoke access where supported.
 
 <a name="other-grouping"> </a>
+
 ## 1:XX.6 Cross-Profile Considerations
 
 This section is informative, not normative. It is intended to put this profile in context with other profiles. Any required groupings should have already been described above.
 
 <a name="atna-cross-profile"> </a>
+
 ### 1:XX.6.1 ATNA - Audit Trail and Node Authentication
 
-The grouping of the {{ linkvhlr }} and the {{ linkvhls }} with an ATNA Secure Node or Secure Application is required for ITI-YY5 and is stated in [Section XX.3 Required Actor Groupings](#required-groupings). What that grouping brings is Authenticate Node [ITI-19] and the creation of audit records for security-relevant events.
+The grouping of the {{ linkvhlr }} and the {{ linkvhls }} with an ATNA Secure Node or Secure Application is required for ITI-YY5 and is stated in [Section 1:XX.3 Required Actor Groupings](#required-groupings). What that grouping brings is Authenticate Node [ITI-19] and the creation of audit records for security-relevant events.
 
 The protection ITI-19 affords depends on which ATNA Secure Transport (STX) option the deployment claims. A Secure Node or Secure Application is required to support at least one STX option, and the available options include [STX: No Secure Transport](https://profiles.ihe.net/ITI/TF/Volume1/ch-9.html), for which ITI-19 requires no actions because confidentiality is provided by an already-secure network such as an isolated segment or a VPN. Where a TLS option is claimed, ITI-19 specifies mutual authentication using X.509 certificates. The ATNA grouping therefore establishes that the channel is protected by a means the deployment has chosen and declared; it does not by itself establish that TLS, or mutual certificate authentication, is in use.
 
 That protection is distinct from the authentication ITI-YY5 requires. Authenticate Node authenticates the communicating node and secures the channel between nodes; ITI-YY5 authenticates the requesting entity and establishes its authorization within the trust network, and under the Sign Manifest Request Option (Verifiable Credential) additionally binds the request to the particular VHL the {{ linkvhlr }} decoded. The authentication options in [ITI-YY5](ITI-YY5.html) are consequently not made redundant by the ATNA grouping, and an ATNA grouping does not satisfy them.
 
 <a name="pcf-cross-profile"> </a>
+
 ### 1:XX.6.2 PCF - Privacy Consent on FHIR
 
 The [IHE Privacy Consent on FHIR (PCF)](https://profiles.ihe.net/ITI/PCF/) profile is the recommended companion for capturing, storing, and enforcing patient consent alongside VHL. A {{ linkvhls }} that records consent acts as a PCF Consent Recorder and initiates Access Consent [ITI-108] transactions to record consent declarations by the {{ linkvhlh }}; this is captured in the [Record Consent](Requirements-RecordConsent.html) requirement.
@@ -483,7 +490,7 @@ The `$generate-vhl` operation (ITI-YY3) accepts an optional `purposeOfUse` input
 
 ### 1:XX.6.3 MHD - Mobile Health Document Sharing
 
-ITI-YY5 (Retrieve Manifest) reuses the FHIR search machinery of [MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html): the VHL manifest URL constructed at ITI-YY3 is a FHIR `List` search using the parameters the Document Responder is required to support per ITI-66, and the ITI-YY5 response is an ITI-66 `searchset` Bundle. Binary retrieval is delegated to [MHD ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html) per the required grouping in [Section XX.3 Required Actor Groupings](#required-groupings).
+ITI-YY5 (Retrieve Manifest) reuses the FHIR search machinery of [MHD ITI-66 Find Document Lists](https://profiles.ihe.net/ITI/MHD/ITI-66.html): the VHL manifest URL constructed at ITI-YY3 is a FHIR `List` search using the parameters the Document Responder is required to support per ITI-66, and the ITI-YY5 response is an ITI-66 `searchset` Bundle. Binary retrieval is delegated to [MHD ITI-68 Retrieve Document](https://profiles.ihe.net/ITI/MHD/ITI-68.html) per the required grouping in [Section 1:XX.3 Required Actor Groupings](#required-groupings).
 
 ### 1:XX.6.4 mCSD - Mobile Care Services Discovery
 
@@ -493,7 +500,7 @@ This is a discovery mechanism only. The DID so obtained is dereferenced and its 
 
 ### 1:XX.6.5 DSG - Document Digital Signature
 
-The Verify Document Signature Option ([Section XX.2.5](#1xx25-verify-document-signature-option-vhl-receiver)) concerns signatures over the documents themselves, which this profile does not define; the IHE profile that does is [Document Digital Signature (DSG)](https://profiles.ihe.net/ITI/DSGj/Volume1/ch-37.html). A {{ linkvhlr }} supporting the option is correspondingly grouped with a DSG **Content Consumer**, and a {{ linkvhls }} that signs the documents it shares with a DSG **Content Creator**.
+The Verify Document Signature Option ([Section 1:XX.2.5](#1xx25-verify-document-signature-option-vhl-receiver)) concerns signatures over the documents themselves, which this profile does not define; the IHE profile that does is [Document Digital Signature (DSG)](https://profiles.ihe.net/ITI/DSGj/Volume1/ch-37.html). A {{ linkvhlr }} supporting the option is correspondingly grouped with a DSG **Content Consumer**, and a {{ linkvhls }} that signs the documents it shares with a DSG **Content Creator**.
 
 DSG carries the XML and JSON cases as content modules on those same two actors rather than as separate profiles:
 
