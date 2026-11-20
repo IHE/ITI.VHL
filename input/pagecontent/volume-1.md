@@ -439,8 +439,8 @@ Algorithms named in examples, tables, and code blocks throughout this IG are ill
 
 - A VHL conveys no authority until its signature has been checked against the trust list. Verification is required of the {{ linkvhlr }} as an expected action of [ITI-YY4 Provide VHL](ITI-YY4.html), before any manifest request is made.
 - VHL expiration timestamps should be enforced.
-- Passcodes (if used) should be communicated out-of-band and validated server-side.
-- VHL Sharers should implement rate limiting and account lockout for failed passcode attempts.
+- A passcode separates possession of the VHL from the ability to use it, and is worth something only where it reaches the {{ linkvhlr }} by a route the VHL itself does not take. See [ITI-YY4 Passcode Protection](ITI-YY4.html#23yy454-passcode-protection) for what that requires of the {{ linkvhlh }}, and [ITI-YY3 Passcode Security](ITI-YY3.html#23yy353-passcode-security) for what a passcode does and does not defend against.
+- A passcode is low-entropy, so what bounds an attack on it is the number of guesses allowed rather than the transport. A {{ linkvhls }} should enforce a total count of incorrect attempts for the lifetime of a VHL, after which the VHL stops resolving, and should enforce it against concurrent as well as sequential requests. See [ITI-YY5 Passcode Security](ITI-YY5.html#23yy555-passcode-security).
 
 ### 1:XX.5.5 Audit Requirements
 

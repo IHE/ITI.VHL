@@ -428,9 +428,13 @@ The `key` travels inside the VHL, so it does not restrict access by anyone holdi
 - Consider short expiration times (minutes to hours) for high-security scenarios
 
 #### 2:3.YY3.5.3 Passcode Security
-- The VHL Holder SHOULD securely store the plaintext passcode for sharing with authorized VHL Receivers
-- During ITI-YY5 Retrieve Manifest, the VHL Receiver provides the passcode which the VHL Sharer validates against the stored hash
-- Use of a passcode adds an additional authentication factor beyond VHL possession
+
+A passcode buys a separation of *possession* of the VHL from the *ability to use* it. The exposures this matters for are the ones [QR Code Security](#23yy352-qr-code-security) names — a VHL photographed, screenshotted, printed and left behind, forwarded, or sitting in a camera roll or a chat history — in all of which the VHL travels without the {{ linkvhlh }}'s intent. 
+
+- The {{ linkvhls }} keeps a one-way hash of the passcode rather than the passcode itself. What that protects is the storage environment: whoever reads the store — a database dump, a backup, a restored snapshot, a log, an insider — does not thereby learn the passcode, and a {{ linkvhlh }} who has reused it elsewhere is not exposed by a compromise of the {{ linkvhls }}.
+- A passcode is low-entropy, so that protection rests on the deliberate cost of the function required at [2:3.YY3.4.1.3 Expected Actions](#23yy3413-expected-actions). The cost makes offline recovery expensive, not impossible. 
+- Hashing the stored value protects neither the exchange nor against guessing through [Retrieve Manifest [ITI-YY5]](ITI-YY5.html). The {{ linkvhls }} computes that hash over a passcode it has just received in the clear, so an online attack is unaffected by how the stored value was derived; what bounds one is the lifetime attempt count and the concurrency enforcement in [ITI-YY5 Passcode Security](ITI-YY5.html#23yy555-passcode-security).
+- The plaintext exists only on the {{ linkvhlh }}'s side, which is where its confidentiality rests. The {{ linkvhlh }} SHOULD store it with the care given to the VHL itself, and share it only with an intended {{ linkvhlr }} — see [ITI-YY4 Passcode Protection](ITI-YY4.html#23yy454-passcode-protection) for what the separate route has to mean in practice.
 
 #### 2:3.YY3.5.4 Manifest URL Construction
 - The `_include` parameter SHOULD only be included if the VHL Sharer supports the Include DocumentReference Option

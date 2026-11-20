@@ -218,7 +218,7 @@ Feature: ITI-YY5 Retrieve Manifest – VHL Sharer Expected Actions
     When the audit event is recorded
     Then the VHL Sharer SHOULD log receiver identity, folder ID, authentication method, authorization decision, and timestamp
 
-  # ─── §2:3.YY5.5.8 Passcode Security ───────────────────────────────────────
+  # ─── §2:3.YY5.5.5 Passcode Security ───────────────────────────────────────
 
   @security @SHOULD
   Scenario: VHL Sharer rate limits failed passcode attempts
