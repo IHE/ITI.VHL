@@ -1,0 +1,38 @@
+@startuml
+skinparam svgDimensionStyle false
+hide footbox
+
+participant "VHL Holder" as VHLH
+participant "VHL Sharer" as VHLS
+participant "Trust Anchor" as TA
+participant "VHL Receiver" as VHLR
+
+== Onboarding to the trust network ==
+
+VHLS -> TA : 01 Submit PKI Material with DID [ITI-YY1]
+VHLR -> TA : 02 Submit PKI Material with DID [ITI-YY1]
+VHLS -> TA : 03 Retrieve Trust List with DID [ITI-YY2]
+VHLR -> TA : 04 Retrieve Trust List with DID [ITI-YY2]
+
+== VHL issuance ==
+
+VHLH -> VHLS : 05 Generate VHL [ITI-YY3]
+VHLS --> VHLH : 06 VHL (QR code or Verifiable Credential)
+
+== VHL presentation and document retrieval ==
+
+VHLH -> VHLR : 07 Provide VHL [ITI-YY4]
+VHLR -> VHLR : 08 Verify VHL signature\nagainst trust list
+VHLR -> VHLS : 09 Retrieve Manifest [ITI-YY5]\n(ATNA secure channel)
+VHLS --> VHLR : 10 Manifest\nFHIR Bundle (searchset)
+VHLR -> VHLS : 11 Retrieve Document [ITI-68]
+VHLS --> VHLR : 12 Documents and digital signatures
+
+legend bottom
+  Illustrative. Shows the VHL transactions applicable to the use cases
+  that follow. Individual use cases exercise different subsets of this
+  pattern, and the deployments described exist independently of this
+  profile - they do not necessarily implement it as specified here.
+endlegend
+
+@enduml

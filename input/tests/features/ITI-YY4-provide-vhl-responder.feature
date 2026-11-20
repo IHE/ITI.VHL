@@ -184,7 +184,7 @@ Feature: ITI-YY4 Provide VHL – VHL Receiver Expected Actions
     Then the request SHALL be an HTTP POST to the manifest URL "_search" endpoint
     And the request body SHALL contain the FHIR search parameters extracted from the manifest URL
     And the request body SHALL include "recipient" and "passcode" (if P flag) and optionally "embeddedLengthMax"
-    And the request SHALL include authentication via at least one of: HTTP Message Signatures (RFC 9421), OAuth Bearer token (SSRAA), or Verifiable Credential option
+    And the request SHALL include a credential under the agreed Sign Manifest Request Option — HTTP Message Signatures (RFC 9421), OAuth Bearer token (SSRAA), or Verifiable Credential — where the VHL Receiver claims one of those options
 
   # ─── Error Handling ──────────────────────────────────────────────────────────
 

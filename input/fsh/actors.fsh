@@ -14,8 +14,7 @@ InstanceOf: ActorDefinition
 Usage: #definition
 * name = "VHLHolder"
 * title = "VHL Holder"
-* description = "An individual—typically the patient or their delegate—who possesses a Verified Health Link (VHL), a signed data artifact that enables a VHL Receiver to verify its authenticity and access one or more health documents made available by a VHL Sharer.
-"
+* description = "An individual—typically the patient or their delegate—who possesses a Verifiable Health Link (VHL), a signed data artifact that enables a VHL Receiver to verify its authenticity and access one or more health documents made available by a VHL Sharer."
 * status = $pubStatus#active
 * publisher = "IHE"
 * type = $actorType#person
@@ -25,19 +24,19 @@ InstanceOf: ActorDefinition
 Usage: #definition
 * name = "VHLReceiver"
 * title = "VHL Receiver"
-* description = "A system or organization that receives a Verified Health Link (VHL) from a VHL Holder and uses it to retrieve health documents from a VHL Sharer, after verifying the authenticity and integrity of the VHL.
-"
+* description = "A system or organization that receives a Verifiable Health Link (VHL) from a VHL Holder and uses it to retrieve health documents from a VHL Sharer, after verifying the authenticity and integrity of the VHL."
 * status = $pubStatus#active
 * publisher = "IHE"
 * type = $actorType#system
+* capabilities[+] = Canonical(VHLReceiverCapabilityStatement)
 
 Instance: VHLSharer
 InstanceOf: ActorDefinition
 Usage: #definition
 * name = "VHLSharer"
 * title = "VHL Sharer"
-* description = "The VHL Sharer generates a VHL, provides the VHL to a VHL Holder, and responds to requests from a VHL Sharer to utilize the VHL."
+* description = "The VHL Sharer generates a VHL in response to a request from a VHL Holder, and responds to requests from a VHL Receiver to utilize the VHL."
 * status = $pubStatus#active
 * publisher = "IHE"
 * type = $actorType#system
-
+* capabilities[+] = Canonical(VHLSharerCapabilityStatement)

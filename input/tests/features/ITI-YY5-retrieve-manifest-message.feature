@@ -1,8 +1,9 @@
 Feature: ITI-YY5 Retrieve Manifest – Message Semantics
   Defines the format of the ITI-YY5 request and response messages.
   The request is an HTTP POST to /List/_search with FHIR search parameters
-  and SHL parameters. Authentication is via HTTP Message Signatures (RFC 9421)
-  or OAuth with SSRAA Option. The response is a FHIR searchset Bundle.
+  and SHL parameters. Where one of the Sign Manifest Request Options is in use,
+  authentication is via that option: HTTP Message Signatures (RFC 9421), OAuth with
+  SSRAA, or Verifiable Credential. The response is a FHIR searchset Bundle.
   Defined once here for both the VHL Receiver (initiator) and VHL Sharer (responder).
 
   Background:
@@ -83,13 +84,13 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
     When the optional SHL parameters are assembled
     Then the body MAY include an "embeddedLengthMax" integer parameter
 
-  # ─── Request: HTTP Message Signature Headers (when Option A is used) ────────
+  # ─── Request: HTTP Message Signature Headers ───────────────────────────────────
 
   @message-semantics @SHALL
   Scenario: Request includes Content-Digest header with SHA-256 hash of the body when HTTP signatures are used
     Given the VHL Receiver is authenticating using HTTP Message Signatures
     When the Content-Digest header is computed
-    Then it SHALL be present in the format "Content-Digest: sha-256=<base64-encoded-hash>"
+    Then it SHALL be present in the RFC 9530 format "Content-Digest: sha-256=:<base64-encoded-hash>:"
     And the hash SHALL be the SHA-256 digest of the raw request body bytes
 
   @message-semantics @SHALL
@@ -120,11 +121,11 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
       | rsa-pss-sha256      |
       | rsa-v1_5-sha256     |
 
-  # ─── Request: OAuth with SSRAA Option Headers (when Option B is used) ───────
+  # ─── Request: OAuth with SSRAA Headers ──────────────────────────────────
 
   @message-semantics @SHALL
   Scenario: Request includes Authorization Bearer header when OAuth with SSRAA is used
-    Given the VHL Receiver is authenticating using OAuth with SSRAA Option
+    Given the VHL Receiver is authenticating under the OAuth with SSRAA option
     When the authorization header is set
     Then the request SHALL include "Authorization: Bearer <access-token>"
 
@@ -165,8 +166,8 @@ Feature: ITI-YY5 Retrieve Manifest – Message Semantics
       | error_condition                                       | http_status              |
       | Malformed request or missing required parameters      | 400 Bad Request          |
       | Signature verification failed or receiver unknown     | 401 Unauthorized         |
-      | VHL expired, revoked, or does not authorize access    | 403 Forbidden            |
-      | List resource with specified _id not found            | 404 Not Found            |
-      | Invalid or missing passcode                           | 422 Unprocessable Entity |
+      | VHL does not authorize the requested documents        | 403 Forbidden            |
+      | List _id not found, or the VHL is no longer active    | 404 Not Found            |
+      | Invalid or missing passcode                           | 401 Unauthorized         |
       | Rate limit exceeded                                   | 429 Too Many Requests    |
       | Internal server error                                 | 500 Internal Server Error|

@@ -4,7 +4,7 @@
 {% assign linkvhlr = '<a href="ActorDefinition-VHLReceiver.html">VHL Receiver</a>' %}
 
 
-The Verifiable Health Links (VHL) profile defines protocols and patterns that allow the sharing of health documents in a auditable and verfiable manner within and across jurisdictional boundaries.   The VHL profile describes mechanisms, the VHLs, that an individual, the VHL Holder, uses to provide authorize access to their health records from an issuer, the {{ linkvhls }}, to a third party, the {{ linkvhlr }}.  The means by which the VHL is held by the VHL Holder or shared by the VHL Holder to the {{ linkvhlr }} are beyond the scope of this profile.
+The Verifiable Health Links (VHL) profile defines protocols and patterns that allow the sharing of health documents in an auditable and verifiable manner within and across jurisdictional boundaries.   The VHL profile describes mechanisms, the VHLs, that an individual, the VHL Holder, uses to authorize access to their health records from an issuer, the {{ linkvhls }}, to a third party, the {{ linkvhlr }}.  The means by which the VHL is held by the VHL Holder or shared by the VHL Holder to the {{ linkvhlr }} are beyond the scope of this profile.
 
 <div markdown="1" class="stu-note">
 
@@ -19,12 +19,13 @@ This guide is organized into the following sections:
 
 1. Volume 1:
    1. [Introduction](volume-1.html)
+   1. [Background Knowledge and Reading](volume-1.html#background-knowledge-and-reading)
    1. [Actors, Transactions, and Content](volume-1.html#actors-and-transactions)
    1. [Actor Options](volume-1.html#actor-options)
-   1. [Actor Required Groupings](volume-1.html#required-groupings)
+   1. [Required Actor Groupings](volume-1.html#required-groupings)
    1. [Overview](volume-1.html#overview)
    1. [Security Considerations](volume-1.html#security-considerations)
-   1. [Cross Profile Considerations](volume-1.html#other-grouping)
+   1. [Cross-Profile Considerations](volume-1.html#other-grouping)
 2. Volume 2: Transaction Detail
    1. [Submit PKI Material with DID [ITI-YY1]](ITI-YY1.html)
    1. [Retrieve Trust List with DID [ITI-YY2]](ITI-YY2.html)
@@ -45,8 +46,8 @@ IHE uses the normative words: "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NO
 
 #### Must Support
 
-The use of ```mustSupport``` in StructureDefinition profiles equivalent to the IHE use of **R2** as defined in [Appendix Z](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.10-profiling-conventions-for-constraints-on-fhir).
+The use of ```mustSupport``` in StructureDefinition profiles is equivalent to the IHE use of **R2** as defined in [Appendix Z](https://profiles.ihe.net/ITI/TF/Volume2/ch-Z.html#z.10-profiling-conventions-for-constraints-on-fhir).
 
-mustSupport of true - only has a meaning on items that are minimal cardinality of zero (0), and applies only to the source actor populating the data. The source actor shall populate the elements marked with MustSupport, if the concept is supported by the actor, a value exists, and security and consent rules permit.
+mustSupport of true only has a meaning on items that are minimal cardinality of zero (0), and applies only to the source actor populating the data. The source actor shall populate the elements marked with MustSupport, if the concept is supported by the actor, a value exists, and security and consent rules permit.
 The consuming actors should handle these elements being populated or being absent/empty.
-Note that sometimes mustSupport will appear on elements with a minimal cardinality greater than zero (0), this is due to inheritance from a less constrained profile.
+Note that sometimes mustSupport will appear on elements with a minimal cardinality greater than zero (0); this is due to inheritance from a less constrained profile.

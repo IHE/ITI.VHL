@@ -80,17 +80,17 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     When the "v" field is set in the SHL payload
     Then the "v" field SHALL default to 1
 
-  # ─── OAuth with SSRAA Option ───────────────────────────────────────────────
+  # ─── Sign Manifest Request Option (OAuth with SSRAA) ───────────────────────────────────────────────
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer includes extension.fhirBaseUrl when OAuth with SSRAA Option is supported
-    Given the VHL Sharer supports the OAuth with SSRAA Option
+  Scenario: VHL Sharer includes extension.fhirBaseUrl when the OAuth with SSRAA option is claimed
+    Given the VHL Sharer claims the Sign Manifest Request Option (OAuth with SSRAA)
     When the SHL payload is constructed
     Then the "extension" object SHALL include "fhirBaseUrl" set to the canonical FHIR base URL of the VHL Sharer
 
   @responder-actions @SHALL
-  Scenario: VHL Sharer does not include extension.fhirBaseUrl when OAuth with SSRAA Option is not supported
-    Given the VHL Sharer does NOT support the OAuth with SSRAA Option
+  Scenario: VHL Sharer does not include extension.fhirBaseUrl when the OAuth with SSRAA option is not claimed
+    Given the VHL Sharer does NOT claim the Sign Manifest Request Option (OAuth with SSRAA)
     When the SHL payload is constructed
     Then the "extension.fhirBaseUrl" field SHALL NOT be present
 
@@ -107,9 +107,18 @@ Feature: ITI-YY3 Generate VHL – VHL Sharer Expected Actions
     Then it SHALL be base64url-encoded per RFC 4648
 
   @responder-actions @SHALL
-  Scenario: Encoded SHL payload is prefixed with vhlink:/
+  Scenario: Encoded SHL payload is prefixed with vhlink:/ for the VC carrier
+    Given the VHL Sharer is returning the VC Enveloped VHL carrier
     When the base64url-encoded string is assembled
     Then it SHALL be prefixed with "vhlink:/"
+    And it SHALL be used as "credentialSubject.id"
+
+  @responder-actions @SHALL
+  Scenario: HCERT carrier places the payload at claim key 5 as a CBOR map
+    Given the VHL Sharer is returning the QR code carrier
+    When the VHL payload is placed in the HCERT structure
+    Then HCERT claim key 5 SHALL be a CBOR map with text keys
+    And it SHALL NOT be base64url-encoded or prefixed with "vhlink:/"
 
   # ─── HCERT/CWT Encoding ───────────────────────────────────────────────────
 

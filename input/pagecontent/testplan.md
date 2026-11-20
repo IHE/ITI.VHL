@@ -3,6 +3,24 @@
 We expect the maturity of the content will improve over time.  For now, we summarize high level testing scope and available tools. Comments are welcome.
 </div>
 
+<div markdown="1" class="stu-note">
+
+**The machine-readable TestPlan resources are temporarily withheld from this publication.**
+
+`TestPlan` is an R5-and-later resource and this guide is published at FHIR R4 (4.0.1). The
+publisher used by the continuous build cannot convert it, and aborts rather than producing the
+guide. The five TestPlan instances — Trust Anchor, VHL Sharer, VHL Receiver, Trust Establishment
+and QR Code Flow — are therefore commented out in `input/fsh/testplans.fsh`. They are retained in
+full in that file and nothing has been deleted.
+
+The narrative test scope on this page is unaffected and remains current.
+
+**To be restored by the authoring team once the publisher supports `TestPlan` in an R4 guide**, or
+once this guide moves to a FHIR version that carries `TestPlan` natively. The restore instructions
+are at the head of `input/fsh/testplans.fsh`, and the per-actor links under
+[Unit Test Procedure](#unit-test-procedure) are to be reinstated at the same time.
+</div>
+
 
 ## Introduction
 
@@ -10,7 +28,7 @@ VHL is an API between four actors: Trust Anchor, VHL Sharer, VHL Holder, and VHL
 
 The testing focuses on the five transactions defined in this profile: Submit PKI Material with DID [ITI-YY1], Retrieve Trust List with DID [ITI-YY2], Generate VHL [ITI-YY3], Provide VHL [ITI-YY4], and Retrieve Manifest [ITI-YY5]. Testing is primarily focused on server-side actor expectations (Trust Anchor and VHL Sharer) where transaction semantics can be validated against conformance criteria, as well as VHL Receiver decoding and verification behavior.
 
-Overall test plan leverages the Examples shown on the [Artifacts Summary](artifacts.html). The [Example Scenarios](artifacts.html#example-example-scenarios) listed illustrate the use cases and interactions defined by this implementation guide. Any applicable resources that are known to have been published by an app or server SHALL conform to the actor and transaction requirements defined in this guide.
+Overall test plan leverages the Examples shown on the [Artifacts Summary](artifacts.html). The [Example Scenarios](artifacts.html) listed illustrate the use cases and interactions defined by this implementation guide. Any applicable resources that are known to have been published by an app or server SHALL conform to the actor and transaction requirements defined in this guide.
 
 This section will be filled in as the IHE-Connectathon need drives the creation of the test plans, test procedures, test tools, and reporting.
 
@@ -36,17 +54,20 @@ The VHL Receiver and VHL Sharer SHALL be tested for the Retrieve Manifest transa
 #### Options Testing
 
 Testing of actor options includes:
-- **Sign Manifest Request Option** - VHL Receiver digitally signs manifest requests; VHL Sharer verifies the signature for mutual authentication and non-repudiation.
+- **Sign Manifest Request Options** - VHL Receiver authenticates itself to the VHL Sharer at ITI-YY5, and the VHL Sharer establishes the Receiver's authorization within the trust network before returning a manifest. Three options provide this, each named for the mechanism it uses, each optional for both actors, each complementary between them, and each tested separately:
+  - **Sign Manifest Request Option (HTTP Message Signatures)** - VHL Receiver signs the request per RFC 9421; VHL Sharer verifies the signature against the Receiver's key material obtained from the trust list.
+  - **Sign Manifest Request Option (OAuth with SSRAA)** - VHL Receiver and VHL Sharer use OAuth 2.0 access tokens, following SSRAA Discovery and Dynamic Client Registration.
+  - **Sign Manifest Request Option (Verifiable Credential)** - VHL Receiver self-issues a JSON-LD LDP-VC (W3C VC Data Model v2) whose `credentialSubject` is the manifest decoded from the QR code, with an embedded `DataIntegrityProof` signed with its trust network key. The VC is sent directly as the HTTP POST body (`Content-Type: application/vc`) with the FHIR search parameters carried in `credentialSubject.id`. VHL Sharer verifies the `proof.proofValue` using the receiver's public key from the trust network and confirms that `credentialSubject.id` matches the `_id` URL parameter. Testing SHALL include:
+    - Correct LDP-VC construction: `@context` begins with `https://www.w3.org/ns/credentials/v2` and defines every term used; required `type`, `issuer`, `validFrom`, `validUntil`, `credentialSubject`, and `proof` fields
+    - Correct `proof` element: `type` = `DataIntegrityProof`, a registered `cryptosuite` (`ecdsa-rdfc-2019` or `ecdsa-jcs-2019`), `proofPurpose` = `assertionMethod`, `verificationMethod` DID URL, and correct `proofValue` computed over the VC document
+    - Correct `credentialSubject` binding: `id` = manifest URL, plus `recipient`, `passcode` (if applicable) and `embeddedLengthMax`; the VHL encryption `key` SHALL NOT appear anywhere in the VC
+    - Correct request format: VC as `application/vc` body; FHIR search parameters carried in `credentialSubject.id` and not repeated in the request line
+    - VHL Sharer acceptance of a valid VC with valid `proof.proofValue` from a receiver whose key is in the trust network
+    - VHL Sharer rejection of VCs with: invalid `proof.proofValue`, unresolvable `proof.verificationMethod`, expired `validUntil`, a `credentialSubject.id` whose folder ID is not one the VHL Sharer issued
+  - Behavior where neither actor claims the option: the VHL Sharer does not establish the identity of the requester, and access follows from possession of the VHL and, where the `P` flag is set, the passcode.
 - **Include DocumentReference Option** - VHL Receiver requests and VHL Sharer returns DocumentReference resources in the manifest response using `_include=List:item`.
 - **Verify Document Signature Option** - VHL Receiver verifies digital signatures on retrieved documents using previously obtained PKI material.
-- **OAuth with SSRAA Option** - VHL Receiver and VHL Sharer use OAuth 2.0 access tokens as an alternative authentication mechanism for ITI-YY5.
-- **Verifiable Credential Option** - VHL Receiver self-issues a JSON-LD LDP-VC (W3C VC Data Model v2) whose `credentialSubject` is the manifest decoded from the QR code, with an embedded `DataIntegrityProof` signed with its trust network key. The VC is sent directly as the HTTP POST body (`Content-Type: application/vc+ld+json`) with FHIR search parameters in the URL. VHL Sharer verifies the `proof.proofValue` using the receiver's public key from the trust network and confirms that `credentialSubject.id` matches the `_id` URL parameter. Testing SHALL include:
-  - Correct LDP-VC construction: `@context` = `https://www.w3.org/ns/credentials/v2`, required `type`, `issuer`, `issuanceDate`, `expirationDate`, `credentialSubject`, and `proof` fields
-  - Correct `proof` element: `type` = `DataIntegrityProof`, valid `cryptosuite` (`ecdsa-2019` or `eddsa-2022`), `proofPurpose` = `assertionMethod`, `verificationMethod` DID URL, and correct `proofValue` computed over the VC document
-  - Correct `credentialSubject` binding: `id` = manifest URL, `manifest` = VHL payload fields (excluding encryption key), `recipient`, `passcode` (if applicable), `embeddedLengthMax`
-  - Correct request format: FHIR search parameters in URL query string; VC as `application/vc+ld+json` body
-  - VHL Sharer acceptance of a valid VC with valid `proof.proofValue` from a receiver whose key is in the trust network
-  - VHL Sharer rejection of VCs with: invalid `proof.proofValue`, unresolvable `proof.verificationMethod`, expired `expirationDate`, `credentialSubject.id` mismatch with URL `_id`
+- **VC Enveloped VHL Option** - VHL Sharer returns the VHL as a signed W3C Verifiable Credential (`application/vc`) from ITI-YY3 in place of a QR code, and the VHL Receiver decodes that carrier at ITI-YY4.
 
 
 
@@ -54,18 +75,18 @@ Testing of actor options includes:
 
 ### Unit Test Procedure
 
-Unit Tests in this context is where a SUT is tested against a simulator or validator.  A simulator is a implementation of an actor that is designed specifically to test the opposite pair actor. The simulator might be a reference implementation or may be a specially designed test-bench. Where a reference implementation is used the negative tests are harder to simulate. A validator is a implementation that can check conformance. A validator may be a simulator, but may also be a standalone tool used to validate only a message encoding. Some reference implementations may be able to validate to a StructureDefinition profile, but often these do not include sufficient constraints given the overall actor conformance criteria. 
+Unit Tests in this context is where a SUT is tested against a simulator or validator.  A simulator is an implementation of an actor that is designed specifically to test the opposite pair actor. The simulator might be a reference implementation or may be a specially designed test-bench. Where a reference implementation is used the negative tests are harder to simulate. A validator is an implementation that can check conformance. A validator may be a simulator, but may also be a standalone tool used to validate only a message encoding. Some reference implementations may be able to validate to a StructureDefinition profile, but often these do not include sufficient constraints given the overall actor conformance criteria. 
 
-**Trust Anchor** – see [TestPlan-TrustAnchor](TestPlan-TestPlan-TrustAnchor.html)
+**Trust Anchor**
 - [ITI-YY1] : On receipt of a DID Document, validate, organize, and sign the trust list, acknowledge
 - [ITI-YY2] : On receipt of a Retrieve Trust List Request, the Trust Anchor responds with the DID Documents
 
-**VHL Sharer** – see [TestPlan-VHLSharer](TestPlan-TestPlan-VHLSharer.html)
+**VHL Sharer**
 - [ITI-YY1] : Submit PKI Material with DID – validate DID semantics
 - [ITI-YY3] : Generate VHL – given the operation inputs, validate the output
 - [ITI-YY5] : Retrieve Manifest – authenticate the receiver and return a conformant searchset Bundle
 
-**VHL Receiver** – see [TestPlan-VHLReceiver](TestPlan-TestPlan-VHLReceiver.html)
+**VHL Receiver**
 - [ITI-YY1] : Submit PKI Material with DID (Optional) – same initiator expectations as VHL Sharer
 - [ITI-YY2] : Retrieve Trust List – construct the request and process the response correctly
 - [ITI-YY4] : Provided QR code is decoded through the full nine-step HCERT/CWT pipeline
@@ -78,4 +99,3 @@ Integration Tests in this context is where two SUT of paired actors test against
 **Integration**
 - Establish Trust
 - Generate/Provide/Retrieve
-----specific keys are available to use

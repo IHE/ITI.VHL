@@ -85,10 +85,10 @@ Feature: Integration – QR Code Generation and Validation Flow
     Then the VHL Sharer SHALL validate the passcode and return HTTP 200 with the manifest Bundle
 
   @integration @SHALL
-  Scenario: Incorrect passcode in ITI-YY5 request results in HTTP 422
+  Scenario: Incorrect passcode in ITI-YY5 request results in HTTP 401
     Given the VHL requires a passcode but the VHL Receiver provides a wrong passcode
     When the VHL Receiver sends the ITI-YY5 request
-    Then the VHL Sharer SHALL return HTTP 422 Unprocessable Entity
+    Then the VHL Sharer SHALL return HTTP 401 Unauthorized
 
   # ─── Group D: Full End-to-End Flow ───────────────────────────────────────────
 
@@ -118,9 +118,9 @@ Feature: Integration – QR Code Generation and Validation Flow
     And SHALL NOT proceed to ITI-YY5
 
   @integration @SHALL
-  Scenario: VHL Receiver receives HTTP 403 when the VHL is revoked at the VHL Sharer before manifest retrieval
+  Scenario: VHL Receiver receives HTTP 404 when the VHL is revoked at the VHL Sharer before manifest retrieval
     Given the VHL Receiver has a valid decoded SHL payload pointing to folder ID "abc123"
     And the VHL Sharer has revoked the VHL with folder ID "abc123" after QR code generation
     When the VHL Receiver sends the ITI-YY5 request
-    Then the VHL Sharer SHALL return HTTP 403 Forbidden
-    And the response SHALL include a FHIR OperationOutcome indicating the VHL has been revoked
+    Then the VHL Sharer SHALL return HTTP 404 Not Found
+    And the response SHALL include a FHIR OperationOutcome indicating the VHL is no longer active

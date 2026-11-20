@@ -9,13 +9,13 @@ activate VHLH
 activate VHLS
 
 
-VHLH -> VHLS : Generate VHL request [ITI-YY1]
-VHLS -> VHLH : Generate VHL response [ITI-YY1]
+VHLH -> VHLS : Generate VHL request [ITI-YY3]
+VHLS -> VHLH : Generate VHL response [ITI-YY3]
 
 activate VHLR
 VHLH -> VHLR : Provide VHL  [ITI-YY4]
-VHLR -> VHLS : Request VHL Document request
-VHLS -> VHLR : Request VHL Document response
+VHLR -> VHLS : Retrieve Manifest request [ITI-YY5]
+VHLS -> VHLR : Retrieve Manifest response [ITI-YY5]
 
 
 @enduml
